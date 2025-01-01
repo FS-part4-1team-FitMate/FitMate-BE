@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String                @id @default(uuid())
+  email               String                @unique
+  name                String
+  password            String
+  phone               String?
+  refreshToken        String?
+  role                Role                  @default(USER)
+  createdAt           DateTime              @default(now())
+  profile             Profile?
+  socialAccounts      SocialAccount[]
+  lessonRequests      LessonRequest[]
+  DirectLessonRequest DirectLessonRequest[]
+  lessonQuotes        LessonQuote[]
+  reviews             Review[]
+  favoriteInstructors FavoriteInstructor[]
+  notifications       Notification[]
+}
+
+model Profile {
+  id             String       @id @default(uuid())
+  userId         String       @unique
+  profileImage   String?
+  nickname       String?
+  experience     Int?
+  gender         Gender?
+  shortIntro     String?
+  detailIntro    String?
+  certifications String?
+  services       LessonType[]
+  Region         Region[]
+  rating         Float?       @default(0)
+  lessonCount    Int          @default(0)
+  reviewCount    Int          @default(0)
+  createdAt      DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SocialAccount {
+  id         String @id @default(uuid())
+  userId     String
+  provider   String @default("local")
+  providerId String @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+}
+
+model LessonRequest {
+  id            String       @id @default(uuid())
+  userId        String
+  lessonType    LessonType
+  subLessonType String
+  duration      Int
+  startDate     DateTime
+  endDate       DateTime
+  locationType  LocationType
+  address       String?
+  status        LessonStatus @default(ACTIVE)
+  progress      Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user                User                  @relation(fields: [userId], references: [id])
+  LessonQuote         LessonQuote[]
+  DirectLessonRequest DirectLessonRequest[]
+}
+
+model DirectLessonRequest {
+  id              String   @id @default(uuid())
+  lessonRequestId String
+  instructorId    String
+  createdAt       DateTime @default(now())
+
+  lessonRequest LessonRequest @relation(fields: [lessonRequestId], references: [id], onDelete: Cascade)
+  instructor    User          @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+}
+
+model LessonQuote {
+  id              String      @id @default(uuid())
+  userId          String
+  lessonRequestId String
+  price           Float
+  message         String
+  status          QuoteStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id])
+  lessonRequest LessonRequest @relation(fields: [lessonRequestId], references: [id])
+  Review        Review[]
+}
+
+model Review {
+  id            String      @id @default(uuid())
+  userId        String
+  lessonQuoteId String
+  rating        Int
+  content       String
+  createdAt     DateTime    @default(now())
+  lessonQuote   LessonQuote @relation(fields: [lessonQuoteId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id])
+}
+
+model FavoriteInstructor {
+  id        String   @id @default(uuid())
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+// ENUM 정의
+enum Role {
+  USER
+  INSTRUCTOR
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum LessonType {
+  SPORTS
+  FITNESS
+  REHAB
+}
+
+enum Region {
+  SEOUL
+  GYEONGGI
+  INCHEON
+  GANGWON
+  CHUNGBUK
+  CHUNGNAM
+  JEONBUK
+  JEONNAM
+  GYEONGBUK
+  GYEONGNAM
+  DAEGU
+  DAEJEON
+  BUSAN
+  ULSAN
+  GWANGJU
+  JEJU
+}
+
+enum LocationType {
+  ONLINE
+  OFFLINE
+}
+
+enum LessonStatus {
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+enum QuoteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELED
+}
+
+enum NotificationType {
+  NEW_LESSON
+  QUOTE_RECEIVED
+  QUOTE_ACCEPTED
+  LESSON_REMINDER
+}
