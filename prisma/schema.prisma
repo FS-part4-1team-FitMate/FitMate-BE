@@ -33,30 +33,34 @@ model User {
 }
 
 model Profile {
-  id             String       @id @default(uuid())
-  userId         String       @unique
-  profileImage   String?
-  nickname       String?
-  experience     Int?
-  gender         Gender?
-  shortIntro     String?
-  detailIntro    String?
-  certifications String?
-  services       LessonType[]
-  Region         Region[]
-  rating         Float?       @default(0)
-  lessonCount    Int          @default(0)
-  reviewCount    Int          @default(0)
-  createdAt      DateTime     @default(now())
+  id                     String       @id @default(uuid())
+  userId                 String       @unique
+  nickname               String
+  profileImage           String?
+  gender                 Gender
+  lessonType             LessonType[]
+  region                 Region[]
+  intro                  String?
+  description            String?
+  experience             Int?
+  certifications         String?
+  certificationValidated Boolean      @default(false)
+  rating                 Float?       @default(0)
+  lessonCount            Int?         @default(0)
+  reviewCount            Int?         @default(0)
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SocialAccount {
-  id         String @id @default(uuid())
+  id         String   @id @default(uuid())
   userId     String
-  provider   String @default("local")
-  providerId String @unique
+  provider   String   @default("local")
+  providerId String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -64,23 +68,26 @@ model SocialAccount {
 }
 
 model LessonRequest {
-  id            String       @id @default(uuid())
-  userId        String
-  lessonType    LessonType
-  subLessonType String
-  duration      Int
-  startDate     DateTime
-  endDate       DateTime
-  locationType  LocationType
-  address       String?
-  status        LessonStatus @default(ACTIVE)
-  progress      Int          @default(0)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-
-  user                User                  @relation(fields: [userId], references: [id])
+  id                  String                @id @default(uuid())
+  userId              String
+  lessonType          LessonType
+  subLessonType       String
+  startDate           DateTime
+  endDate             DateTime
+  lessonCount         Int
+  lessonTime          Int
+  quoteEndDate        DateTime
+  locationType        LocationType
+  postcode            String?
+  roadAddress         String?
+  detailAddress       String?
+  status              LessonRequestStatus   @default(PENDING)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
   LessonQuote         LessonQuote[]
   DirectLessonRequest DirectLessonRequest[]
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model DirectLessonRequest {
@@ -88,6 +95,7 @@ model DirectLessonRequest {
   lessonRequestId String
   instructorId    String
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   lessonRequest LessonRequest @relation(fields: [lessonRequestId], references: [id], onDelete: Cascade)
   instructor    User          @relation(fields: [instructorId], references: [id], onDelete: Cascade)
@@ -95,17 +103,18 @@ model DirectLessonRequest {
 
 model LessonQuote {
   id              String      @id @default(uuid())
-  userId          String
+  instructorId    String
   lessonRequestId String
   price           Float
   message         String
   status          QuoteStatus @default(PENDING)
+  rejectionReason String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+  Review          Review[]
 
-  user          User          @relation(fields: [userId], references: [id])
+  instructor    User          @relation(fields: [instructorId], references: [id], onDelete: Cascade)
   lessonRequest LessonRequest @relation(fields: [lessonRequestId], references: [id])
-  Review        Review[]
 }
 
 model Review {
@@ -115,6 +124,7 @@ model Review {
   rating        Int
   content       String
   createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   lessonQuote   LessonQuote @relation(fields: [lessonQuoteId], references: [id], onDelete: Cascade)
   user          User        @relation(fields: [userId], references: [id])
 }
@@ -123,6 +133,7 @@ model FavoriteInstructor {
   id        String   @id @default(uuid())
   userId    String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -142,12 +153,12 @@ model Notification {
 enum Role {
   USER
   INSTRUCTOR
+  ADMIN //관리자 고도화
 }
 
 enum Gender {
   MALE
   FEMALE
-  OTHER
 }
 
 enum LessonType {
@@ -180,10 +191,11 @@ enum LocationType {
   OFFLINE
 }
 
-enum LessonStatus {
-  ACTIVE
+enum LessonRequestStatus {
+  PENDING // ACTIVE
   COMPLETED
   CANCELED
+  EXPIRED
 }
 
 enum QuoteStatus {
@@ -194,8 +206,9 @@ enum QuoteStatus {
 }
 
 enum NotificationType {
-  NEW_LESSON
-  QUOTE_RECEIVED
-  QUOTE_ACCEPTED
-  LESSON_REMINDER
+  CHAT_MESSAGE
+  LESSON_CONFIRMATION
+  LESSON_DATE_REMINDER
+  NEW_REQUEST
+  NEW_DIRECT_LESSON
 }
