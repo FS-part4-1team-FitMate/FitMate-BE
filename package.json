@@ -7,7 +7,21 @@
   "license": "UNLICENSED",
   "main": "dist/src/main.js",
   "type": "module",
-  "imports": {},
+  "imports": {
+    "#auth/*": "./dist/src/auth/*",
+    "#common/*": "./dist/src/common/*",
+    "#exception/*": "./dist/src/exception/*",
+    "#user/*": "./dist/src/user/*",
+    "#profile/*": "./dist/src/profile/*",
+    "#lesson/*": "./dist/src/lesson/*",
+    "#direct-lesson/*": "./dist/src/direct-lesson/*",
+    "#quote/*": "./dist/src/quote/*",
+    "#review/*": "./dist/src/review/*",
+    "#notification/*": "./dist/src/notification/*",
+    "#utils/*": "./dist/src/utils/*",
+    "#logger/*": "./dist/src/logger/*",
+    "#prisma/*": "./dist/prisma/*"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -20,9 +34,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
-  },
-  "prisma": {
+    "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {

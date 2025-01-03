@@ -1,14 +1,22 @@
 {
   "compilerOptions": {
-    "module": "Node16",
-    "target": "esnext",
-    "moduleResolution": "node16",
-    "baseUrl": "./",
+    "module": "ESNext",
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "baseUrl": ".",
     "paths": {
       "#auth/*": ["./src/auth/*"],
       "#common/*": ["./src/common/*"],
+      "#exception/*": ["./src/exception/*"],
       "#user/*": ["./src/user/*"],
+      "#profile/*": ["./src/profile/*"],
+      "#lesson/*": ["./src/lesson/*"],
+      "#direct-lesson/*": ["./src/direct-lesson/*"],
+      "#quote/*": ["./src/quote/*"],
+      "#review/*": ["./src/review/*"],
+      "#notification/*": ["./src/notification/*"],
       "#utils/*": ["./src/utils/*"],
+      "#logger/*": ["./src/logger/*"],
       "#prisma/*": ["./prisma/*"]
     },
     "outDir": "./dist",
