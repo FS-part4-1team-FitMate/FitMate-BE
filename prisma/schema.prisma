@@ -16,7 +16,7 @@ datasource db {
 model User {
   id                  String                @id @default(uuid())
   email               String                @unique
-  name                String
+  nickname            String
   password            String
   phone               String?
   refreshToken        String?
@@ -36,7 +36,7 @@ model User {
 model Profile {
   id                     String       @id @default(uuid())
   userId                 String       @unique
-  nickname               String
+  name                   String?
   profileImage           String?
   gender                 Gender
   lessonType             LessonType[]
