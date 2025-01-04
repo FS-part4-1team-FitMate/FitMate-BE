@@ -8,6 +8,9 @@ CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE');
 CREATE TYPE "LessonType" AS ENUM ('SPORTS', 'FITNESS', 'REHAB');
 
 -- CreateEnum
+CREATE TYPE "LessonSubType" AS ENUM ('SOCCER', 'BASKETBALL', 'BASEBALL', 'TENNIS', 'BADMINTON', 'TABLE_TENNIS', 'SKI', 'SURFING', 'BOXING', 'TAEKWONDO', 'JIUJITSU', 'PERSONAL_TRAINING', 'YOGA', 'PILATES', 'DIET_MANAGEMENT', 'STRETCHING', 'REHAB_TREATMENT');
+
+-- CreateEnum
 CREATE TYPE "Region" AS ENUM ('SEOUL', 'GYEONGGI', 'INCHEON', 'GANGWON', 'CHUNGBUK', 'CHUNGNAM', 'JEONBUK', 'JEONNAM', 'GYEONGBUK', 'GYEONGNAM', 'DAEGU', 'DAEJEON', 'BUSAN', 'ULSAN', 'GWANGJU', 'JEJU');
 
 -- CreateEnum
@@ -26,7 +29,7 @@ CREATE TYPE "NotificationType" AS ENUM ('CHAT_MESSAGE', 'LESSON_CONFIRMATION', '
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "nickname" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "phone" TEXT,
     "refreshToken" TEXT,
@@ -41,7 +44,7 @@ CREATE TABLE "User" (
 CREATE TABLE "Profile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "nickname" TEXT NOT NULL,
+    "name" TEXT,
     "profileImage" TEXT,
     "gender" "Gender" NOT NULL,
     "lessonType" "LessonType"[],
@@ -49,7 +52,7 @@ CREATE TABLE "Profile" (
     "intro" TEXT,
     "description" TEXT,
     "experience" INTEGER,
-    "certifications" TEXT,
+    "certification" TEXT,
     "certificationValidated" BOOLEAN NOT NULL DEFAULT false,
     "rating" DOUBLE PRECISION DEFAULT 0,
     "lessonCount" INTEGER DEFAULT 0,
@@ -77,7 +80,7 @@ CREATE TABLE "LessonRequest" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "lessonType" "LessonType" NOT NULL,
-    "subLessonType" TEXT NOT NULL,
+    "lessonSubType" "LessonSubType",
     "startDate" TIMESTAMP(3) NOT NULL,
     "endDate" TIMESTAMP(3) NOT NULL,
     "lessonCount" INTEGER NOT NULL,
