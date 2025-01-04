@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import jwt from 'jsonwebtoken';
-import { NoEnvVariableException, UnauthorizedException, UserEmailNotFoundException, UserExistsException } from '#exception/http-exception.js';
+import { NoEnvVariableException, UserEmailNotFoundException, UserExistsException } from '#exception/http-exception.js';
 import { CreateUser, FilterUser } from '#auth/type/auth.type';
 import { UserRepository } from '#user/user.repository.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
@@ -12,6 +13,7 @@ export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async createUser(data: CreateUser): Promise<FilterUser> {
@@ -38,11 +40,8 @@ export class AuthService {
   createToken(userId: string, type: string = 'access'): string {
     const payload = { userId };
     const options = { expiresIn: type === 'refresh' ? '2w' : '1h' };
-    const secret = this.configService.get<string>('JWT_SECRET');
-    if (!secret) {
-      throw new NoEnvVariableException();
-    }
-    return jwt.sign(payload, secret, options);
+    const jwt = this.jwtService.sign(payload, options);
+    return jwt;
   }
 
   async updateUser(userId: string, refreshToken: string): Promise<FilterUser> {

@@ -16,7 +16,7 @@ export class AuthController {
   @Post('signIn')
   @UseGuards(AuthGuard('local'))
   async loginUser(@ReqUser() userId: string) {
-    const accessToken = this.authService.createToken(userId);
+    const accessToken = this.authService.createToken(userId, 'access');
     const refreshToken = this.authService.createToken(userId, 'refresh');
     await this.authService.updateUser(userId, refreshToken);
     return { accessToken, refreshToken };
