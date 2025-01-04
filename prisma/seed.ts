@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { PORFILES } from './mock/profile.mock.js';
 import { USERS } from './mock/user.mock.js';
 
 const prisma = new PrismaClient();
@@ -6,10 +7,15 @@ const prisma = new PrismaClient();
 async function main() {
   // 기존 데이터 삭제
   await prisma.user.deleteMany();
+  await prisma.profile.deleteMany();
 
   // 목 데이터 삽입
   await prisma.user.createMany({
     data: USERS,
+    skipDuplicates: true,
+  });
+  await prisma.profile.createMany({
+    data: PORFILES,
     skipDuplicates: true,
   });
 }
