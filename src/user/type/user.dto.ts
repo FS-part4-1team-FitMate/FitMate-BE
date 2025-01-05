@@ -5,7 +5,7 @@ import { IsNotEmpty, IsNumber, IsEnum, IsString, IsOptional } from 'class-valida
 export class InputCreateUserDTO {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  nickname: string;
 
   @IsNotEmpty()
   @IsString()
