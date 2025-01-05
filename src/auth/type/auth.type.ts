@@ -9,3 +9,7 @@ export class CreateUser {
 }
 
 export type FilterUser = Omit<User, 'password' | 'refreshToken'>;
+
+export class Payload {
+  userId: string;
+}

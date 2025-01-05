@@ -5,8 +5,9 @@ import { PassportModule } from '@nestjs/passport';
 import { PrismaModule } from '#prisma/prisma.module.js';
 import { AuthController } from '#auth/auth.controller.js';
 import { AuthService } from '#auth/auth.service.js';
+import { LocalStrategy } from '#auth/strategy/local.strategy.js';
+import { RefreshTokenStrategy } from '#auth/strategy/refresh-token.strategy.js';
 import { UserRepository } from '#user/user.repository.js';
-import { LocalStrategy } from './guard/local.strategy.js';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { LocalStrategy } from './guard/local.strategy.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy],
+  providers: [AuthService, LocalStrategy, RefreshTokenStrategy],
   exports: [],
 })
 export class AuthModule {}

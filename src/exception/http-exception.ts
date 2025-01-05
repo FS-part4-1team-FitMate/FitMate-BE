@@ -19,3 +19,5 @@ export const PasswordErrorException: ExceptionConstructor = customHttpException(
 export const NoEnvVariableException: ExceptionConstructor = customHttpException(ExceptionMessages.NO_ENV_VARIABLE, HttpStatus.INTERNAL_SERVER_ERROR);
 export const UnauthorizedException: ExceptionConstructor = customHttpException(ExceptionMessages.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
 export const WrongFormatException: ExceptionConstructor = customHttpException(ExceptionMessages.WRONG_FORMAT, HttpStatus.BAD_REQUEST);
+export const NoRefreshToken: ExceptionConstructor = customHttpException(ExceptionMessages.NO_REFRESH_TOKEN, HttpStatus.NOT_FOUND);
+export const InvalidRefreshToken: ExceptionConstructor = customHttpException(ExceptionMessages.INVALID_REFRESH_TOKEN, HttpStatus.UNAUTHORIZED);

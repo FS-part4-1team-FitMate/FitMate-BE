@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import jwt from 'jsonwebtoken';
-import { NoEnvVariableException, UserEmailNotFoundException, UserExistsException } from '#exception/http-exception.js';
+import { UserEmailNotFoundException, UserExistsException } from '#exception/http-exception.js';
+import { InvalidRefreshToken } from '#exception/http-exception.js';
 import { CreateUser, FilterUser } from '#auth/type/auth.type';
 import { UserRepository } from '#user/user.repository.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
@@ -37,6 +37,11 @@ export class AuthService {
     return filterSensitiveUserData(user);
   }
 
+  async updateUser(userId: string, refreshToken: string): Promise<FilterUser> {
+    const user = await this.userRepository.updateUser(userId, refreshToken);
+    return filterSensitiveUserData(user);
+  }
+
   createToken(userId: string, type: string = 'access'): string {
     const payload = { userId };
     const options = { expiresIn: type === 'refresh' ? '2w' : '1h' };
@@ -44,16 +49,9 @@ export class AuthService {
     return jwt;
   }
 
-  async updateUser(userId: string, refreshToken: string): Promise<FilterUser> {
-    const user = await this.userRepository.updateUser(userId, refreshToken);
-    return filterSensitiveUserData(user);
+  async refreshToken(userId: string, refreshToken: string): Promise<string> {
+    const user = await this.userRepository.findUserById(userId);
+    if (!user || user.refreshToken !== refreshToken) throw new InvalidRefreshToken();
+    return this.createToken(user.id);
   }
-
-  // async refreshToken(userId: string, refreshToken: string): Promise<string> {
-  //   const user = await this.userRepository.findUserById(userId);
-  //   if (!user || user.refreshToken !== refreshToken) {
-  //     throw new UnauthorizedException();
-  //   }
-  //   return this.createToken(user.id);
-  // }
 }
