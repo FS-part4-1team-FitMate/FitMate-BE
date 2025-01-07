@@ -1,5 +1,5 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError } from 'rxjs';
 import { logger } from './winston-logger.js';
 
 @Injectable()
@@ -19,7 +19,6 @@ export class LoggingInterceptor implements NestInterceptor {
     `;
 
     logger.info(`Request: ${logMessage}`);
-
     return next.handle().pipe(
       tap((data) => {
         const { statusCode } = response;
@@ -29,8 +28,13 @@ export class LoggingInterceptor implements NestInterceptor {
             Response Body: ${responseBody}
             Cookies: ${JSON.stringify(response.get('Set-Cookie'))}
           `;
-
         logger.info(`Response: ${logMessage}`);
+      }),
+      catchError((error) => {
+        logger.error(`
+          Error: ${error.message}
+          Stack: ${error.stack || 'No stack available'}`);
+        throw error;
       }),
     );
   }

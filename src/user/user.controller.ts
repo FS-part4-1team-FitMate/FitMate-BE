@@ -1,30 +1,24 @@
-import { Controller, Get, Param, Post, Body, Patch, Delete, HttpCode } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { AsyncLocalStorage } from 'async_hooks';
+import { IAsyncLocalStorage } from '#common/als/als.type.js';
+import { AlsStore } from '#common/als/store-validator.js';
 import { UUIDPipe } from '#common/uuid.pipe.js';
-import type { InputCreateUserDTO, InputUpdateUserDTO } from '#user/type/user.dto.js';
+import { ForbiddenException } from '#exception/http-exception.js';
+import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { UserService } from '#user/user.service.js';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly alsStore: AlsStore,
+  ) {}
 
   @Get(':id')
+  @UseGuards(AccessTokenGuard)
   async getUserById(@Param('id', UUIDPipe) id: string) {
+    const { userId } = this.alsStore.getStore();
+    if (id !== userId) throw new ForbiddenException();
     return await this.userService.findUserById(id);
-  }
-
-  @Post()
-  async postUser(@Body() body: InputCreateUserDTO) {
-    return await this.userService.createUser(body);
-  }
-
-  @Patch(':id')
-  async patchUser(@Param('id', UUIDPipe) id: string, @Body() body: InputUpdateUserDTO) {
-    return await this.userService.updateUser(id, body);
-  }
-
-  @Delete(':id')
-  @HttpCode(204)
-  async deleteUser(@Param('id', UUIDPipe) id: string) {
-    return await this.userService.deleteUser(id);
   }
 }
