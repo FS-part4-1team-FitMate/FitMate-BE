@@ -17,10 +17,10 @@ export class AccessTokenGuard implements CanActivate {
       const decoded = this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET || 'default-secret',
       });
-      request.user = decoded; // 사용자 정보를 요청에 저장
+      request.user = decoded;
       return true;
     } catch (err) {
-      return false; // 토큰 검증 실패
+      return false;
     }
   }
 }

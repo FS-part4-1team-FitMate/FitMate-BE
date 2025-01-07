@@ -8,6 +8,7 @@ import { UserModule } from '#user/user.module.js';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     PrismaModule,
     UserModule,

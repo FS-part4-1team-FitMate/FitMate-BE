@@ -1,0 +1,18 @@
+import { Gender, LessonType, Region } from '@prisma/client';
+
+export const PROFILES = [
+  {
+    id: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f',
+    userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f',
+    nickname: '유저01',
+    profileImage: '',
+    phone: '010-123-7890',
+    gender: Gender.FEMALE,
+    lessonType: [LessonType.FITNESS],
+    region: [Region.SEOUL],
+    intro: '',
+    description: '',
+    certification: '',
+    certificationValidated: false,
+  },
+];

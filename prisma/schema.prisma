@@ -14,28 +14,28 @@ datasource db {
 }
 
 model User {
-  id                  String                @id @default(uuid())
-  name                String
-  email               String                @unique
-  password            String
-  refreshToken        String?
-  role                Role                  @default(USER)
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  profile             Profile?
-  socialAccounts      SocialAccount[]
-  lessonRequests      LessonRequest[]
-  DirectLessonRequest DirectLessonRequest[]
-  lessonQuotes        LessonQuote[]
-  reviews             Review[]
-  favoriteTrainer     FavoriteTrainer[]
-  notifications       Notification[]
+  id                   String                @id @default(uuid())
+  email                String                @unique
+  nickname             String
+  password             String
+  refreshToken         String?
+  role                 Role                  @default(USER)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  profile              Profile?
+  socialAccounts       SocialAccount[]
+  lessonRequests       LessonRequest[]
+  directLessonRequests DirectLessonRequest[]
+  lessonQuotes         LessonQuote[]
+  reviews              Review[]
+  favoriteTrainer      FavoriteTrainer[]
+  notifications        Notification[]
 }
 
 model Profile {
   id                     String       @id @default(uuid())
   userId                 String       @unique
-  nickname               String
+  name                   String?
   profileImage           String?
   phone                  String?
   gender                 Gender
@@ -44,7 +44,7 @@ model Profile {
   intro                  String?
   description            String?
   experience             Int?
-  certifications         String?
+  certification          String?
   certificationValidated Boolean      @default(false)
   rating                 Float?       @default(0)
   lessonCount            Int?         @default(0)
