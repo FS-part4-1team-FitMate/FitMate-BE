@@ -4,7 +4,7 @@ export const USERS = [
   {
     id: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f',
     email: 'user01@example.com',
-    name: 'user01',
+    nickname: 'user01',
     password: 'a123456.',
     refreshToken: 'someRefreshTokenHere',
     role: Role.USER,
@@ -14,7 +14,7 @@ export const USERS = [
   {
     id: '699fc386-d1a7-4430-a37d-9d1c5bdafd4d',
     email: 'user02@example.com',
-    name: 'user02',
+    nickname: 'user02',
     password: 'a123456.',
     refreshToken: 'someRefreshTokenHere',
     role: Role.USER,
@@ -24,7 +24,7 @@ export const USERS = [
   {
     id: '699fc386-d1a7-4430-a37d-9d1c5bdafd4d',
     email: 'user03@example.com',
-    name: 'user03',
+    nickname: 'user03',
     password: 'a123456.',
     refreshToken: 'someRefreshTokenHere',
     role: Role.USER,
@@ -34,7 +34,7 @@ export const USERS = [
   {
     id: '337fc386-d1a7-4430-a37d-9d1c5bdafd4d',
     email: 'train01@example.com',
-    name: 'train01',
+    nickname: 'train01',
     password: 'a123456.',
     refreshToken: 'someRefreshTokenHere',
     role: Role.TRAINER,

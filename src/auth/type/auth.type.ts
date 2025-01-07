@@ -1,7 +1,7 @@
 import type { Role, User } from '@prisma/client';
 
 export class CreateUser {
-  name: string;
+  nickname: string;
   email: string;
   password: string;
   role: Role;

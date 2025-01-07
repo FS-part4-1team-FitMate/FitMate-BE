@@ -2,7 +2,7 @@ import { PartialType } from '@nestjs/mapped-types';
 import { Role } from '@prisma/client';
 
 export class CreateUser {
-  name: string;
+  nickname: string;
   email: string;
   password: string;
   role: Role;

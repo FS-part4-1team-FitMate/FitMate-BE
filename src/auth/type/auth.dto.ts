@@ -4,7 +4,7 @@ import { IsNotEmpty, IsOptional, IsString, IsEmail, Matches, IsEnum } from 'clas
 export class InputCreateUserDTO {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  nickname: string;
 
   @IsNotEmpty()
   @IsEmail()
