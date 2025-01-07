@@ -18,6 +18,7 @@
     "#quote/*": "./dist/src/quote/*",
     "#review/*": "./dist/src/review/*",
     "#notification/*": "./dist/src/notification/*",
+    "#configs/*": "./dist/src/configs/*",
     "#utils/*": "./dist/src/utils/*",
     "#logger/*": "./dist/src/logger/*",
     "#prisma/*": "./dist/prisma/*"

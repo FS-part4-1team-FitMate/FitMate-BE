@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserEmailNotFoundException, UserExistsException } from '#exception/http-exception.js';
 import { InvalidRefreshToken } from '#exception/http-exception.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
 import { CreateUser, FilterUser } from '#auth/type/auth.type';
 import { UserRepository } from '#user/user.repository.js';
+import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 import { hashingPassword, verifyPassword } from '#utils/hashing-password.js';
 
@@ -13,7 +13,6 @@ import { hashingPassword, verifyPassword } from '#utils/hashing-password.js';
 export class AuthService implements IAuthService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -45,7 +44,7 @@ export class AuthService implements IAuthService {
 
   createToken(userId: string, role: string, type: string = 'access'): string {
     const payload = { userId, role };
-    const options = { expiresIn: type === 'refresh' ? '2w' : '1h' };
+    const options = { expiresIn: type === 'refresh' ? TOKEN_EXPIRATION.ACCESS : TOKEN_EXPIRATION.REFRESH };
     const jwt = this.jwtService.sign(payload, options);
     return jwt;
   }

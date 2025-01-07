@@ -10,17 +10,17 @@ import { Payload } from '#auth/type/auth.type.js';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signUp/user')
+  @Post('signup/user')
   async createUser(@Body() body: InputCreateUserDTO) {
     return await this.authService.createUser({ ...body, role: 'USER' });
   }
 
-  @Post('signUp/trainer')
+  @Post('signup/trainer')
   async createTrainer(@Body() body: InputCreateUserDTO) {
     return await this.authService.createUser({ ...body, role: 'TRAINER' });
   }
 
-  @Post('signIn')
+  @Post('login')
   @UseGuards(AuthGuard('local'))
   async loginUser(@ReqUser() user: { userId: string; role: string }) {
     const { userId, role } = user;

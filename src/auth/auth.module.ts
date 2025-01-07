@@ -8,6 +8,7 @@ import { AuthService } from '#auth/auth.service.js';
 import { LocalStrategy } from '#auth/strategy/local.strategy.js';
 import { RefreshTokenStrategy } from '#auth/strategy/refresh-token.strategy.js';
 import { UserRepository } from '#user/user.repository.js';
+import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { UserRepository } from '#user/user.repository.js';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: TOKEN_EXPIRATION.REFRESH },
       }),
     }),
   ],
