@@ -1,0 +1,17 @@
+### Lesson 생성 요청
+POST http://localhost:3000/lesson
+Content-Type: application/json
+
+{
+  "lessonType": "FITNESS",
+  "lessonSubType": "YOGA",
+  "startDate": "2024-01-13T10:00:00.000Z",
+  "endDate": "2024-01-19T23:59:59.000Z",
+  "lessonCount": 3,
+  "lessonTime": 30,
+  "quoteEndDate": "2024-01-11T23:59:59.000Z",
+  "locationType": "OFFLINE",
+  "postcode": "13529",
+  "roadAddress": "경기 성남시 분당구 판교역로 166",
+  "detailAddress": "101동 101호"
+}

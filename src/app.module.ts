@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '#prisma/prisma.module.js';
 import { UserModule } from '#user/user.module.js';
+import { LessonModule } from './lesson/lesson.module.js';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { UserModule } from '#user/user.module.js';
     }),
     PrismaModule,
     UserModule,
+    LessonModule,
   ],
   controllers: [],
   providers: [],
