@@ -23,7 +23,7 @@ export const logger = winston.createLogger({
       filename: 'logs/%DATE%-warn.log',
       datePattern: 'YYYY-MM-DD',
       level: 'warn',
-      maxFiles: '14d', // 14일간 파일 유지
+      maxFiles: '14d',
       zippedArchive: true,
     }),
   ],
