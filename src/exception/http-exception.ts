@@ -23,3 +23,4 @@ export const NoRefreshToken: ExceptionConstructor = customHttpException(Exceptio
 export const InvalidRefreshToken: ExceptionConstructor = customHttpException(ExceptionMessages.INVALID_REFRESH_TOKEN, HttpStatus.UNAUTHORIZED);
 export const NoStoreException: ExceptionConstructor = customHttpException(ExceptionMessages.NO_STORE, HttpStatus.INTERNAL_SERVER_ERROR);
 export const ForbiddenException: ExceptionConstructor = customHttpException(ExceptionMessages.FORBIDDEN, HttpStatus.FORBIDDEN);
+export const ProfileNotFound: ExceptionConstructor = customHttpException(ExceptionMessages.PROFILE_NOT_FOUND, HttpStatus.NOT_FOUND);

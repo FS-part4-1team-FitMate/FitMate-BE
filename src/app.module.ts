@@ -6,6 +6,7 @@ import { AlsModule } from '#common/als/als.module.js';
 import { AuthModule } from '#auth/auth.module.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { UserModule } from '#user/user.module.js';
+import { ProfileModule } from '#profile/profile.module.js';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserModule } from '#user/user.module.js';
     AlsModule,
     AuthModule,
     UserModule,
+    ProfileModule,
   ],
   controllers: [],
   providers: [AccessTokenGuard],

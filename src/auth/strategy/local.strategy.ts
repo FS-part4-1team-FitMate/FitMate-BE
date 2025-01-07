@@ -4,7 +4,7 @@ import { validateOrReject } from 'class-validator';
 import { Strategy } from 'passport-local';
 import { WrongFormatException } from '#exception/http-exception.js';
 import { AuthService } from '#auth/auth.service.js';
-import { InputSignInDTO } from '#auth/type/auth.dto.js';
+import { LoginDTO } from '#auth/type/auth.dto.js';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -13,7 +13,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(email: string, password: string) {
-    const signInDto = new InputSignInDTO();
+    const signInDto = new LoginDTO();
     signInDto.email = email;
     signInDto.password = password;
 

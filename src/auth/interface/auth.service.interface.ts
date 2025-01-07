@@ -1,5 +1,5 @@
-import { CreateUser } from '#auth/type/auth.type.js';
-import { FilterUser } from '#auth/type/auth.type.js';
+import type { CreateUser } from '#auth/type/auth.type.js';
+import type { FilterUser } from '#auth/type/auth.type.js';
 
 export interface IAuthService {
   createUser(data: CreateUser): Promise<FilterUser>;
