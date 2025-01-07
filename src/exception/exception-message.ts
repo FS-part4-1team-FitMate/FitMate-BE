@@ -11,6 +11,7 @@ enum ExceptionMessages {
   NO_REFRESH_TOKEN = '리프레시 토큰이 없습니다.',
   INVALID_REFRESH_TOKEN = '유효하지 않은 리프레시 토큰입니다.',
   INVALID_ACCESS_TOKEN = '유효하지 않은 엑세스 토큰입니다.',
+  NO_STORE = '활성화된 AsyncLocalStorage 컨텍스트를 찾을 수 없습니다.',
 }
 
 export default ExceptionMessages;

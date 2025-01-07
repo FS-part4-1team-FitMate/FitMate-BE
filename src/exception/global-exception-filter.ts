@@ -18,6 +18,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const responseMessage = exception.getResponse();
       message = typeof responseMessage === 'string' ? responseMessage : exception.message;
       stack = exception.stack;
+    } else if (exception instanceof Error) {
+      message = exception.message;
+      stack = exception.stack;
     }
 
     response.status(status).json({

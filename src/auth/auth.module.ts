@@ -27,6 +27,6 @@ import { UserRepository } from '#user/user.repository.js';
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, RefreshTokenStrategy, UserRepository],
-  exports: [],
+  exports: [JwtModule],
 })
 export class AuthModule {}

@@ -3,13 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserEmailNotFoundException, UserExistsException } from '#exception/http-exception.js';
 import { InvalidRefreshToken } from '#exception/http-exception.js';
+import { IAuthService } from '#auth/interface/auth.service.interface.js';
 import { CreateUser, FilterUser } from '#auth/type/auth.type';
 import { UserRepository } from '#user/user.repository.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 import { hashingPassword, verifyPassword } from '#utils/hashing-password.js';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly configService: ConfigService,

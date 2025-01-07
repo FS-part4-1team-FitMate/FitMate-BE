@@ -1,9 +1,14 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { AsyncLocalStorage } from 'async_hooks';
+import { IAsyncLocalStorage } from '#common/als/als.type.js';
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private als: AsyncLocalStorage<IAsyncLocalStorage>,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
@@ -15,11 +20,20 @@ export class AccessTokenGuard implements CanActivate {
 
     try {
       const decoded = this.jwtService.verify(token, {
-        secret: process.env.JWT_SECRET || 'default-secret',
+        secret: process.env.JWT_SECRET,
       });
       request.user = decoded;
+
+      const store = this.als.getStore();
+      if (store) {
+        store.userId = decoded.userId;
+        store.userRole = decoded.role;
+        console.log(store.userId); //추후 삭제
+        console.log(store.userRole); //추후 삭제
+      }
+
       return true;
-    } catch (err) {
+    } catch (e) {
       return false;
     }
   }
