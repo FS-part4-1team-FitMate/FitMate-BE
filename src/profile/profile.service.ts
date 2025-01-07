@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import type { Profile } from '@prisma/client';
 import { ProfileNotFound } from '#exception/http-exception.js';
+import { IProfileService } from '#profile/interface/profile.service.interface.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 import type { CreateProfile, UpdateProfile } from '#profile/type/profile.type.js';
 
 @Injectable()
-export class ProfileService {
+export class ProfileService implements IProfileService {
   constructor(private readonly profileRepository: ProfileRepository) {}
 
   async createProfile(data: CreateProfile): Promise<Profile> {
