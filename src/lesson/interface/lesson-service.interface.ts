@@ -5,6 +5,6 @@ export interface ILessonService {
   createLesson(data: CreateLesson, userId: string): Promise<LessonResponse>;
   getLessonById(id: string): Promise<LessonResponse | null>;
   updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse | null>;
-  getLessons(): Promise<LessonResponse[]>;
+  getLessons(): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }>;
   updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse | null>;
 }

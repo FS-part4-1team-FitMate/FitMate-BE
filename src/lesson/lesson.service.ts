@@ -17,6 +17,7 @@ export class LessonService implements ILessonService {
   async createLesson(data: CreateLesson, userId: string): Promise<LessonResponse> {
     const userExists = await this.userRepository.findUserById(userId);
     if (!userExists) {
+      logger.warn(`User not found: ${userId}`);
       throw new UserNotFoundException();
     }
     logger.debug('sevice data: ', data);
@@ -32,8 +33,14 @@ export class LessonService implements ILessonService {
     return this.lessonRepository.update(id, data);
   }
 
-  async getLessons(): Promise<LessonResponse[]> {
-    return this.lessonRepository.findAll();
+  async getLessons(): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
+    const lessons = await this.lessonRepository.findAll();
+    const totalCount = lessons.length;
+    return {
+      list: lessons,
+      totalCount,
+      hasMore: false,
+    };
   }
 
   async updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse | null> {
