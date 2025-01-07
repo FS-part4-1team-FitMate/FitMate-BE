@@ -3,6 +3,7 @@ import { AsyncLocalStorage } from 'async_hooks';
 import { IAsyncLocalStorage } from '#common/als/als.type.js';
 import { AlsStore } from '#common/als/store-validator.js';
 import { UUIDPipe } from '#common/uuid.pipe.js';
+import { ForbiddenException } from '#exception/http-exception.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { UserService } from '#user/user.service.js';
 
@@ -16,8 +17,8 @@ export class UserController {
   @Get(':id')
   @UseGuards(AccessTokenGuard)
   async getUserById(@Param('id', UUIDPipe) id: string) {
-    const { userId, userRole } = this.alsStore.getStore();
-    console.log(`test: ${userId}, ${userRole}`);
+    const { userId } = this.alsStore.getStore();
+    if (id !== userId) throw new ForbiddenException();
     return await this.userService.findUserById(id);
   }
 }

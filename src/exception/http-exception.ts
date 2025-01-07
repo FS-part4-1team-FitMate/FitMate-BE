@@ -22,3 +22,4 @@ export const WrongFormatException: ExceptionConstructor = customHttpException(Ex
 export const NoRefreshToken: ExceptionConstructor = customHttpException(ExceptionMessages.NO_REFRESH_TOKEN, HttpStatus.NOT_FOUND);
 export const InvalidRefreshToken: ExceptionConstructor = customHttpException(ExceptionMessages.INVALID_REFRESH_TOKEN, HttpStatus.UNAUTHORIZED);
 export const NoStoreException: ExceptionConstructor = customHttpException(ExceptionMessages.NO_STORE, HttpStatus.INTERNAL_SERVER_ERROR);
+export const ForbiddenException: ExceptionConstructor = customHttpException(ExceptionMessages.FORBIDDEN, HttpStatus.FORBIDDEN);
