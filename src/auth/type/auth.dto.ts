@@ -15,14 +15,6 @@ export class InputCreateUserDTO {
   @IsString()
   @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{10,}$/)
   password: string;
-
-  @IsOptional()
-  @IsString()
-  phone: string;
-
-  @IsNotEmpty()
-  @IsEnum(Role)
-  role: Role;
 }
 
 export class InputSignInDTO {
@@ -32,5 +24,6 @@ export class InputSignInDTO {
 
   @IsNotEmpty()
   @IsString()
+  @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{10,}$/)
   password: string;
 }

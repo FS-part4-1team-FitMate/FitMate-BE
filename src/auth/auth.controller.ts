@@ -10,26 +10,32 @@ import { Payload } from '#auth/type/auth.type.js';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signUp')
+  @Post('signUp/user')
   async createUser(@Body() body: InputCreateUserDTO) {
-    return await this.authService.createUser(body);
+    return await this.authService.createUser({ ...body, role: 'USER' });
+  }
+
+  @Post('signUp/trainer')
+  async createTrainer(@Body() body: InputCreateUserDTO) {
+    return await this.authService.createUser({ ...body, role: 'TRAINER' });
   }
 
   @Post('signIn')
   @UseGuards(AuthGuard('local'))
-  async loginUser(@ReqUser() user: { userId: string }) {
-    const { userId } = user;
-    const accessToken = this.authService.createToken(userId, 'access');
-    const refreshToken = this.authService.createToken(userId, 'refresh');
+  async loginUser(@ReqUser() user: { userId: string; role: string }) {
+    const { userId, role } = user;
+    const accessToken = this.authService.createToken(userId, role, 'access');
+    const refreshToken = this.authService.createToken(userId, role, 'refresh');
     await this.authService.updateUser(userId, refreshToken);
     return { accessToken, refreshToken };
   }
 
   @Post('token/refresh')
   @UseGuards(RefreshTokenGuard)
-  async refreshAccessToken(@ReqUser() user: Payload & { refreshToken: string }) {
-    const { userId, refreshToken } = user;
-    const accessToken = await this.authService.refreshToken(userId, refreshToken);
+  async refreshAccessToken(@ReqUser() user: { userId: string; role: string; refreshToken: string }) {
+    const { userId, role, refreshToken } = user;
+    console.log(userId, role);
+    const accessToken = await this.authService.refreshToken(userId, role, refreshToken);
     return { accessToken };
   }
 }

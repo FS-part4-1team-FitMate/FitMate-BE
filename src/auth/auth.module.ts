@@ -15,7 +15,6 @@ import { UserRepository } from '#user/user.repository.js';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    UserRepository,
     PassportModule.register({ defaultStrategy: 'local' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -27,7 +26,7 @@ import { UserRepository } from '#user/user.repository.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, RefreshTokenStrategy],
+  providers: [AuthService, LocalStrategy, RefreshTokenStrategy, UserRepository],
   exports: [],
 })
 export class AuthModule {}

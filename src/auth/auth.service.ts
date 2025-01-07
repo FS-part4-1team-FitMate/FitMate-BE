@@ -42,16 +42,16 @@ export class AuthService {
     return filterSensitiveUserData(user);
   }
 
-  createToken(userId: string, type: string = 'access'): string {
-    const payload = { userId };
+  createToken(userId: string, role: string, type: string = 'access'): string {
+    const payload = { userId, role };
     const options = { expiresIn: type === 'refresh' ? '2w' : '1h' };
     const jwt = this.jwtService.sign(payload, options);
     return jwt;
   }
 
-  async refreshToken(userId: string, refreshToken: string): Promise<string> {
+  async refreshToken(userId: string, role: string, refreshToken: string): Promise<string> {
     const user = await this.userRepository.findUserById(userId);
     if (!user || user.refreshToken !== refreshToken) throw new InvalidRefreshToken();
-    return this.createToken(user.id);
+    return this.createToken(user.id, role);
   }
 }

@@ -18,7 +18,6 @@ model User {
   name                String
   email               String                @unique
   password            String
-  phone               String?
   refreshToken        String?
   role                Role                  @default(USER)
   createdAt           DateTime              @default(now())
@@ -38,6 +37,7 @@ model Profile {
   userId                 String       @unique
   nickname               String
   profileImage           String?
+  phone                  String?
   gender                 Gender
   lessonType             LessonType[]
   region                 Region[]
