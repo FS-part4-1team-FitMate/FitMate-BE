@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { GlobalExceptionFilter } from '#exception/global-exception-filter.js';
 import { LoggingInterceptor } from '#logger/logging.interceptor.js';
-import { AppModule } from './app.module.js';
 import { logger } from '#logger/winston-logger.js';
+import { AppModule } from './app.module.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

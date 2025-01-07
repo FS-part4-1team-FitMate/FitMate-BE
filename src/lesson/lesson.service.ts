@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { LessonRequestStatus } from '@prisma/client';
 import { BadRequestException, UserNotFoundException } from '#exception/http-exception.js';
 import { UserRepository } from '#user/user.repository.js';
+import { logger } from '#logger/winston-logger.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
 import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
-import { logger } from '#logger/winston-logger.js';
 
 @Injectable()
 export class LessonService implements ILessonService {
@@ -19,7 +19,7 @@ export class LessonService implements ILessonService {
     if (!userExists) {
       throw new UserNotFoundException();
     }
-    logger.warn('sevice data', data);
+    logger.debug('sevice data: ', data);
 
     return this.lessonRepository.create({ ...data, userId });
   }

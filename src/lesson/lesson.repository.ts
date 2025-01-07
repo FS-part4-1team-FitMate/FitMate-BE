@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LessonRequest, LessonRequestStatus } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
+import { logger } from '#logger/winston-logger.js';
 import { ILessonRepository } from './interface/lesson-repository.interface.js';
 import { CreateLesson, PatchLesson } from './type/lesson.type.js';
 
@@ -9,7 +10,7 @@ export class LessonRepository implements ILessonRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateLesson & { userId: string }): Promise<LessonRequest> {
-    console.log('repo data', data);
+    logger.debug('repo data', data);
     return this.prisma.lessonRequest.create({ data });
   }
 
