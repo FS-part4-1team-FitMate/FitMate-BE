@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserEmailNotFoundException, UserExistsException } from '#exception/http-exception.js';
+import { UserEmailNotFound, UserExistsException } from '#exception/http-exception.js';
 import { InvalidRefreshToken } from '#exception/http-exception.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
 import type { CreateUser, FilterUser } from '#auth/type/auth.type';
@@ -32,7 +32,7 @@ export class AuthService implements IAuthService {
 
   async getUser(email: string, password: string): Promise<FilterUser> {
     const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new UserEmailNotFoundException();
+    if (!user) throw new UserEmailNotFound();
     verifyPassword(password, user.password);
     return filterSensitiveUserData(user);
   }
