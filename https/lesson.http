@@ -1,0 +1,43 @@
+###
+// user 회원가입
+POST http://localhost:3000/auth/signup/user
+Content-Type: application/json
+
+{
+  "nickname": "user03",
+  "email": "user03@example.com",
+  "password": "a123456."
+}
+
+### 로그인
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "user03@example.com",
+  "password": "a123456."
+}
+
+### Lesson 요청 등록
+POST http://localhost:3000/lessons
+Content-Type: application/json
+
+{
+  "lessonType": "FITNESS",
+  "lessonSubType": "YOGA",
+  "startDate": "2024-01-13T10:00:00.000Z",
+  "endDate": "2024-01-19T23:59:59.000Z",
+  "lessonCount": 3,
+  "lessonTime": 30,
+  "quoteEndDate": "2024-01-11T23:59:59.000Z",
+  "locationType": "OFFLINE",
+  "postcode": "13529",
+  "roadAddress": "경기 성남시 분당구 판교역로 166",
+  "detailAddress": "101동 101호"
+}
+
+###  Lesson 요청 상세 조회
+GET http://localhost:3000/lessons/b06a4a27-a624-4ac1-a99e-cfb8bfb664c8
+
+### Lesson 전체 조회
+GET http://localhost:3000/lessons

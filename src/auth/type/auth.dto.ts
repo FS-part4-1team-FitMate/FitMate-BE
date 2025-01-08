@@ -12,7 +12,7 @@ export class CreateUserDTO {
 
   @IsNotEmpty()
   @IsString()
-  @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{10,}$/)
+  @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{8,}$/)
   password: string;
 }
 
@@ -23,6 +23,6 @@ export class LoginDTO {
 
   @IsNotEmpty()
   @IsString()
-  @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{10,}$/)
+  @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{8,}$/)
   password: string;
 }
