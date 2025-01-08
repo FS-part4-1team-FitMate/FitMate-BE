@@ -1,6 +1,4 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
-import { AsyncLocalStorage } from 'async_hooks';
-import { IAsyncLocalStorage } from '#common/als/als.type.js';
 import { AlsStore } from '#common/als/store-validator.js';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { ForbiddenException } from '#exception/http-exception.js';

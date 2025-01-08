@@ -12,6 +12,7 @@
       "#profile/*": ["./src/profile/*"],
       "#lesson/*": ["./src/lesson/*"],
       "#direct-lesson/*": ["./src/direct-lesson/*"],
+      "#trainer/*": ["./src/trainer/*"],
       "#quote/*": ["./src/quote/*"],
       "#review/*": ["./src/review/*"],
       "#notification/*": ["./src/notification/*"],

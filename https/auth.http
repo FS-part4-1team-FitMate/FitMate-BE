@@ -1,0 +1,41 @@
+###
+// user 회원가입
+POST http://localhost:3000/auth/signUp/user
+Content-Type: application/json
+
+{
+  "nickname": "test12",
+  "email": "test12@example.com",
+  "password": "testpassword12!"
+}
+
+###
+// trainer 회원가입
+POST http://localhost:3000/auth/signUp/trainer
+Content-Type: application/json
+
+{
+  "nickname": "test13",
+  "email": "test13@example.com",
+  "password": "testpassword13!"
+}
+
+###
+// 로그인
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "test5@example.com",
+  "password": "testpassword5!"
+}
+
+###
+// access token 재발급
+POST http://localhost:3000/auth/token/refresh
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0NTg1YjY0MC02OTBmLTRhY2YtYWUyZS1hZGM3Zjk1N2M2MGMiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjI5NzUwNiwiZXhwIjoxNzM2MzAxMTA2fQ.t3zHamdeiA1eW7HLiSIAy67pPwGvjtRRj_PhgjYymjM
+
+###
+// user 단일 조회하기
+GET http://localhost:3000/users/4585b640-690f-4acf-ae2e-adc7f957c60c
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0NTg1YjY0MC02OTBmLTRhY2YtYWUyZS1hZGM3Zjk1N2M2MGMiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjI2OTMzNCwiZXhwIjoxNzM3NDc4OTM0fQ.Y81e4FlGxUcO1JTtn6Ev5IPaFTn0PHJILOGCetj8G4k
