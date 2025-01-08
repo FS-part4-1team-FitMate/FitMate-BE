@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { UUIDPipe } from '#common/uuid.pipe.js';
+import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { ProfileService } from '#profile/profile.service.js';
 import { CreateProfileDTO, UpdateProfileDTO } from '#profile/type/profile.dto.js';
 
@@ -8,6 +9,7 @@ export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
   @Post()
+  @UseGuards(AccessTokenGuard)
   postProfile(@Body() body: CreateProfileDTO) {
     return this.profileService.createProfile(body);
   }

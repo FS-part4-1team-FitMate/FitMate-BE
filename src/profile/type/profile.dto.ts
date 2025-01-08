@@ -6,6 +6,7 @@ export class CreateProfileDTO {
   @IsString()
   @IsNotEmpty()
   userId: string;
+
   @IsString()
   @IsOptional()
   name?: string;
@@ -13,9 +14,11 @@ export class CreateProfileDTO {
   @IsString()
   @IsOptional()
   profileImage?: string;
+
   @IsString()
   @IsOptional()
   phone?: string;
+
   @IsEnum(Gender)
   gender: Gender;
 
