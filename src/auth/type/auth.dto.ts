@@ -13,7 +13,7 @@ export class InputCreateUserDTO {
 
   @IsNotEmpty()
   @IsString()
-  @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{10,}$/)
+  @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{8,}$/)
   password: string;
 }
 
@@ -24,6 +24,6 @@ export class InputSignInDTO {
 
   @IsNotEmpty()
   @IsString()
-  @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{10,}$/)
+  @Matches(/^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+~`\-={}[\]:;"'<>,.?/\\]).{8,}$/)
   password: string;
 }

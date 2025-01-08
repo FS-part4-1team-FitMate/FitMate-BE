@@ -1,3 +1,23 @@
+###
+// user 회원가입
+POST http://localhost:3000/auth/signup/user
+Content-Type: application/json
+
+{
+  "nickname": "user03",
+  "email": "user03@example.com",
+  "password": "a123456."
+}
+
+### 로그인
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "user03@example.com",
+  "password": "a123456."
+}
+
 ### Lesson 요청 등록
 POST http://localhost:3000/lessons
 Content-Type: application/json
@@ -17,7 +37,7 @@ Content-Type: application/json
 }
 
 ###  Lesson 요청 상세 조회
-GET http://localhost:3000/lessons/ce3bb618-edc0-40a2-a3f0-940ce2887f38
+GET http://localhost:3000/lessons/3b1b4eb3-de81-443a-a04b-2092301653f6
 
 ### Lesson 전체 조회
 GET http://localhost:3000/lessons

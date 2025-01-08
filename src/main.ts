@@ -14,7 +14,7 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new LoggingInterceptor());
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }));
-  app.useGlobalFilters(new GlobalExceptionFilter(configService));
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.listen(port, () => {
     logger.info(`🚀 Server is running on port ${port}`);
