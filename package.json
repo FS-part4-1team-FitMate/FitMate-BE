@@ -15,6 +15,7 @@
     "#profile/*": "./dist/src/profile/*",
     "#lesson/*": "./dist/src/lesson/*",
     "#direct-lesson/*": "./dist/src/direct-lesson/*",
+    "#trainer/*": "./dist/src/trainer/*",
     "#quote/*": "./dist/src/quote/*",
     "#review/*": "./dist/src/review/*",
     "#notification/*": "./dist/src/notification/*",
