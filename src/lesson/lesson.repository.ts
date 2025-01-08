@@ -7,30 +7,33 @@ import { CreateLesson, PatchLesson } from './type/lesson.type.js';
 
 @Injectable()
 export class LessonRepository implements ILessonRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly lessonRequest;
+  constructor(private readonly prisma: PrismaService) {
+    this.lessonRequest = prisma.lessonRequest;
+  }
 
   async create(data: CreateLesson & { userId: string }): Promise<LessonRequest> {
     logger.debug('repo data', data);
-    return this.prisma.lessonRequest.create({ data });
+    return this.lessonRequest.create({ data });
   }
 
   async findAll(): Promise<LessonRequest[]> {
-    return this.prisma.lessonRequest.findMany();
+    return this.lessonRequest.findMany();
   }
 
   async findOne(id: string): Promise<LessonRequest | null> {
-    return this.prisma.lessonRequest.findUnique({ where: { id } });
+    return this.lessonRequest.findUnique({ where: { id } });
   }
 
   async update(id: string, data: PatchLesson): Promise<LessonRequest | null> {
-    return this.prisma.lessonRequest.update({ where: { id }, data });
+    return this.lessonRequest.update({ where: { id }, data });
   }
 
   async updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest | null> {
-    return this.prisma.lessonRequest.update({ where: { id }, data: { status } });
+    return this.lessonRequest.update({ where: { id }, data: { status } });
   }
 
   async delete(id: string): Promise<LessonRequest> {
-    return this.prisma.lessonRequest.delete({ where: { id } });
+    return this.lessonRequest.delete({ where: { id } });
   }
 }

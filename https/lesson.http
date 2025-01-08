@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ###  Lesson 요청 상세 조회
-GET http://localhost:3000/lessons/3b1b4eb3-de81-443a-a04b-2092301653f6
+GET http://localhost:3000/lessons/b06a4a27-a624-4ac1-a99e-cfb8bfb664c8
 
 ### Lesson 전체 조회
 GET http://localhost:3000/lessons

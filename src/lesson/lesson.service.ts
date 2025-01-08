@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { LessonRequestStatus } from '@prisma/client';
-import { BadRequestException, UserNotFoundException } from '#exception/http-exception.js';
+import { UserNotFoundException } from '#exception/http-exception.js';
 import { UserRepository } from '#user/user.repository.js';
 import { logger } from '#logger/winston-logger.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
@@ -22,15 +22,19 @@ export class LessonService implements ILessonService {
     }
     logger.debug('sevice data: ', data);
 
-    return this.lessonRepository.create({ ...data, userId });
+    return await this.lessonRepository.create({ ...data, userId });
   }
 
   async getLessonById(id: string): Promise<LessonResponse | null> {
-    return this.lessonRepository.findOne(id);
+    const lesson = await this.lessonRepository.findOne(id);
+    if (!lesson) {
+      throw new NotFoundException('요청하신 Lesson이 존재하지 않습니다.'); //추후 수정
+    }
+    return lesson;
   }
 
   async updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse | null> {
-    return this.lessonRepository.update(id, data);
+    return await this.lessonRepository.update(id, data);
   }
 
   async getLessons(): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
@@ -44,6 +48,6 @@ export class LessonService implements ILessonService {
   }
 
   async updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse | null> {
-    return this.lessonRepository.updateStatus(id, status);
+    return await this.lessonRepository.updateStatus(id, status);
   }
 }
