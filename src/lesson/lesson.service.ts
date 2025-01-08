@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { LessonRequestStatus } from '@prisma/client';
-import { UserNotFoundException } from '#exception/http-exception.js';
+import { UserNotFound } from '#exception/http-exception.js';
 import { UserRepository } from '#user/user.repository.js';
 import { logger } from '#logger/winston-logger.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
@@ -18,7 +18,7 @@ export class LessonService implements ILessonService {
     const userExists = await this.userRepository.findUserById(userId);
     if (!userExists) {
       logger.warn(`User not found: ${userId}`);
-      throw new UserNotFoundException();
+      throw new UserNotFound();
     }
     logger.debug('sevice data: ', data);
 

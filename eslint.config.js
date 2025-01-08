@@ -62,6 +62,7 @@ export default [
             { pattern: '#profile/**', group: 'internal', position: 'before' },
             { pattern: '#lesson/**', group: 'internal', position: 'before' },
             { pattern: '#direct-lesson/**', group: 'internal', position: 'before' },
+            { pattern: '#trainer/**', group: 'internal', position: 'before' },
             { pattern: '#quote/**', group: 'internal', position: 'before' },
             { pattern: '#review/**', group: 'internal', position: 'before' },
             { pattern: '#notification/**', group: 'internal', position: 'before' },

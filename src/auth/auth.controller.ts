@@ -3,20 +3,19 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
-import { InputCreateUserDTO } from '#auth/type/auth.dto.js';
-import { Payload } from '#auth/type/auth.type.js';
+import { CreateUserDTO } from '#auth/type/auth.dto.js';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup/user')
-  async createUser(@Body() body: InputCreateUserDTO) {
+  async createUser(@Body() body: CreateUserDTO) {
     return await this.authService.createUser({ ...body, role: 'USER' });
   }
 
   @Post('signup/trainer')
-  async createTrainer(@Body() body: InputCreateUserDTO) {
+  async createTrainer(@Body() body: CreateUserDTO) {
     return await this.authService.createUser({ ...body, role: 'TRAINER' });
   }
 

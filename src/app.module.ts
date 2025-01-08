@@ -6,6 +6,7 @@ import { AlsModule } from '#common/als/als.module.js';
 import { AuthModule } from '#auth/auth.module.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { UserModule } from '#user/user.module.js';
+import { ProfileModule } from '#profile/profile.module.js';
 import { LessonModule } from './lesson/lesson.module.js';
 
 @Module({
@@ -18,6 +19,7 @@ import { LessonModule } from './lesson/lesson.module.js';
     AlsModule,
     AuthModule,
     UserModule,
+    ProfileModule,
     LessonModule,
   ],
   controllers: [],
