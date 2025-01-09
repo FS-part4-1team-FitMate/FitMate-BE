@@ -5,7 +5,6 @@ enum AuthExceptionMessage {
   UNAUTHORIZED = '로그인이 필요합니다.',
   USER_NOT_FOUND = '해당 유저를 찾을 수 없습니다.',
   NO_REFRESH_TOKEN = '리프레시 토큰이 없습니다.',
-  PROFILE_NOT_FOUND = '해당 프로필을 찾을 수 없습니다.',
 }
 
 export default AuthExceptionMessage;

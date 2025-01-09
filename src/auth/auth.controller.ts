@@ -2,8 +2,8 @@ import { UseGuards, Body, Controller, Post, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
+import { CreateUserDTO } from '#auth/dto/auth.dto.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
-import { CreateUserDTO } from '#auth/type/auth.dto.js';
 
 @Controller('auth')
 export class AuthController {
