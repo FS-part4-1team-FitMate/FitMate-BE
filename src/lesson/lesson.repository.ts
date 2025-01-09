@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { LessonRequest, LessonRequestStatus } from '@prisma/client';
+import { LessonRequest, LessonRequestStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
-import { logger } from '#logger/winston-logger.js';
 import { ILessonRepository } from './interface/lesson-repository.interface.js';
 import { CreateLesson, PatchLesson } from './type/lesson.type.js';
 
@@ -13,24 +12,47 @@ export class LessonRepository implements ILessonRepository {
   }
 
   async create(data: CreateLesson & { userId: string }): Promise<LessonRequest> {
-    logger.debug('repo data', data);
     return this.lessonRequest.create({ data });
   }
 
-  async findAll(): Promise<LessonRequest[]> {
-    return this.lessonRequest.findMany();
+  async findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]> {
+    const whereClause: Prisma.LessonRequestWhereInput = { userId };
+    if (status) {
+      whereClause.status = status;
+    }
+    return this.lessonRequest.findMany({ where: whereClause });
+  }
+
+  async findAll(
+    where: Record<string, any> = {},
+    orderBy: Record<string, string> = { created_at: 'desc' },
+    skip = 0,
+    take = 10,
+  ): Promise<LessonRequest[]> {
+    return this.lessonRequest.findMany({
+      where,
+      orderBy,
+      skip,
+      take,
+    });
+  }
+
+  async count(where: Record<string, any> = {}): Promise<number> {
+    return this.lessonRequest.count({
+      where,
+    });
   }
 
   async findOne(id: string): Promise<LessonRequest | null> {
     return this.lessonRequest.findUnique({ where: { id } });
   }
 
-  async update(id: string, data: PatchLesson): Promise<LessonRequest | null> {
-    return this.lessonRequest.update({ where: { id }, data });
+  async updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest> {
+    return this.lessonRequest.update({ where: { id }, data: { status } });
   }
 
-  async updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest | null> {
-    return this.lessonRequest.update({ where: { id }, data: { status } });
+  async update(id: string, data: PatchLesson): Promise<LessonRequest> {
+    return this.lessonRequest.update({ where: { id }, data });
   }
 
   async delete(id: string): Promise<LessonRequest> {
