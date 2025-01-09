@@ -34,7 +34,7 @@ export class AuthService implements IAuthService {
   async getUser(email: string, password: string): Promise<FilterUser> {
     const user = await this.userRepository.findByEmail(email);
     if (!user) throw new NotFoundException(AuthExceptionMessage.EMAIL_NOT_FOUND);
-    verifyPassword(password, user.password);
+    await verifyPassword(password, user.password);
     return filterSensitiveUserData(user);
   }
 

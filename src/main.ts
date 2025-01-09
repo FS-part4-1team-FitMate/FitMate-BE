@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { GlobalExceptionFilter } from '#exception/global-exception-filter.js';
@@ -13,7 +13,18 @@ async function bootstrap() {
   const port = configService.get('PORT') ?? 3000;
 
   app.useGlobalInterceptors(new LoggingInterceptor());
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      exceptionFactory: (errors) => {
+        console.log(errors);
+        const errorMessages = errors.flatMap((error) => Object.values(error.constraints || {}));
+        return new BadRequestException(errorMessages);
+      },
+    }),
+  );
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.enableCors({

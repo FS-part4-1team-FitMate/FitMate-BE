@@ -16,7 +16,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const responseMessage = exception.getResponse();
-      message = typeof responseMessage === 'string' ? responseMessage : exception.message;
+      if (typeof responseMessage === 'object' && responseMessage !== null && 'message' in responseMessage) {
+        message = (responseMessage as { message: string }).message;
+      } else {
+        message = responseMessage as string;
+      }
       stack = exception.stack;
     } else if (exception instanceof Error) {
       message = exception.message;
@@ -26,7 +30,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     response.status(status).json({
       statusCode: status,
       message,
-      stack,
       timestamp: new Date().toISOString(),
       path: request.url,
     });
