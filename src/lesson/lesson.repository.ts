@@ -15,14 +15,6 @@ export class LessonRepository implements ILessonRepository {
     return this.lessonRequest.create({ data });
   }
 
-  async findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]> {
-    const whereClause: Prisma.LessonRequestWhereInput = { userId };
-    if (status) {
-      whereClause.status = status;
-    }
-    return this.lessonRequest.findMany({ where: whereClause });
-  }
-
   async findAll(
     where: Record<string, any> = {},
     orderBy: Record<string, string> = { created_at: 'desc' },
@@ -41,6 +33,14 @@ export class LessonRepository implements ILessonRepository {
     return this.lessonRequest.count({
       where,
     });
+  }
+
+  async findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]> {
+    const whereClause: Prisma.LessonRequestWhereInput = { userId };
+    if (status) {
+      whereClause.status = status;
+    }
+    return this.lessonRequest.findMany({ where: whereClause });
   }
 
   async findOne(id: string): Promise<LessonRequest | null> {

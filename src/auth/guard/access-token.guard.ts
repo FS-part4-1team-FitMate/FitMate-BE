@@ -28,6 +28,8 @@ export class AccessTokenGuard implements CanActivate {
       if (store) {
         store.userId = decoded.userId;
         store.userRole = decoded.role;
+        console.log(store.userId); //추후 삭제
+        console.log(store.userRole); //추후 삭제'
       }
 
       return true;

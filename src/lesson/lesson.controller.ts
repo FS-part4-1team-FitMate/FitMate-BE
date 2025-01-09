@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, UseGuards, UnauthorizedExcep
 import { AlsStore } from '#common/als/store-validator.js';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
+import { logger } from '#logger/winston-logger.js';
 import { CreateLessonDto, QueryLessonDto, UpdateLessonDto } from './dto/lesson.dto.js';
 import { LessonService } from './lesson.service.js';
 
@@ -30,6 +31,29 @@ export class LessonController {
   }
 
   /*************************************************************************************
+   * 요청 레슨 목록 조회
+   * ***********************************************************************************
+   */
+  @Get()
+  async getLessons(@Query() query: QueryLessonDto) {
+    return this.lessonService.getLessons(query);
+  }
+
+  /*************************************************************************************
+   * 나의 요청 레슨 목록 조회
+   * ***********************************************************************************
+   */
+  @Get('me')
+  @UseGuards(AccessTokenGuard)
+  async getMyLessons(@Query() query: QueryLessonDto) {
+    const { userId } = this.alsStore.getStore();
+    if (!userId) {
+      throw new UnauthorizedException('인증정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
+    }
+    return this.lessonService.getLessons(query, userId);
+  }
+
+  /*************************************************************************************
    * 요청 레슨 상세조회
    * ***********************************************************************************
    */
@@ -52,15 +76,7 @@ export class LessonController {
     return this.lessonService.cancelLessonById(id, userId);
   }
 
-  /*************************************************************************************
-   * 요청 레슨 목록 조회
-   * ***********************************************************************************
-   */
-  @Get()
-  async getLessons(@Query() query: QueryLessonDto) {
-    return this.lessonService.getLessons(query);
-  }
-
+  //
   @Patch(':id')
   async update(@Param('id', UUIDPipe) id: string, @Body() body: UpdateLessonDto) {
     return this.lessonService.updateLessonById(id, body);

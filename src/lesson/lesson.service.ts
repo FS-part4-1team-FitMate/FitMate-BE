@@ -35,6 +35,61 @@ export class LessonService implements ILessonService {
   }
 
   /*************************************************************************************
+   * 요청 레슨 목록 조회 (나의 요청 레슨 공통 조회)
+   * ***********************************************************************************
+   */
+  async getLessons(query: QueryLessonDto, userId?: string): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
+    const {
+      page = 1,
+      limit = 5,
+      order = 'created_at',
+      sort = 'desc',
+      keyword,
+      lessonType,
+      lessonSubType,
+      locationType,
+      status,
+    } = query.toCamelCase();
+
+    const orderMapping: Record<string, string> = {
+      created_at: 'createdAt',
+      start_date: 'startDate',
+      end_date: 'endDate',
+      quote_end_date: 'quoteEndDate',
+      rating: 'rating',
+      lesson_count: 'lessonCount',
+      lesson_time: 'lessonTime',
+    };
+
+    const orderByField = orderMapping[order] || 'createdAt';
+
+    // 필터 조건 구성
+    const where = {
+      ...(userId && { userId }),
+      ...(lessonType && { lessonType: { in: lessonType } }),
+      ...(lessonSubType && { lessonSubType: { in: lessonSubType } }),
+      ...(locationType && { locationType: { in: locationType } }),
+      ...(status && { status: { in: status } }),
+      ...(keyword && {
+        OR: [{ roadAddress: { contains: keyword } }, { detailAddress: { contains: keyword } }],
+      }),
+    };
+
+    const orderBy: Record<string, string> = {};
+    orderBy[orderByField] = sort;
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const [lessons, totalCount] = await Promise.all([this.lessonRepository.findAll(where, orderBy, skip, take), this.lessonRepository.count(where)]);
+
+    return {
+      list: lessons,
+      totalCount,
+      hasMore: totalCount > page * limit,
+    };
+  }
+
+  /*************************************************************************************
    * 요청 레슨 상세조회
    * ***********************************************************************************
    */
@@ -67,60 +122,6 @@ export class LessonService implements ILessonService {
     }
 
     return await this.lessonRepository.updateStatus(lessonId, LessonRequestStatus.CANCELED);
-  }
-
-  /*************************************************************************************
-   * 요청 레슨 목록 조회
-   * ***********************************************************************************
-   */
-  async getLessons(query: QueryLessonDto): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
-    const {
-      page = 1,
-      limit = 5,
-      order = 'created_at',
-      sort = 'desc',
-      keyword,
-      lessonType,
-      lessonSubType,
-      locationType,
-      status,
-    } = query.toCamelCase();
-
-    const orderMapping: Record<string, string> = {
-      created_at: 'createdAt',
-      start_date: 'startDate',
-      end_date: 'endDate',
-      quote_end_date: 'quoteEndDate',
-      rating: 'rating',
-      lesson_count: 'lessonCount',
-      lesson_time: 'lessonTime',
-    };
-
-    const orderByField = orderMapping[order] || 'createdAt';
-
-    // 필터 조건 구성
-    const where = {
-      ...(lessonType && { lessonType: { in: lessonType } }),
-      ...(lessonSubType && { lessonSubType: { in: lessonSubType } }),
-      ...(locationType && { locationType: { in: locationType } }),
-      ...(status && { status: { in: status } }),
-      ...(keyword && {
-        OR: [{ roadAddress: { contains: keyword } }, { detailAddress: { contains: keyword } }],
-      }),
-    };
-
-    const orderBy: Record<string, string> = {};
-    orderBy[orderByField] = sort;
-    const skip = (page - 1) * limit;
-    const take = limit;
-
-    const [lessons, totalCount] = await Promise.all([this.lessonRepository.findAll(where, orderBy, skip, take), this.lessonRepository.count(where)]);
-
-    return {
-      list: lessons,
-      totalCount,
-      hasMore: totalCount > page * limit,
-    };
   }
 
   async updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse> {
