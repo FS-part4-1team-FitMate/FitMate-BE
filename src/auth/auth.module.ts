@@ -9,6 +9,7 @@ import { AuthService } from '#auth/auth.service.js';
 import { LocalStrategy } from '#auth/strategy/local.strategy.js';
 import { RefreshTokenStrategy } from '#auth/strategy/refresh-token.strategy.js';
 import { UserRepository } from '#user/user.repository.js';
+import { UserService } from '#user/user.service.js';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { UserRepository } from '#user/user.repository.js';
     JwtConfigModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, RefreshTokenStrategy, UserRepository],
+  providers: [AuthService, LocalStrategy, RefreshTokenStrategy, UserRepository, UserService],
   exports: [],
 })
 export class AuthModule {}

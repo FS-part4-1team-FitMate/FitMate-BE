@@ -1,13 +1,17 @@
-import { UseGuards, Body, Controller, Post, Req } from '@nestjs/common';
+import { UseGuards, Body, Controller, Post } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
+import { UserService } from '#user/user.service.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post('signup/user')
   async createUser(@Body() body: CreateUserDTO) {
@@ -25,8 +29,8 @@ export class AuthController {
     const { userId, role } = user;
     const accessToken = this.authService.createToken(userId, role, 'access');
     const refreshToken = this.authService.createToken(userId, role, 'refresh');
-    await this.authService.updateUser(userId, refreshToken);
-    return { accessToken, refreshToken };
+    const userInfo = await this.authService.updateUser(userId, refreshToken);
+    return { accessToken, refreshToken, user: userInfo };
   }
 
   @Post('token/refresh')

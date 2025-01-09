@@ -6,6 +6,7 @@ import ExceptionMessages from '#exception/exception-message.js';
 import type { FilterUser } from '#auth/type/auth.type.js';
 import { IUserService } from '#user/interface/user.service.interface.js';
 import { UserRepository } from '#user/user.repository.js';
+import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -19,6 +20,6 @@ export class UserService implements IUserService {
     if (id !== userId) throw new ForbiddenException(ExceptionMessages.FORBIDDEN);
     const user = await this.userRepository.findUserById(id);
     if (!user) throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
-    return user;
+    return filterSensitiveUserData(user);
   }
 }
