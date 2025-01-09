@@ -1,7 +1,7 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, Param, UseGuards } from '@nestjs/common';
 import { AlsStore } from '#common/als/store-validator.js';
 import { UUIDPipe } from '#common/uuid.pipe.js';
-import { ForbiddenException } from '#exception/http-exception.js';
+import ExceptionMessages from '#exception/exception-message.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { UserService } from '#user/user.service.js';
 
@@ -16,7 +16,7 @@ export class UserController {
   @UseGuards(AccessTokenGuard)
   async getUserById(@Param('id', UUIDPipe) id: string) {
     const { userId } = this.alsStore.getStore();
-    if (id !== userId) throw new ForbiddenException();
+    if (id !== userId) throw new ForbiddenException(ExceptionMessages.FORBIDDEN);
     return await this.userService.findUserById(id);
   }
 }

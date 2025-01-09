@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import type { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { NoRefreshToken } from '#exception/http-exception.js';
+import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import type { Payload } from '#auth/type/auth.type.js';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refres
 
   async validate(req: Request, payload: Payload) {
     const refreshToken = req.headers.authorization?.split(' ')[1];
-    if (!refreshToken) throw new NoRefreshToken();
+    if (!refreshToken) throw new UnauthorizedException(AuthExceptionMessage.NO_REFRESH_TOKEN);
     return { ...payload, refreshToken };
   }
 }
