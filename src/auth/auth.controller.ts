@@ -4,14 +4,10 @@ import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
-import { UserService } from '#user/user.service.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup/user')
   async createUser(@Body() body: CreateUserDTO) {

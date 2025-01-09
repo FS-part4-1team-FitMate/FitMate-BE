@@ -21,7 +21,7 @@ import { UserService } from '#user/user.service.js';
     JwtConfigModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, RefreshTokenStrategy, UserRepository, UserService],
+  providers: [AuthService, LocalStrategy, RefreshTokenStrategy, UserRepository],
   exports: [],
 })
 export class AuthModule {}
