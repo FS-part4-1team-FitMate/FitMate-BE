@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserEmailNotFound, UserExistsException } from '#exception/http-exception.js';
-import { InvalidRefreshToken } from '#exception/http-exception.js';
+import AuthExceptionMessage from '#exception/auth-exception-message.js';
+import ExceptionMessages from '#exception/exception-message.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
 import type { CreateUser, FilterUser } from '#auth/type/auth.type';
 import { UserRepository } from '#user/user.repository.js';
@@ -19,7 +20,7 @@ export class AuthService implements IAuthService {
   async createUser(data: CreateUser): Promise<FilterUser> {
     const userEmail = await this.userRepository.findByEmail(data.email);
     if (userEmail) {
-      throw new UserExistsException();
+      throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
     }
     const hashedPassword = await hashingPassword(data.password);
     const { password, ...userWithoutPassword } = data;
@@ -32,8 +33,8 @@ export class AuthService implements IAuthService {
 
   async getUser(email: string, password: string): Promise<FilterUser> {
     const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new UserEmailNotFound();
-    verifyPassword(password, user.password);
+    if (!user) throw new NotFoundException(AuthExceptionMessage.EMAIL_NOT_FOUND);
+    await verifyPassword(password, user.password);
     return filterSensitiveUserData(user);
   }
 
@@ -51,7 +52,7 @@ export class AuthService implements IAuthService {
 
   async refreshToken(userId: string, role: string, refreshToken: string): Promise<string> {
     const user = await this.userRepository.findUserById(userId);
-    if (!user || user.refreshToken !== refreshToken) throw new InvalidRefreshToken();
+    if (!user || user.refreshToken !== refreshToken) throw new UnauthorizedException(ExceptionMessages.INVALID_REFRESH_TOKEN);
     return this.createToken(user.id, role);
   }
 }

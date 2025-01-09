@@ -1,10 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { validateOrReject } from 'class-validator';
 import { Strategy } from 'passport-local';
-import { WrongFormat } from '#exception/http-exception.js';
+import ExceptionMessages from '#exception/exception-message.js';
 import { AuthService } from '#auth/auth.service.js';
-import { LoginDTO } from '#auth/type/auth.dto.js';
+import { LoginDTO } from '#auth/dto/auth.dto.js';
+import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -20,7 +22,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     try {
       await validateOrReject(signInDto);
     } catch (e) {
-      throw new WrongFormat();
+      throw new BadRequestException(ExceptionMessages.WRONG_FORMAT);
     }
 
     const user = await this.authService.getUser(email, password);

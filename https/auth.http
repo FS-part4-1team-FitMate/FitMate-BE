@@ -4,9 +4,9 @@ POST http://localhost:3000/auth/signUp/user
 Content-Type: application/json
 
 {
-  "nickname": "test12",
-  "email": "test12@example.com",
-  "password": "testpassword12!"
+  "nickname": "test17",
+  "email": "test17@example.com",
+  "password": "testpassword17!"
 }
 
 ###
@@ -15,9 +15,9 @@ POST http://localhost:3000/auth/signUp/trainer
 Content-Type: application/json
 
 {
-  "nickname": "test13",
-  "email": "test13@example.com",
-  "password": "testpassword13!"
+  "nickname": "test16",
+  "email": "test16@example.com",
+  "password": "testpassword16!"
 }
 
 ###
@@ -26,8 +26,8 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "test5@example.com",
-  "password": "testpassword5!"
+  "email": "test3@example.com",
+  "password": "testpassword14!"
 }
 
 ###
@@ -37,5 +37,5 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0NTg1Y
 
 ###
 // user 단일 조회하기
-GET http://localhost:3000/users/4585b640-690f-4acf-ae2e-adc7f957c60c
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0NTg1YjY0MC02OTBmLTRhY2YtYWUyZS1hZGM3Zjk1N2M2MGMiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjI2OTMzNCwiZXhwIjoxNzM3NDc4OTM0fQ.Y81e4FlGxUcO1JTtn6Ev5IPaFTn0PHJILOGCetj8G4k
+GET http://localhost:3000/users/0852ac4f-20b8-4d8f-b539-78a18438d158
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwODUyYWM0Zi0yMGI4LTRkOGYtYjUzOS03OGExODQzOGQxNTgiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjQwOTg1NSwiZXhwIjoxNzM3NjE5NDU1fQ.8BMk5GTVbzCvOt3Z2N35eNK1Zt4m3pWfuOmLxfRJYjY

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { LessonRequestStatus } from '@prisma/client';
-import { UserNotFound } from '#exception/http-exception.js';
+import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
 import { logger } from '#logger/winston-logger.js';
 import { QueryLessonDto } from './dto/lesson.dto.js';
@@ -22,7 +22,7 @@ export class LessonService implements ILessonService {
   async createLesson(data: CreateLesson, userId: string): Promise<LessonResponse> {
     const userExists = await this.userRepository.findUserById(userId);
     if (!userExists) {
-      throw new UserNotFound();
+      throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
     }
 
     const pendingLesson = await this.lessonRepository.findLessonsByUserId(userId, LessonRequestStatus.PENDING);
