@@ -20,7 +20,7 @@ async function bootstrap() {
     origin: configService.get<string>('CORS_ORIGIN') || '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
-  
+
   app.listen(port, () => {
     logger.info(`🚀 Server is running on port ${port}`);
   });
