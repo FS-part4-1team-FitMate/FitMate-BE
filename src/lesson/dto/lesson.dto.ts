@@ -5,11 +5,11 @@ import { IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from 'c
 
 export class CreateLessonDto {
   @IsNotEmpty()
-  @IsEnum(LessonType)
+  @IsEnum(LessonType, { message: '유효하지 않은 레슨 타입입니다.' })
   lessonType: LessonType;
 
   @IsOptional()
-  @IsEnum(LessonSubType)
+  @IsEnum(LessonSubType, { message: '유효하지 않은 레슨 서브타입입니다.' })
   lessonSubType?: LessonSubType;
 
   @IsNotEmpty()
@@ -36,7 +36,7 @@ export class CreateLessonDto {
   quoteEndDate: Date;
 
   @IsNotEmpty()
-  @IsEnum(LocationType)
+  @IsEnum(LocationType, { message: '유효하지 않은 위치 타입입니다.' })
   locationType: LocationType;
 
   @IsOptional()
@@ -71,22 +71,22 @@ export class QueryLessonDto {
 
   @IsOptional()
   @Transform(({ value }) => (value ? value.split(',') : []))
-  @IsEnum(LessonType, { each: true })
+  @IsEnum(LessonType, { each: true, message: '유효하지 않은 레슨 타입입니다.' })
   lesson_type?: LessonType[];
 
   @IsOptional()
   @Transform(({ value }) => (value ? value.split(',') : []))
-  @IsEnum(LessonSubType, { each: true })
+  @IsEnum(LessonSubType, { each: true, message: '유효하지 않은 레슨 서브타입입니다.' })
   lesson_sub_type?: LessonSubType[];
 
   @IsOptional()
   @Transform(({ value }) => (value ? value.split(',') : []))
-  @IsEnum(LocationType, { each: true })
+  @IsEnum(LocationType, { each: true, message: '유효하지 않은 위치 타입입니다.' })
   location_type?: LocationType[];
 
   @IsOptional()
   @Transform(({ value }) => (value ? value.split(',') : []))
-  @IsEnum(LessonRequestStatus, { each: true })
+  @IsEnum(LessonRequestStatus, { each: true, message: '유효하지 않은 요청 상태값입니다.' })
   status?: LessonRequestStatus[];
 
   @IsOptional()

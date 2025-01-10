@@ -31,9 +31,11 @@ export class LessonService implements ILessonService {
       throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
     }
 
-    const pendingLesson = await this.lessonRepository.findLessonsByUserId(userId, LessonRequestStatus.PENDING);
+    const pendingLesson = await this.lessonRepository.findLessonsByUserId(
+      userId,
+      LessonRequestStatus.PENDING,
+    );
     if (pendingLesson.length > 0) {
-      logger.warn(`유저 ${userId}는 현재 진행중인 레슨이 있습니다.`);
       throw new BadRequestException('이미 진행중인 레슨이 있습니다.'); // 추후 수정
     }
 
@@ -44,7 +46,10 @@ export class LessonService implements ILessonService {
    * 요청 레슨 목록 조회 (나의 요청 레슨 공통 조회)
    * ***********************************************************************************
    */
-  async getLessons(query: QueryLessonDto, userId?: string): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
+  async getLessons(
+    query: QueryLessonDto,
+    userId?: string,
+  ): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
     if (!userId) {
       throw new UnauthorizedException('인증정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
     }
@@ -90,7 +95,10 @@ export class LessonService implements ILessonService {
     const skip = (page - 1) * limit;
     const take = limit;
 
-    const [lessons, totalCount] = await Promise.all([this.lessonRepository.findAll(where, orderBy, skip, take), this.lessonRepository.count(where)]);
+    const [lessons, totalCount] = await Promise.all([
+      this.lessonRepository.findAll(where, orderBy, skip, take),
+      this.lessonRepository.count(where),
+    ]);
 
     return {
       list: lessons,
