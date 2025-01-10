@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Profile } from '@prisma/client';
-import { ProfileNotFound } from '#exception/http-exception.js';
+import ProfileExceptionMessage from '#exception/profile-exception-message.js';
 import { IProfileService } from '#profile/interface/profile.service.interface.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 import type { CreateProfile, UpdateProfile } from '#profile/type/profile.type.js';
@@ -15,13 +15,13 @@ export class ProfileService implements IProfileService {
 
   async findProfileById(id: string): Promise<Profile> {
     const profile = await this.profileRepository.findProfileById(id);
-    if (!profile) throw new ProfileNotFound();
+    if (!profile) throw new NotFoundException(ProfileExceptionMessage.PROFILE_NOT_FOUND);
     return profile;
   }
 
   async updateProfile(id: string, data: UpdateProfile): Promise<Profile> {
     const profile = await this.profileRepository.findProfileById(id);
-    if (!profile) throw new ProfileNotFound();
+    if (!profile) throw new NotFoundException(ProfileExceptionMessage.PROFILE_NOT_FOUND);
     return await this.profileRepository.updateProfile(id, data);
   }
 }

@@ -1,6 +1,6 @@
 import type { Role, User } from '@prisma/client';
 
-export class CreateUser {
+export interface CreateUser {
   nickname: string;
   email: string;
   password: string;
@@ -9,7 +9,7 @@ export class CreateUser {
 
 export type FilterUser = Omit<User, 'password' | 'refreshToken'>;
 
-export class Payload {
+export interface Payload {
   userId: string;
   role: Role;
 }

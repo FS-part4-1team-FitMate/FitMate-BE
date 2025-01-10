@@ -1,11 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { Role } from '@prisma/client';
 
-export class CreateUser {
+export interface CreateUser {
   nickname: string;
   email: string;
   password: string;
   role: Role;
 }
-
-export class PatchUser extends PartialType(CreateUser) {}
