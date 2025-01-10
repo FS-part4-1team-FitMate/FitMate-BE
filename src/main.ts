@@ -2,6 +2,7 @@ import { ValidationPipe, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { GlobalExceptionFilter } from '#exception/global-exception-filter.js';
+import { RoleAssignPipe } from '#profile/pipe/role-assign.pipe.js';
 import { LoggingInterceptor } from '#logger/logging.interceptor.js';
 import { logger } from '#logger/winston-logger.js';
 import { AppModule } from './app.module.js';

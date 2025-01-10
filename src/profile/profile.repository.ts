@@ -18,9 +18,14 @@ export class ProfileRepository implements IProfileRepository {
     });
   }
 
-  async createProfile(data: CreateProfile): Promise<Profile> {
+  async createProfile(userId: string, data: CreateProfile): Promise<Profile> {
     return await this.profile.create({
-      data,
+      data: {
+        ...data,
+        user: {
+          connect: { id: userId },
+        },
+      },
     });
   }
 

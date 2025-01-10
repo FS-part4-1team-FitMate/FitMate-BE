@@ -1,8 +1,6 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { Gender, LessonType, Region } from '@prisma/client';
+import { Gender, LessonType, Region, Role } from '@prisma/client';
 
-export class CreateProfile {
-  userId: string;
+export interface CreateProfile {
   name?: string;
   profileImage?: string;
   phone?: string;
@@ -15,4 +13,8 @@ export class CreateProfile {
   certification?: string;
 }
 
-export class UpdateProfile extends PartialType(CreateProfile) {}
+export interface UpdateProfile extends Partial<CreateProfile> {}
+
+export interface UserRole {
+  role: Role;
+}

@@ -9,8 +9,8 @@ import type { CreateProfile, UpdateProfile } from '#profile/type/profile.type.js
 export class ProfileService implements IProfileService {
   constructor(private readonly profileRepository: ProfileRepository) {}
 
-  async createProfile(data: CreateProfile): Promise<Profile> {
-    return await this.profileRepository.createProfile(data);
+  async createProfile(userId: string, data: CreateProfile): Promise<Profile> {
+    return await this.profileRepository.createProfile(userId, data);
   }
 
   async findProfileById(id: string): Promise<Profile> {

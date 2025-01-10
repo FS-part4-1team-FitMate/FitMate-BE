@@ -1,5 +1,6 @@
-import { UseGuards, Body, Controller, Post } from '@nestjs/common';
+import { UseGuards, Body, Controller, Post, Res } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import express from 'express';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
@@ -39,10 +40,14 @@ export class AuthController {
 
   @Post('token/refresh')
   @UseGuards(RefreshTokenGuard)
-  async refreshAccessToken(@ReqUser() user: { userId: string; role: string; refreshToken: string }) {
+  async refreshAccessToken(
+    @ReqUser() user: { userId: string; role: string; refreshToken: string },
+    @Res() res: express.Response,
+  ) {
     const { userId, role, refreshToken } = user;
     console.log(userId, role);
     const accessToken = await this.authService.refreshToken(userId, role, refreshToken);
-    return { accessToken };
+    res.setHeader('Authorization', `Bearer ${accessToken}`);
+    return res.send();
   }
 }
