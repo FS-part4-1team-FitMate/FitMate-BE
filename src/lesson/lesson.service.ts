@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { LessonRequestStatus } from '@prisma/client';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
+import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
-import { logger } from '#logger/winston-logger.js';
 import { QueryLessonDto } from './dto/lesson.dto.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
@@ -21,10 +21,10 @@ export class LessonService implements ILessonService {
    */
   async createLesson(data: CreateLesson, userId: string, userRole: string): Promise<LessonResponse> {
     if (!userId) {
-      throw new UnauthorizedException('인증 정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
+      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
     }
     if (userRole !== 'USER') {
-      throw new UnauthorizedException('일반 유저인 경우에만 레슨을 요청하실 수 있습니다.'); // 추후 수정
+      throw new UnauthorizedException(LessonExceptionMessage.ONLY_USER_CAN_REQUEST_LESSON);
     }
     const userExists = await this.userRepository.findUserById(userId);
     if (!userExists) {
@@ -36,7 +36,7 @@ export class LessonService implements ILessonService {
       LessonRequestStatus.PENDING,
     );
     if (pendingLesson.length > 0) {
-      throw new BadRequestException('이미 진행중인 레슨이 있습니다.'); // 추후 수정
+      throw new BadRequestException(LessonExceptionMessage.PENDING_LESSON_EXISTS);
     }
 
     return await this.lessonRepository.create({ ...data, userId });
@@ -51,7 +51,7 @@ export class LessonService implements ILessonService {
     userId?: string,
   ): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
     if (!userId) {
-      throw new UnauthorizedException('인증정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
+      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
     }
 
     const {
@@ -114,7 +114,7 @@ export class LessonService implements ILessonService {
   async getLessonById(id: string): Promise<LessonResponse> {
     const lesson = await this.lessonRepository.findOne(id);
     if (!lesson) {
-      throw new NotFoundException('요청하신 Lesson이 존재하지 않습니다.'); // 추후 수정
+      throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
     return lesson;
   }
@@ -125,22 +125,21 @@ export class LessonService implements ILessonService {
    */
   async cancelLessonById(lessonId: string, userId: string): Promise<LessonResponse> {
     if (!userId) {
-      throw new UnauthorizedException('인증 정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
+      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
     }
 
     const lesson = await this.lessonRepository.findOne(lessonId);
-    logger.debug('cancel 요청 lesson: ', lesson);
 
     if (!lesson) {
-      throw new NotFoundException('요청하신 Lesson이 존재하지 않습니다.'); // 추후 수정
+      throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
 
     if (lesson.userId !== userId) {
-      throw new UnauthorizedException('본인의 레슨만 취소할 수 있습니다.'); // 추후 수정
+      throw new UnauthorizedException(LessonExceptionMessage.NOT_MY_LESSON);
     }
 
     if (lesson.status !== LessonRequestStatus.PENDING) {
-      throw new BadRequestException('대기중인 레슨만 취소할 수 있습니다.'); // 추후 수정
+      throw new BadRequestException(LessonExceptionMessage.INVALID_STATUS_TOBE_PENDING);
     }
 
     return await this.lessonRepository.updateStatus(lessonId, LessonRequestStatus.CANCELED);

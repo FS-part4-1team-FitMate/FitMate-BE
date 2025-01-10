@@ -1,9 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards, UnauthorizedException, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { AlsStore } from '#common/als/store-validator.js';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
-import { logger } from '#logger/winston-logger.js';
-import { CreateLessonDto, QueryLessonDto, UpdateLessonDto } from './dto/lesson.dto.js';
+import { CreateLessonDto, QueryLessonDto } from './dto/lesson.dto.js';
 import { LessonService } from './lesson.service.js';
 
 @Controller('lessons')
