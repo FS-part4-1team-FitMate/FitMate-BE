@@ -12,15 +12,7 @@ export class LessonRepository implements ILessonRepository {
   }
 
   async create(data: CreateLesson & { userId: string }): Promise<LessonRequest> {
-    return this.lessonRequest.create({ data });
-  }
-
-  async findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]> {
-    const whereClause: Prisma.LessonRequestWhereInput = { userId };
-    if (status) {
-      whereClause.status = status;
-    }
-    return this.lessonRequest.findMany({ where: whereClause });
+    return await this.lessonRequest.create({ data });
   }
 
   async findAll(
@@ -29,7 +21,7 @@ export class LessonRepository implements ILessonRepository {
     skip = 0,
     take = 10,
   ): Promise<LessonRequest[]> {
-    return this.lessonRequest.findMany({
+    return await this.lessonRequest.findMany({
       where,
       orderBy,
       skip,
@@ -38,24 +30,28 @@ export class LessonRepository implements ILessonRepository {
   }
 
   async count(where: Record<string, any> = {}): Promise<number> {
-    return this.lessonRequest.count({
+    return await this.lessonRequest.count({
       where,
     });
   }
 
+  async findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]> {
+    const whereClause: Prisma.LessonRequestWhereInput = { userId };
+    if (status) {
+      whereClause.status = status;
+    }
+    return await this.lessonRequest.findMany({ where: whereClause });
+  }
+
   async findOne(id: string): Promise<LessonRequest | null> {
-    return this.lessonRequest.findUnique({ where: { id } });
+    return await this.lessonRequest.findUnique({ where: { id } });
   }
 
   async updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest> {
-    return this.lessonRequest.update({ where: { id }, data: { status } });
+    return await this.lessonRequest.update({ where: { id }, data: { status } });
   }
 
   async update(id: string, data: PatchLesson): Promise<LessonRequest> {
-    return this.lessonRequest.update({ where: { id }, data });
-  }
-
-  async delete(id: string): Promise<LessonRequest> {
-    return this.lessonRequest.delete({ where: { id } });
+    return await this.lessonRequest.update({ where: { id }, data });
   }
 }

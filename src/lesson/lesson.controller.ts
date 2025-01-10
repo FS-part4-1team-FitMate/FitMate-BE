@@ -1,8 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards, UnauthorizedException, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { AlsStore } from '#common/als/store-validator.js';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
-import { CreateLessonDto, QueryLessonDto, UpdateLessonDto } from './dto/lesson.dto.js';
+import { CreateLessonDto, QueryLessonDto } from './dto/lesson.dto.js';
 import { LessonService } from './lesson.service.js';
 
 @Controller('lessons')
@@ -20,13 +29,27 @@ export class LessonController {
   @UseGuards(AccessTokenGuard)
   async create(@Body() body: CreateLessonDto) {
     const { userId, userRole } = this.alsStore.getStore();
-    if (!userId) {
-      throw new UnauthorizedException('인증 정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
-    }
-    if (userRole !== 'USER') {
-      throw new UnauthorizedException('일반 유저인 경우에만 레슨을 요청하실 수 있습니다.'); // 추후 수정
-    }
-    return this.lessonService.createLesson(body, userId);
+    return this.lessonService.createLesson(body, userId, userRole);
+  }
+
+  /*************************************************************************************
+   * 요청 레슨 목록 조회
+   * ***********************************************************************************
+   */
+  @Get()
+  async getLessons(@Query() query: QueryLessonDto) {
+    return this.lessonService.getLessons(query);
+  }
+
+  /*************************************************************************************
+   * 나의 요청 레슨 목록 조회
+   * ***********************************************************************************
+   */
+  @Get('me')
+  @UseGuards(AccessTokenGuard)
+  async getMyLessons(@Query() query: QueryLessonDto) {
+    const { userId } = this.alsStore.getStore();
+    return this.lessonService.getLessons(query, userId);
   }
 
   /*************************************************************************************
@@ -46,23 +69,6 @@ export class LessonController {
   @UseGuards(AccessTokenGuard)
   async cancelLesson(@Param('id', UUIDPipe) id: string) {
     const { userId } = this.alsStore.getStore();
-    if (!userId) {
-      throw new UnauthorizedException('인증 정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
-    }
     return this.lessonService.cancelLessonById(id, userId);
-  }
-
-  /*************************************************************************************
-   * 요청 레슨 목록 조회
-   * ***********************************************************************************
-   */
-  @Get()
-  async getLessons(@Query() query: QueryLessonDto) {
-    return this.lessonService.getLessons(query);
-  }
-
-  @Patch(':id')
-  async update(@Param('id', UUIDPipe) id: string, @Body() body: UpdateLessonDto) {
-    return this.lessonService.updateLessonById(id, body);
   }
 }

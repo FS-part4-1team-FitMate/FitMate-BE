@@ -7,5 +7,4 @@ export interface ILessonRepository {
   findOne(id: string): Promise<LessonRequest | null>;
   update(id: string, data: PatchLesson): Promise<LessonRequest | null>;
   updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest | null>;
-  delete(id: string): Promise<LessonRequest>;
 }
