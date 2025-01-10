@@ -19,7 +19,13 @@ export class LessonService implements ILessonService {
    * 요청 레슨 생성
    * ***********************************************************************************
    */
-  async createLesson(data: CreateLesson, userId: string): Promise<LessonResponse> {
+  async createLesson(data: CreateLesson, userId: string, userRole: string): Promise<LessonResponse> {
+    if (!userId) {
+      throw new UnauthorizedException('인증 정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
+    }
+    if (userRole !== 'USER') {
+      throw new UnauthorizedException('일반 유저인 경우에만 레슨을 요청하실 수 있습니다.'); // 추후 수정
+    }
     const userExists = await this.userRepository.findUserById(userId);
     if (!userExists) {
       throw new UserNotFound();
@@ -39,6 +45,10 @@ export class LessonService implements ILessonService {
    * ***********************************************************************************
    */
   async getLessons(query: QueryLessonDto, userId?: string): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
+    if (!userId) {
+      throw new UnauthorizedException('인증정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
+    }
+
     const {
       page = 1,
       limit = 5,
@@ -106,6 +116,10 @@ export class LessonService implements ILessonService {
    * ***********************************************************************************
    */
   async cancelLessonById(lessonId: string, userId: string): Promise<LessonResponse> {
+    if (!userId) {
+      throw new UnauthorizedException('인증 정보가 유효하지 않습니다. 다시 로그인해 주세요'); // 추후 수정
+    }
+
     const lesson = await this.lessonRepository.findOne(lessonId);
     logger.debug('cancel 요청 lesson: ', lesson);
 
