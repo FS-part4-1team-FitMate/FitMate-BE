@@ -8,6 +8,7 @@ import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { UserModule } from '#user/user.module.js';
 import { ProfileModule } from '#profile/profile.module.js';
 import { LessonModule } from './lesson/lesson.module.js';
+import { TrainerModule } from './trainer/trainer.module.js';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { LessonModule } from './lesson/lesson.module.js';
     UserModule,
     ProfileModule,
     LessonModule,
+    TrainerModule,
   ],
   controllers: [],
   providers: [AccessTokenGuard],

@@ -28,7 +28,8 @@ model User {
   directLessonRequests DirectLessonRequest[]
   lessonQuotes         LessonQuote[]
   reviews              Review[]
-  favoriteTrainer      FavoriteTrainer[]
+  favoriteTrainers     FavoriteTrainer[]     @relation("UserToFavoriteTrainers")
+  favoritedByUsers     FavoriteTrainer[]     @relation("TrainerToFavoriteTrainers")
   notifications        Notification[]
 }
 
@@ -133,10 +134,11 @@ model Review {
 model FavoriteTrainer {
   id        String   @id @default(uuid())
   userId    String
+  trainerId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], name: "UserToFavoriteTrainers")
+  trainer   User     @relation(fields: [trainerId], references: [id], name: "TrainerToFavoriteTrainers")
 }
 
 model Notification {
