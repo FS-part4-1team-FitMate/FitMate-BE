@@ -12,21 +12,24 @@ export class ProfileRepository implements IProfileRepository {
     this.profile = prisma.profile;
   }
 
-  async findProfileById(id: string): Promise<Profile | null> {
+  async findProfileById(userId: string): Promise<Profile | null> {
     return await this.profile.findUnique({
-      where: { id },
+      where: { userId },
     });
   }
 
-  async createProfile(data: CreateProfile): Promise<Profile> {
+  async createProfile(userId: string, data: CreateProfile): Promise<Profile> {
     return await this.profile.create({
-      data,
+      data: {
+        userId,
+        ...data,
+      },
     });
   }
 
-  async updateProfile(id: string, data: UpdateProfile): Promise<Profile> {
+  async updateProfile(userId: string, data: UpdateProfile): Promise<Profile> {
     return await this.profile.update({
-      where: { id },
+      where: { userId },
       data,
     });
   }

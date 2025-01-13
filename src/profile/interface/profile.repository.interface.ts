@@ -3,6 +3,6 @@ import type { CreateProfile, UpdateProfile } from '#profile/type/profile.type.js
 
 export interface IProfileRepository {
   findProfileById(id: string): Promise<Profile | null>;
-  createProfile(data: CreateProfile): Promise<Profile>;
+  createProfile(userId: string, data: CreateProfile): Promise<Profile>;
   updateProfile(id: string, data: UpdateProfile): Promise<Profile>;
 }

@@ -52,7 +52,8 @@ export class AuthService implements IAuthService {
 
   async refreshToken(userId: string, role: string, refreshToken: string): Promise<string> {
     const user = await this.userRepository.findUserById(userId);
-    if (!user || user.refreshToken !== refreshToken) throw new UnauthorizedException(ExceptionMessages.INVALID_REFRESH_TOKEN);
+    if (!user || user.refreshToken !== refreshToken)
+      throw new UnauthorizedException(ExceptionMessages.INVALID_REFRESH_TOKEN);
     return this.createToken(user.id, role);
   }
 }
