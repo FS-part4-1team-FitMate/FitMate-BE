@@ -14,7 +14,7 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "user02@example.com",
+  "email": "user03@example.com",
   "password": "a123456."
 }
 
@@ -66,9 +66,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmY
 }
 
 ### Lesson 요청 취소
-PATCH http://localhost:3000/lessons/8a85eebe-82d8-4287-ad5d-b4393eb033c6/cancel
+PATCH http://localhost:3000/lessons/9d9f3182-b3f5-4a7b-9b63-bf7ab21956bd/cancel
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzYzBlNmEzNC0zMzZlLTQ0MGUtOTY5Zi0wYWEwMTk5YzU5MTUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjM4ODIwMywiZXhwIjoxNzM3NTk3ODAzfQ.mdtcDemLuKzDABO_86Tkuoho_TCacaopLKR8waBcvO8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2YiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjQwODE1OCwiZXhwIjoxNzM3NjE3NzU4fQ.sQdttuIRl8cEUuoEuXz_zjsKiiPOYzdvaTommGmaKGM
 
 ###  Lesson 요청 상세 조회
 GET http://localhost:3000/lessons/ed4eeb51-b761-4398-9e8e-dd5b048fafa6
@@ -81,3 +81,11 @@ GET http://localhost:3000/lessons?lesson_type=SPORTS,FITNESS&location_type=ONLIN
 
 ###
 GET http://localhost:3000/lessons?status=CANCELED&page=1&limit=5
+
+### 나의 요청 레슨 목록 조회
+GET http://localhost:3000/lessons/me?status=PENDING&page=1&limit=5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzYzBlNmEzNC0zMzZlLTQ0MGUtOTY5Zi0wYWEwMTk5YzU5MTUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjQxMDU1OCwiZXhwIjoxNzM3NjIwMTU4fQ.LfZOl8h14ZZjHqPYxMOWffZkufdvWG58XKZsxHlMNYI
+
+###
+GET http://localhost:3000/lessons/me?status=CANCELED
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzYzBlNmEzNC0zMzZlLTQ0MGUtOTY5Zi0wYWEwMTk5YzU5MTUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjQxMDU1OCwiZXhwIjoxNzM3NjIwMTU4fQ.LfZOl8h14ZZjHqPYxMOWffZkufdvWG58XKZsxHlMNYI
