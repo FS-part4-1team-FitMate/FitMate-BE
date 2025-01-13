@@ -10,20 +10,20 @@ export class TrainerRepository implements ITrainerRepository {
   async addFavoriteTrainer(userId: string, data: CreateFavoriteTrainer): Promise<FavoriteTrainerResponse> {
     return await this.prisma.favoriteTrainer.create({
       data: { userId, trainerId: data.trainerId },
-      select: { id: true, userId: true, trainerId: true, createdAt: true, updatedAt: true },
     });
   }
 
   async removeFavoriteTrainer(userId: string, data: RemoveFavoriteTrainer): Promise<void> {
-    await this.prisma.favoriteTrainer.deleteMany({
-      where: { userId, trainerId: data.trainerId },
+    await this.prisma.favoriteTrainer.delete({
+      where: {
+        userId_trainerId: { userId, trainerId: data.trainerId },
+      },
     });
   }
 
   async findFavoriteTrainer(userId: string, trainerId: string): Promise<FavoriteTrainerResponse | null> {
-    return await this.prisma.favoriteTrainer.findFirst({
-      where: { userId, trainerId },
-      select: { id: true, userId: true, trainerId: true, createdAt: true, updatedAt: true },
+    return await this.prisma.favoriteTrainer.findUnique({
+      where: { userId_trainerId: { userId, trainerId } },
     });
   }
 }

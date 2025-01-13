@@ -139,6 +139,8 @@ model FavoriteTrainer {
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], name: "UserToFavoriteTrainers")
   trainer   User     @relation(fields: [trainerId], references: [id], name: "TrainerToFavoriteTrainers")
+
+  @@unique([userId, trainerId])
 }
 
 model Notification {
