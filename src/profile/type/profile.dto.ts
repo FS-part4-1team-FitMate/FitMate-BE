@@ -35,22 +35,22 @@ export class CreateProfileDTO {
   @IsEnum(Region, { each: true })
   region: Region[];
 
-  // @IsOptional()
-  @RoleFieldValidator('TRAINER', { message: 'intro를 작성해야 합니다.' })
+  @RoleFieldValidator('TRAINER', { message: '한 줄 소개를 작성해야 합니다.' })
   intro: string;
 
+  @RoleFieldValidator('TRAINER', { message: '상세 설명을 작성해야 합니다.' })
+  description: string;
+
+  @RoleFieldValidator(
+    'TRAINER',
+    { message: '경력을 등록해야 합니다.' },
+    (value: any) => typeof value === 'number' && Number.isInteger(value) && value >= 0,
+  )
+  experience: number;
+
   @IsString()
   @IsOptional()
-  description?: string;
-
-  @IsInt()
-  @Min(0)
-  @IsOptional()
-  experience?: number;
-
-  @IsString()
-  @IsOptional()
-  certification?: string;
+  certification: string;
 }
 
 export class UpdateProfileDTO extends PartialType(CreateProfileDTO) {}

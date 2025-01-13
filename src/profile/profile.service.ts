@@ -1,8 +1,10 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Profile } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
+import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
 import ProfileExceptionMessage from '#exception/profile-exception-message.js';
+import { UserRepository } from '#user/user.repository.js';
 import { IProfileService } from '#profile/interface/profile.service.interface.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 import type { CreateProfile, UpdateProfile } from '#profile/type/profile.type.js';
@@ -11,6 +13,7 @@ import type { CreateProfile, UpdateProfile } from '#profile/type/profile.type.js
 export class ProfileService implements IProfileService {
   constructor(
     private readonly profileRepository: ProfileRepository,
+    private readonly UserRepository: UserRepository,
     private readonly alsStore: AlsStore,
   ) {}
 
@@ -26,7 +29,9 @@ export class ProfileService implements IProfileService {
 
   async findProfileById(id: string): Promise<Profile> {
     const profile = await this.profileRepository.findProfileById(id);
+    console.log(profile);
     if (!profile) throw new NotFoundException(ProfileExceptionMessage.PROFILE_NOT_FOUND);
+
     return profile;
   }
 

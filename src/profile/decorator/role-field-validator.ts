@@ -1,6 +1,10 @@
 import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
 
-export function RoleFieldValidator(role: string, validationOptions?: ValidationOptions) {
+export function RoleFieldValidator(
+  role: string,
+  validationOptions?: ValidationOptions,
+  additionalValidator?: (value: any) => boolean,
+) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
       name: 'roleFieldValidator',
@@ -19,6 +23,11 @@ export function RoleFieldValidator(role: string, validationOptions?: ValidationO
 
           if (userRole === requiredRole) {
             console.log(`Role is ${requiredRole}, validating ${propertyName} field`);
+
+            if (additionalValidator) {
+              return additionalValidator(value);
+            }
+
             return value != null && value !== '';
           }
 
