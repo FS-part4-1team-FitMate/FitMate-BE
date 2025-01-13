@@ -23,15 +23,11 @@ export class AccessTokenGuard implements CanActivate {
         secret: process.env.JWT_SECRET,
       });
       request.user = decoded;
-      console.log(`Decoded: ${JSON.stringify(decoded, null, 2)}`);
 
       const store = this.als.getStore();
-      console.log('AsyncLocalStorage store:', store);
       if (store) {
         store.userId = decoded.userId;
         store.userRole = decoded.role;
-        console.log(store.userId); //추후 삭제
-        console.log(store.userRole); //추후 삭제
       }
 
       return true;

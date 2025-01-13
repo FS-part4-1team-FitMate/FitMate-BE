@@ -18,8 +18,7 @@ export class ProfileService implements IProfileService {
   ) {}
 
   async createProfile(data: CreateProfile): Promise<Profile> {
-    const { userId, userRole } = await this.alsStore.getStore();
-    console.log('Stored userRole:', userRole);
+    const { userId } = await this.alsStore.getStore();
 
     const profile = await this.profileRepository.findProfileById(userId);
     if (profile) throw new ConflictException(ProfileExceptionMessage.PROFILE_CONFLICT);
@@ -40,8 +39,6 @@ export class ProfileService implements IProfileService {
     if (!profile) throw new NotFoundException(ProfileExceptionMessage.PROFILE_NOT_FOUND);
 
     const { userId } = await this.alsStore.getStore();
-    console.log('Provided ID:', id);
-    console.log('Stored userId:', userId);
     if (id !== userId) throw new ForbiddenException(ExceptionMessages.FORBIDDEN);
 
     return await this.profileRepository.updateProfile(id, data);
