@@ -13,8 +13,8 @@ export class AuthController {
   @Post('signup/user')
   async createUser(@Body() body: CreateUserDTO) {
     const user = await this.authService.createUser({ ...body, role: 'USER' });
-    const accessToken = this.authService.createToken(user.id, user.role, 'access');
-    const refreshToken = this.authService.createToken(user.id, user.role, 'refresh');
+    const accessToken = this.authService.createToken(user.id, 'USER', 'access');
+    const refreshToken = this.authService.createToken(user.id, 'USER', 'refresh');
     const userInfo = await this.authService.updateUser(user.id, refreshToken);
     return { accessToken, refreshToken, user: userInfo };
   }
@@ -22,8 +22,8 @@ export class AuthController {
   @Post('signup/trainer')
   async createTrainer(@Body() body: CreateUserDTO) {
     const trainer = await this.authService.createUser({ ...body, role: 'TRAINER' });
-    const accessToken = this.authService.createToken(trainer.id, trainer.role, 'access');
-    const refreshToken = this.authService.createToken(trainer.id, trainer.role, 'refresh');
+    const accessToken = this.authService.createToken(trainer.id, 'TRAINER', 'access');
+    const refreshToken = this.authService.createToken(trainer.id, 'TRAINER', 'refresh');
     const userInfo = await this.authService.updateUser(trainer.id, refreshToken);
     return { accessToken, refreshToken, user: userInfo };
   }

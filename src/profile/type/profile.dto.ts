@@ -1,12 +1,13 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { Gender, LessonType, Region } from '@prisma/client';
-import { IsString, IsOptional, IsArray, IsEnum, IsInt, Min } from 'class-validator';
+import { Gender, LessonType, Region, Role } from '@prisma/client';
+import { IsString, IsOptional, IsArray, IsEnum, IsInt, Min, IsNotEmpty } from 'class-validator';
 import { RoleFieldValidator } from '#profile/decorator/role-field-validator.js';
 
 export class CreateProfileDTO {
+  @IsNotEmpty()
   @IsString()
-  @IsOptional()
-  role?: string; //서버에서만 사용
+  @IsEnum(Role)
+  role: Role; //서버에서만 사용
 
   @IsString()
   @IsOptional()
@@ -20,21 +21,23 @@ export class CreateProfileDTO {
   @IsOptional()
   phone?: string;
 
+  @IsNotEmpty()
   @IsEnum(Gender)
   gender: Gender;
 
   @IsArray()
+  @IsNotEmpty()
   @IsEnum(LessonType, { each: true })
   lessonType: LessonType[];
 
   @IsArray()
+  @IsNotEmpty()
   @IsEnum(Region, { each: true })
   region: Region[];
 
-  @IsString()
-  @IsOptional()
+  // @IsOptional()
   @RoleFieldValidator('TRAINER', { message: 'intro를 작성해야 합니다.' })
-  intro?: string;
+  intro: string;
 
   @IsString()
   @IsOptional()

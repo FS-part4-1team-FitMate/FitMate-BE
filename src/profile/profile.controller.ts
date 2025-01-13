@@ -1,34 +1,20 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  UsePipes,
-  UseGuards,
-  ValidationPipe,
-} from '@nestjs/common';
-import { AlsStore } from '#common/als/store-validator.js';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
-import { RoleAssignPipe } from '#profile/pipe/role-assign.pipe.js';
+import { RoleInterceptor } from '#profile/interceptor/role.interceptor.js';
 import { ProfileService } from '#profile/profile.service.js';
 import { CreateProfileDTO, UpdateProfileDTO } from '#profile/type/profile.dto.js';
 
 @Controller('profile')
 export class ProfileController {
-  constructor(
-    private readonly profileService: ProfileService,
-    private readonly alsStore: AlsStore,
-  ) {}
+  constructor(private readonly profileService: ProfileService) {}
 
   @Post()
   @UseGuards(AccessTokenGuard)
-  @UsePipes(RoleAssignPipe)
+  @UseInterceptors(RoleInterceptor)
   async postProfile(@Body() body: CreateProfileDTO) {
-    const { userId } = await this.alsStore.getStore();
-    return this.profileService.createProfile(userId, body);
+    const { role, ...restBody } = body;
+    return this.profileService.createProfile(restBody);
   }
 
   @Get(':id')
@@ -37,6 +23,7 @@ export class ProfileController {
   }
 
   @Patch(':id')
+  @UseGuards(AccessTokenGuard)
   patchProfile(@Param('id', UUIDPipe) id: string, @Body() body: UpdateProfileDTO) {
     return this.profileService.updateProfile(id, body);
   }
