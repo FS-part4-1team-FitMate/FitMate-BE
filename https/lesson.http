@@ -4,7 +4,7 @@ POST http://localhost:3000/auth/signUp/user
 Content-Type: application/json
 
 {
-  "nickname": "user01",
+  "nickname": "user03",
   "email": "user03@example.com",
   "password": "a123456."
 }
@@ -14,14 +14,14 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "user02@example.com",
+  "email": "user01@example.com",
   "password": "a123456."
 }
 
 ### Lesson 요청 등록 #OFFLINE
 POST http://localhost:3000/lessons
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2YiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjc2MTg4NSwiZXhwIjoxNzM3OTcxNDg1fQ.iYo9-b9L3nmI22WnENJSSgnumVUZzIo1W3N68JybHac
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2YiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjgzMjc4MywiZXhwIjoxNzM4MDQyMzgzfQ.OOWLlg7tp8EmhI6onP0y4SPPjRViRsVDcRE8LG-9FsA
 
 {
   "lessonType": "FITNESS",
@@ -57,12 +57,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmY
 }
 
 ### Lesson 요청 취소
-PATCH http://localhost:3000/lessons/9d9f3182-b3f5-4a7b-9b63-bf7ab21956bd/cancel
+PATCH http://localhost:3000/lessons/777f2bf6-0bb9-49b6-9a19-a097c24c1911/cancel
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2YiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjQwODE1OCwiZXhwIjoxNzM3NjE3NzU4fQ.sQdttuIRl8cEUuoEuXz_zjsKiiPOYzdvaTommGmaKGM
 
 ###  Lesson 요청 상세 조회
-GET http://localhost:3000/lessons/6c3e95d6-0786-4cfb-9501-354ab8d527f1
+GET http://localhost:3000/lessons/777f2bf6-0bb9-49b6-9a19-a097c24c1911
 
 ### 요청 레슨 목록 조회
 GET http://localhost:3000/lessons?page=1&limit=2&order=start_date&sort=asc

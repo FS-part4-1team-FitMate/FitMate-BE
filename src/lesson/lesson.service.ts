@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { LessonRequestStatus } from '@prisma/client';
+import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
@@ -13,16 +14,24 @@ export class LessonService implements ILessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
     private readonly userRepository: UserRepository,
+    private readonly alsStore: AlsStore,
   ) {}
 
+  private getUserId(): string {
+    const { userId } = this.alsStore.getStore();
+    if (!userId) {
+      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
+    }
+    return userId;
+  }
   /*************************************************************************************
    * 요청 레슨 생성
    * ***********************************************************************************
    */
-  async createLesson(data: CreateLesson, userId: string, userRole: string): Promise<LessonResponse> {
-    if (!userId) {
-      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
-    }
+  async createLesson(data: CreateLesson): Promise<LessonResponse> {
+    const userId = this.getUserId();
+    const { userRole } = this.alsStore.getStore();
+
     if (userRole !== 'USER') {
       throw new UnauthorizedException(LessonExceptionMessage.ONLY_USER_CAN_REQUEST_LESSON);
     }
@@ -43,17 +52,26 @@ export class LessonService implements ILessonService {
   }
 
   /*************************************************************************************
-   * 요청 레슨 목록 조회 (나의 요청 레슨 공통 조회)
+   * 나의 요청 레슨 목록 조회
+   * ***********************************************************************************
+   */
+  async getMyLessons(query: QueryLessonDto): Promise<{
+    list: LessonResponse[];
+    totalCount: number;
+    hasMore: boolean;
+  }> {
+    const userId = this.getUserId();
+    return this.getLessons(query, userId);
+  }
+
+  /*************************************************************************************
+   * 요청 레슨 목록 조회
    * ***********************************************************************************
    */
   async getLessons(
     query: QueryLessonDto,
     userId?: string,
   ): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
-    if (!userId) {
-      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
-    }
-
     const {
       page = 1,
       limit = 5,
@@ -123,10 +141,8 @@ export class LessonService implements ILessonService {
    * 요청 레슨 취소
    * ***********************************************************************************
    */
-  async cancelLessonById(lessonId: string, userId: string): Promise<LessonResponse> {
-    if (!userId) {
-      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
-    }
+  async cancelLessonById(lessonId: string): Promise<LessonResponse> {
+    const userId = this.getUserId();
 
     const lesson = await this.lessonRepository.findOne(lessonId);
 

@@ -11,9 +11,3 @@ export type PatchLessonQuote = Partial<CreateLessonQuote>;
 
 export type LessonQuoteResponse = LessonQuote;
 
-export type UpdateLessonQuoteStatus = {
-  id: string;
-  userId: string;
-  status: QuoteStatus;
-  rejectionReason?: string;
-};

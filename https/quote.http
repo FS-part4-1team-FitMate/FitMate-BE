@@ -3,7 +3,7 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "user02@example.com",
+  "email": "user01@example.com",
   "password": "a123456."
 }
 
@@ -15,16 +15,15 @@ Content-Type: application/json
   "email": "train01@example.com",
   "password": "a123456."
 }
-
 ### 견적 등록
 POST  http://localhost:3000/quotes
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzMzdmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkNGQiLCJyb2xlIjoiVFJBSU5FUiIsImlhdCI6MTczNjgyMTIwOCwiZXhwIjoxNzM4MDMwODA4fQ.lsSFI5IFoT5JK8LXDiPkGX1Rbpl8s-H28WYZlOlYDoA
 
 {
-  "lessonRequestId": "50a1a9c4-b3b5-4413-996e-e0357347382c",
+  "lessonRequestId": "4efd04e6-98a1-47b5-b100-781d4eb61957",
   "price": 100000,
-  "message": "온라인 견적 요청드립니다. 긍정적인 검토 부탁드립니다."
+  "message": "견적 드립니다. 긍정적인 검토 부탁드립니다."
 }
 
 ### 견적 조회
@@ -40,9 +39,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmY
 
 
 ### 견적 상태 거절
-PATCH http://localhost:3000/quotes/54aa0243-4cdd-4ce3-9ffb-76f6271c29c4/reject
+PATCH http://localhost:3000/quotes/bc734ff4-c875-4b8d-8b6d-4b1832e8c5dd/reject
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkNGQiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjgyMjY0OCwiZXhwIjoxNzM4MDMyMjQ4fQ.f-U7jUNbbjUFUhDIabyvIQ4oeyLOCg0MKf_yiI6MnJ8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2YiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjgzNjY3MSwiZXhwIjoxNzM4MDQ2MjcxfQ.v2Bj7qfnSli3XHzK7YCx-jaTcnXhLGDFWNyumsbUIB8
 
 {
   "rejectionReason": "가격이 너무 높습니다. 다시 제안해주세요."

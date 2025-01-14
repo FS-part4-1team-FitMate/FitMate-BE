@@ -3,12 +3,13 @@ import { AlsStore } from '#common/als/store-validator.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { CreateQuoteDto, UpdateQuoteDto, UpdateQuoteStatusDto } from './dto/quote.dto.js';
 import { QuoteService } from './quote.service.js';
+import { CreateLessonQuote } from './type/quote.type.js';
 
 @Controller('quotes')
 export class QuoteController {
   constructor(
     private readonly quoteService: QuoteService,
-    private readonly alsStore: AlsStore,
+    private readonly asStore: AlsStore,
   ) {}
 
   /*************************************************************************************
@@ -18,8 +19,9 @@ export class QuoteController {
   @Post()
   @UseGuards(AccessTokenGuard)
   async create(@Body() body: CreateQuoteDto) {
-    const { userId, userRole } = this.alsStore.getStore();
-    return this.quoteService.createLessonQuote({ ...body, trainerId: userId }, userRole);
+    const { userId } = this.asStore.getStore();
+    const data: CreateLessonQuote = { ...body, trainerId: userId };
+    return this.quoteService.createLessonQuote(data);
   }
 
   /*************************************************************************************
@@ -29,8 +31,7 @@ export class QuoteController {
   @Patch(':id/accept')
   @UseGuards(AccessTokenGuard)
   async acceptQuote(@Param('id') id: string) {
-    const { userId } = this.alsStore.getStore();
-    return this.quoteService.acceptLessonQuote(id, userId);
+    return this.quoteService.acceptLessonQuote(id);
   }
 
   /*************************************************************************************
@@ -40,8 +41,7 @@ export class QuoteController {
   @Patch(':id/reject')
   @UseGuards(AccessTokenGuard)
   async rejectQuote(@Param('id') id: string, @Body() body: UpdateQuoteStatusDto) {
-    const { userId } = this.alsStore.getStore();
-    return this.quoteService.rejectLessonQuote(id, userId, body.rejectionReason);
+    return this.quoteService.rejectLessonQuote(id, body.rejectionReason);
   }
 
   /*************************************************************************************

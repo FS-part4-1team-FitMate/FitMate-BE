@@ -3,7 +3,7 @@ import { Transform } from 'class-transformer';
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateQuoteDto {
-  @IsNotEmpty({ message: '트레이너 ID는 필수 입력 값입니다.' })
+  @IsNotEmpty({ message: '레슨 요청 ID는 필수 입력 값입니다.' })
   @IsString()
   lessonRequestId: string;
 
