@@ -9,6 +9,7 @@ import { UserModule } from '#user/user.module.js';
 import { ProfileModule } from '#profile/profile.module.js';
 import { LessonModule } from './lesson/lesson.module.js';
 import { QuoteModule } from './quote/quote.module.js';
+import { TrainerModule } from './trainer/trainer.module.js';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { QuoteModule } from './quote/quote.module.js';
     ProfileModule,
     LessonModule,
     QuoteModule,
+    TrainerModule,
   ],
   controllers: [],
   providers: [AccessTokenGuard],

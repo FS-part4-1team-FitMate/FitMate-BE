@@ -1,11 +1,13 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { Gender, LessonType, Region } from '@prisma/client';
-import { IsString, IsOptional, IsNotEmpty, IsArray, IsEnum, IsInt, Min } from 'class-validator';
+import { Gender, LessonType, Region, Role } from '@prisma/client';
+import { IsString, IsOptional, IsArray, IsEnum, IsInt, Min, IsNotEmpty } from 'class-validator';
+import { RoleFieldValidator } from '#profile/decorator/role-field-validator.js';
 
 export class CreateProfileDTO {
-  @IsString()
   @IsNotEmpty()
-  userId: string;
+  @IsString()
+  @IsEnum(Role)
+  role: Role; //서버에서만 사용
 
   @IsString()
   @IsOptional()
@@ -19,33 +21,36 @@ export class CreateProfileDTO {
   @IsOptional()
   phone?: string;
 
+  @IsNotEmpty()
   @IsEnum(Gender)
   gender: Gender;
 
   @IsArray()
+  @IsNotEmpty()
   @IsEnum(LessonType, { each: true })
   lessonType: LessonType[];
 
   @IsArray()
+  @IsNotEmpty()
   @IsEnum(Region, { each: true })
   region: Region[];
 
-  @IsString()
-  @IsOptional()
-  intro?: string;
+  @RoleFieldValidator('TRAINER', { message: '한 줄 소개를 작성해야 합니다.' })
+  intro: string;
+
+  @RoleFieldValidator('TRAINER', { message: '상세 설명을 작성해야 합니다.' })
+  description: string;
+
+  @RoleFieldValidator(
+    'TRAINER',
+    { message: '경력을 등록해야 합니다.' },
+    (value: any) => typeof value === 'number' && Number.isInteger(value) && value >= 0,
+  )
+  experience: number;
 
   @IsString()
   @IsOptional()
-  description?: string;
-
-  @IsInt()
-  @Min(0)
-  @IsOptional()
-  experience?: number;
-
-  @IsString()
-  @IsOptional()
-  certification?: string;
+  certification: string;
 }
 
 export class UpdateProfileDTO extends PartialType(CreateProfileDTO) {}

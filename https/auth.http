@@ -1,6 +1,6 @@
 ###
 // user 회원가입
-POST http://localhost:3000/auth/signUp/user
+POST http://localhost:3000/auth/signup/user
 Content-Type: application/json
 
 {
@@ -11,7 +11,7 @@ Content-Type: application/json
 
 ###
 // trainer 회원가입
-POST http://localhost:3000/auth/signUp/trainer
+POST http://localhost:3000/auth/signup/trainer
 Content-Type: application/json
 
 {
@@ -26,14 +26,14 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "test3@example.com",
-  "password": "testpassword14!"
+  "email": "test16@example.com",
+  "password": "testpassword16!"
 }
 
 ###
 // access token 재발급
 POST http://localhost:3000/auth/token/refresh
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0NTg1YjY0MC02OTBmLTRhY2YtYWUyZS1hZGM3Zjk1N2M2MGMiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNjI5NzUwNiwiZXhwIjoxNzM2MzAxMTA2fQ.t3zHamdeiA1eW7HLiSIAy67pPwGvjtRRj_PhgjYymjM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzcwMjIyOS0wYzllLTQ5YjMtOGZlMC04YmVmNDhkMjYyYjciLCJyb2xlIjoiVFJBSU5FUiIsImlhdCI6MTczNjQ4MzE2OSwiZXhwIjoxNzM2NDg2NzY5fQ.ae1EqtEfhM6FjiajnMjcRHZHB8NZJuE5fhNUXIBEQyU
 
 ###
 // user 단일 조회하기

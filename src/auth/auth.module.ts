@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { PrismaModule } from '#prisma/prisma.module.js';
 import { JwtConfigModule } from '#common/jwt.module.js';
@@ -9,7 +8,6 @@ import { AuthService } from '#auth/auth.service.js';
 import { LocalStrategy } from '#auth/strategy/local.strategy.js';
 import { RefreshTokenStrategy } from '#auth/strategy/refresh-token.strategy.js';
 import { UserRepository } from '#user/user.repository.js';
-import { UserService } from '#user/user.service.js';
 
 @Module({
   imports: [

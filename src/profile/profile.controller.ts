@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
+import { RoleInterceptor } from '#profile/interceptor/role.interceptor.js';
 import { ProfileService } from '#profile/profile.service.js';
 import { CreateProfileDTO, UpdateProfileDTO } from '#profile/type/profile.dto.js';
 
@@ -10,8 +11,10 @@ export class ProfileController {
 
   @Post()
   @UseGuards(AccessTokenGuard)
-  postProfile(@Body() body: CreateProfileDTO) {
-    return this.profileService.createProfile(body);
+  @UseInterceptors(RoleInterceptor)
+  async postProfile(@Body() body: CreateProfileDTO) {
+    const { role, ...restBody } = body;
+    return this.profileService.createProfile(restBody);
   }
 
   @Get(':id')
@@ -20,6 +23,7 @@ export class ProfileController {
   }
 
   @Patch(':id')
+  @UseGuards(AccessTokenGuard)
   patchProfile(@Param('id', UUIDPipe) id: string, @Body() body: UpdateProfileDTO) {
     return this.profileService.updateProfile(id, body);
   }
