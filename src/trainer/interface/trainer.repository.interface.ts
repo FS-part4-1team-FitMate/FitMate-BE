@@ -1,4 +1,8 @@
-import { CreateFavoriteTrainer, RemoveFavoriteTrainer, FavoriteTrainerResponse } from '../type/trainer.type.js';
+import {
+  CreateFavoriteTrainer,
+  RemoveFavoriteTrainer,
+  FavoriteTrainerResponse,
+} from '../type/trainer.type.js';
 
 export interface ITrainerRepository {
   addFavoriteTrainer(userId: string, data: CreateFavoriteTrainer): Promise<FavoriteTrainerResponse>;

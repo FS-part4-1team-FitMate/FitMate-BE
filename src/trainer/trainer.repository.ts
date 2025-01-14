@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { ITrainerRepository } from '#trainer/interface/trainer.repository.interface.js';
-import { CreateFavoriteTrainer, RemoveFavoriteTrainer, FavoriteTrainerResponse } from '#trainer/type/trainer.type.js';
+import {
+  CreateFavoriteTrainer,
+  RemoveFavoriteTrainer,
+  FavoriteTrainerResponse,
+} from '#trainer/type/trainer.type.js';
 
 @Injectable()
 export class TrainerRepository implements ITrainerRepository {

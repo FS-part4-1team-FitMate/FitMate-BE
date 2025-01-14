@@ -1,15 +1,23 @@
 import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import TrainerExceptionMessage from '#exception/trainer-exception-message.js';
 import { TrainerRepository } from '#trainer/trainer.repository.js';
-import type { CreateFavoriteTrainer, RemoveFavoriteTrainer, FavoriteTrainerResponse } from '#trainer/type/trainer.type.js';
+import type {
+  CreateFavoriteTrainer,
+  RemoveFavoriteTrainer,
+  FavoriteTrainerResponse,
+} from '#trainer/type/trainer.type.js';
 
 @Injectable()
 export class TrainerService {
-  constructor(private readonly trainerRepository: TrainerRepository) {}
+  constructor(
+    private readonly trainerRepository: TrainerRepository,
+    private readonly alsStore: AlsStore,
+  ) {}
 
-  async addFavoriteTrainer(userId: string, data: CreateFavoriteTrainer): Promise<FavoriteTrainerResponse> {
-    // userId 검증
+  async addFavoriteTrainer(data: CreateFavoriteTrainer): Promise<FavoriteTrainerResponse> {
+    const { userId } = await this.alsStore.getStore();
     if (!userId) {
       throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
     }
@@ -24,8 +32,8 @@ export class TrainerService {
     return await this.trainerRepository.addFavoriteTrainer(userId, data);
   }
 
-  async removeFavoriteTrainer(userId: string, data: RemoveFavoriteTrainer): Promise<void> {
-    // userId 검증
+  async removeFavoriteTrainer(data: RemoveFavoriteTrainer): Promise<void> {
+    const { userId } = this.alsStore.getStore();
     if (!userId) {
       throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
     }
