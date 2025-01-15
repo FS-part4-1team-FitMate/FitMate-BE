@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -39,7 +39,15 @@ export class S3Service {
       ContentType: contentType,
     });
 
-    const presignedUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
-    return presignedUrl;
+    return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+  }
+
+  async getPresignedDownloadUrl(key: string): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 }

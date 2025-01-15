@@ -14,7 +14,7 @@ export class CreateProfileDTO {
   @IsIn(['image/jpg', 'image/jpeg', 'image/png', 'image/webp'], {
     message: 'Content-Type이 형식에 맞지 않습니다.',
   })
-  contentType?: string;
+  contentType?: 'image/jpg' | 'image/jpeg' | 'image/png' | 'image/webp';
 
   @IsString()
   @IsOptional()

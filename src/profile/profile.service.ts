@@ -19,7 +19,7 @@ export class ProfileService implements IProfileService {
   constructor(
     private readonly profileRepository: ProfileRepository,
     private readonly alsStore: AlsStore,
-    private readonly s3service: S3Service,
+    private readonly s3Service: S3Service,
   ) {}
 
   async createProfile(data: CreateProfile): Promise<CustomProfile> {
@@ -56,12 +56,25 @@ export class ProfileService implements IProfileService {
     };
   }
 
-  async findProfileById(id: string): Promise<Profile> {
+  async findProfileById(id: string): Promise<CustomProfile> {
     const profile = await this.profileRepository.findProfileById(id);
-    console.log(profile);
     if (!profile) throw new NotFoundException(ProfileExceptionMessage.PROFILE_NOT_FOUND);
+    let profileImagePresignedUrl;
+    let certificationPresignedUrl;
 
-    return profile;
+    if (profile.profileImage) {
+      profileImagePresignedUrl = await this.s3Service.getPresignedDownloadUrl(profile.profileImage);
+    }
+
+    if (profile.certification) {
+      certificationPresignedUrl = await this.s3Service.getPresignedDownloadUrl(profile.certification);
+    }
+
+    return {
+      profile: profile,
+      profileImagePresignedUrl: profileImagePresignedUrl,
+      certificationPresignedUrl: certificationPresignedUrl,
+    };
   }
 
   async updateProfile(id: string, data: UpdateProfile): Promise<Profile> {
@@ -79,8 +92,15 @@ export class ProfileService implements IProfileService {
     count: number,
     defaultKey: string,
     folder: 'profile' | 'certification',
-    contentType?: string,
+    contentType?: 'image/jpg' | 'image/jpeg' | 'image/png' | 'image/webp',
   ): Promise<{ s3Key: string; presignedUrl?: string }> {
+    const fileExtensionMap = {
+      'image/jpg': 'jpg',
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+    };
+
     if (count === 0) {
       return { s3Key: defaultKey };
     }
@@ -89,8 +109,10 @@ export class ProfileService implements IProfileService {
       throw new BadRequestException(ProfileExceptionMessage.CONTENT_TYPE_REQUIRED);
     }
 
-    const s3Key = `${folder}/${userId}/${Date.now()}.jpg`;
-    const presignedUrl = await this.s3service.generatePresignedUrl(s3Key, contentType);
+    const fileExtension = fileExtensionMap[contentType];
+
+    const s3Key = `${folder}/${userId}/${Date.now()}.${fileExtension}`;
+    const presignedUrl = await this.s3Service.generatePresignedUrl(s3Key, contentType);
     return { s3Key, presignedUrl };
   }
 }

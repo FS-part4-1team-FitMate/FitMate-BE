@@ -2,7 +2,7 @@ import { Gender, LessonType, Region, Role, Profile } from '@prisma/client';
 
 export interface CreateProfile {
   name?: string;
-  contentType?: string;
+  contentType?: 'image/jpg' | 'image/jpeg' | 'image/png' | 'image/webp';
   profileImageCount: number;
   profileImage?: string;
   phone?: string;
