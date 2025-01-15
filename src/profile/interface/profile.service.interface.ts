@@ -3,5 +3,5 @@ import type { CreateProfile, UpdateProfile, CustomProfile } from '#profile/type/
 export interface IProfileService {
   createProfile(data: CreateProfile): Promise<CustomProfile>;
   findProfileById(id: string): Promise<CustomProfile>;
-  updateProfile(id: string, data: UpdateProfile): Promise<Profile>;
+  updateProfile(id: string, data: UpdateProfile): Promise<CustomProfile>;
 }

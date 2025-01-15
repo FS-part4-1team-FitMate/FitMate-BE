@@ -30,7 +30,7 @@ export class ProfileService implements IProfileService {
 
     const { profileImageCount, certificationCount, contentType, ...restData } = data;
 
-    const profileImage = await this.handleImage(
+    const profileImage = await this.createImage(
       userId,
       profileImageCount,
       'profile-default.jpg',
@@ -39,7 +39,7 @@ export class ProfileService implements IProfileService {
     );
     restData.profileImage = profileImage.s3Key;
 
-    const certificationImage = await this.handleImage(
+    const certificationImage = await this.createImage(
       userId,
       certificationCount,
       'img_default.jpg',
@@ -77,17 +77,46 @@ export class ProfileService implements IProfileService {
     };
   }
 
-  async updateProfile(id: string, data: UpdateProfile): Promise<Profile> {
+  async updateProfile(id: string, data: UpdateProfile): Promise<CustomProfile> {
     const profile = await this.profileRepository.findProfileById(id);
     if (!profile) throw new NotFoundException(ProfileExceptionMessage.PROFILE_NOT_FOUND);
 
     const { userId } = await this.alsStore.getStore();
     if (id !== userId) throw new ForbiddenException(ExceptionMessages.FORBIDDEN);
 
-    return await this.profileRepository.updateProfile(id, data);
+    const { profileImageCount, certificationCount, contentType, ...restData } = data;
+
+    if (!profile.profileImage) {
+      throw new Error('Profile image key is required to generate a presigned URL.');
+    }
+    const profileImage =
+      profileImageCount === 1
+        ? await this.createImage(userId, profileImageCount, profile.profileImage, 'profile', contentType)
+        : { s3Key: profile.profileImage, presignedUrl: undefined };
+
+    if (!profile.certification) {
+      throw new Error('Profile image key is required to generate a presigned URL.');
+    }
+    const certificationImage =
+      certificationCount === 1
+        ? await this.createImage(
+            userId,
+            certificationCount,
+            profile.certification,
+            'certification',
+            contentType,
+          )
+        : { s3Key: profile.certification, presignedUrl: undefined };
+
+    const updateProfile = await this.profileRepository.updateProfile(id, restData);
+    return {
+      profile: updateProfile,
+      profileImagePresignedUrl: profileImage.presignedUrl,
+      certificationPresignedUrl: certificationImage.presignedUrl,
+    };
   }
 
-  async handleImage(
+  async createImage(
     userId: string,
     count: number,
     defaultKey: string,
