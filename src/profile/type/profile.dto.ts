@@ -2,6 +2,7 @@ import { PartialType } from '@nestjs/mapped-types';
 import { Gender, LessonType, Region, Role } from '@prisma/client';
 import { IsString, IsOptional, IsArray, IsEnum, IsInt, IsNotEmpty, IsIn } from 'class-validator';
 import { RoleFieldValidator } from '#profile/decorator/role-field-validator.js';
+import type { ContentType } from '#profile/type/profile.type.js';
 
 export class CreateProfileDTO {
   @IsNotEmpty()
@@ -14,7 +15,7 @@ export class CreateProfileDTO {
   @IsIn(['image/jpg', 'image/jpeg', 'image/png', 'image/webp'], {
     message: 'Content-Type이 형식에 맞지 않습니다.',
   })
-  contentType?: 'image/jpg' | 'image/jpeg' | 'image/png' | 'image/webp';
+  contentType?: ContentType;
 
   @IsString()
   @IsOptional()

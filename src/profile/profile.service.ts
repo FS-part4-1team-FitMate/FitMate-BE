@@ -11,7 +11,7 @@ import ExceptionMessages from '#exception/exception-message.js';
 import ProfileExceptionMessage from '#exception/profile-exception-message.js';
 import { IProfileService } from '#profile/interface/profile.service.interface.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
-import type { CreateProfile, UpdateProfile, CustomProfile } from '#profile/type/profile.type.js';
+import type { CreateProfile, UpdateProfile, CustomProfile, ContentType } from '#profile/type/profile.type.js';
 import { S3Service } from '#s3/s3.service.js';
 
 @Injectable()
@@ -92,7 +92,7 @@ export class ProfileService implements IProfileService {
     count: number,
     defaultKey: string,
     folder: 'profile' | 'certification',
-    contentType?: 'image/jpg' | 'image/jpeg' | 'image/png' | 'image/webp',
+    contentType?: ContentType,
   ): Promise<{ s3Key: string; presignedUrl?: string }> {
     const fileExtensionMap = {
       'image/jpg': 'jpg',
