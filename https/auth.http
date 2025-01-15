@@ -4,9 +4,9 @@ POST http://localhost:3000/auth/signup/user
 Content-Type: application/json
 
 {
-  "nickname": "test17",
-  "email": "test17@example.com",
-  "password": "testpassword17!"
+  "nickname": "test26",
+  "email": "test26@example.com",
+  "password": "testpassword26!"
 }
 
 ###
@@ -15,9 +15,9 @@ POST http://localhost:3000/auth/signup/trainer
 Content-Type: application/json
 
 {
-  "nickname": "test16",
-  "email": "test16@example.com",
-  "password": "testpassword16!"
+  "nickname": "test25",
+  "email": "test25@example.com",
+  "password": "testpassword25!"
 }
 
 ###

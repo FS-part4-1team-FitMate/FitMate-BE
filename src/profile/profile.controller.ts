@@ -14,6 +14,7 @@ export class ProfileController {
   @UseInterceptors(RoleInterceptor)
   async postProfile(@Body() body: CreateProfileDTO) {
     const { role, ...restBody } = body;
+
     return this.profileService.createProfile(restBody);
   }
 

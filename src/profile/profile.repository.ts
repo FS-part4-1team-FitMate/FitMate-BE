@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { Profile } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { IProfileRepository } from '#profile/interface/profile.repository.interface.js';
-import type { CreateProfile, UpdateProfile } from '#profile/type/profile.type.js';
+import type { CreateProfile, ExclusionCountProfile, UpdateProfile } from '#profile/type/profile.type.js';
 
 @Injectable()
 export class ProfileRepository implements IProfileRepository {
@@ -18,7 +18,7 @@ export class ProfileRepository implements IProfileRepository {
     });
   }
 
-  async createProfile(userId: string, data: CreateProfile): Promise<Profile> {
+  async createProfile(userId: string, data: ExclusionCountProfile): Promise<Profile> {
     return await this.profile.create({
       data: {
         userId,

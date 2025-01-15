@@ -66,6 +66,7 @@ export default [
             { pattern: '#quote/**', group: 'internal', position: 'before' },
             { pattern: '#review/**', group: 'internal', position: 'before' },
             { pattern: '#notification/**', group: 'internal', position: 'before' },
+            { pattern: '#s3/**', group: 'internal', position: 'before' },
             { pattern: '#configs/**', group: 'internal', position: 'before' },
             { pattern: '#utils/**', group: 'internal', position: 'before' },
             { pattern: '#logger/**', group: 'internal', position: 'before' },

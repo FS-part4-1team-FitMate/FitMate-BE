@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { Gender, LessonType, Region, Role } from '@prisma/client';
-import { IsString, IsOptional, IsArray, IsEnum, IsInt, Min, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsEnum, IsInt, IsNotEmpty, IsIn } from 'class-validator';
 import { RoleFieldValidator } from '#profile/decorator/role-field-validator.js';
 
 export class CreateProfileDTO {
@@ -12,6 +12,11 @@ export class CreateProfileDTO {
   @IsString()
   @IsOptional()
   name?: string;
+
+  @IsInt()
+  @IsNotEmpty()
+  @IsIn([0, 1], { message: 'profileImageCount를 입력해야합니다' })
+  profileImageCount: number;
 
   @IsString()
   @IsOptional()
@@ -48,9 +53,14 @@ export class CreateProfileDTO {
   )
   experience: number;
 
+  @IsInt()
+  @IsNotEmpty()
+  @IsIn([0, 1], { message: 'certificationCount를 입력해야합니다' })
+  certificationCount: number;
+
   @IsString()
   @IsOptional()
-  certification: string;
+  certification?: string;
 }
 
 export class UpdateProfileDTO extends PartialType(CreateProfileDTO) {}
