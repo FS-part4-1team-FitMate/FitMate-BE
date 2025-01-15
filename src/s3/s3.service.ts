@@ -32,11 +32,11 @@ export class S3Service {
     return { region, accessKeyId, secretAccessKey, bucketName };
   }
 
-  async generatePresignedUrl(fileName: string): Promise<string> {
+  async generatePresignedUrl(fileName: string, contentType: string): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: `${fileName}`,
-      ContentType: 'image/jpeg',
+      ContentType: contentType,
     });
 
     const presignedUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });

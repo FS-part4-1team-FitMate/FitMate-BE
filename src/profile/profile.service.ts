@@ -1,4 +1,10 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { Profile } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import ExceptionMessages from '#exception/exception-message.js';
@@ -22,9 +28,15 @@ export class ProfileService implements IProfileService {
     const profile = await this.profileRepository.findProfileById(userId);
     if (profile) throw new ConflictException(ProfileExceptionMessage.PROFILE_CONFLICT);
 
-    const { profileImageCount, certificationCount, ...restData } = data;
+    const { profileImageCount, certificationCount, contentType, ...restData } = data;
 
-    const profileImage = await this.handleImage(userId, profileImageCount, 'profile-default.jpg', 'profile');
+    const profileImage = await this.handleImage(
+      userId,
+      profileImageCount,
+      'profile-default.jpg',
+      'profile',
+      profileImageCount === 0 ? undefined : contentType,
+    );
     restData.profileImage = profileImage.s3Key;
 
     const certificationImage = await this.handleImage(
@@ -32,6 +44,7 @@ export class ProfileService implements IProfileService {
       certificationCount,
       'img_default.jpg',
       'certification',
+      certificationCount === 0 ? undefined : contentType,
     );
     restData.certification = certificationImage.s3Key;
 
@@ -66,12 +79,18 @@ export class ProfileService implements IProfileService {
     count: number,
     defaultKey: string,
     folder: 'profile' | 'certification',
+    contentType?: string,
   ): Promise<{ s3Key: string; presignedUrl?: string }> {
     if (count === 0) {
       return { s3Key: defaultKey };
     }
+
+    if (!contentType) {
+      throw new BadRequestException(ProfileExceptionMessage.CONTENT_TYPE_REQUIRED);
+    }
+
     const s3Key = `${folder}/${userId}/${Date.now()}.jpg`;
-    const presignedUrl = await this.s3service.generatePresignedUrl(s3Key);
+    const presignedUrl = await this.s3service.generatePresignedUrl(s3Key, contentType);
     return { s3Key, presignedUrl };
   }
 }
