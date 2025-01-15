@@ -1,7 +1,7 @@
 import type { Profile } from '@prisma/client';
-import type { CreateProfile, UpdateProfile } from '#profile/type/profile.type.js';
+import type { CreateProfile, UpdateProfile, CustomProfile } from '#profile/type/profile.type.js';
 export interface IProfileService {
-  createProfile(data: CreateProfile): Promise<Profile>;
-  findProfileById(id: string): Promise<Profile>;
-  updateProfile(id: string, data: UpdateProfile): Promise<Profile>;
+  createProfile(data: CreateProfile): Promise<CustomProfile>;
+  findProfileById(id: string): Promise<CustomProfile>;
+  updateProfile(id: string, data: UpdateProfile): Promise<CustomProfile>;
 }

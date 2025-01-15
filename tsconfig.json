@@ -16,6 +16,7 @@
       "#quote/*": ["./src/quote/*"],
       "#review/*": ["./src/review/*"],
       "#notification/*": ["./src/notification/*"],
+      "#s3/*": ["./src/s3/*"],
       "#utils/*": ["./src/utils/*"],
       "#configs/*": ["./src/configs/*"],
       "#logger/*": ["./src/logger/*"],
