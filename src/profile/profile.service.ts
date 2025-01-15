@@ -92,8 +92,7 @@ export class ProfileService implements IProfileService {
     let certificationPresignedUrl;
 
     if (profileImageCount === 1) {
-      if (!contentType) throw new Error('Content type is required for updating profile image.');
-
+      if (!contentType) throw new Error(ProfileExceptionMessage.CONTENT_TYPE_REQUIRED);
       if (profile.profileImage === 'profile-default.jpg') {
         const newProfileImage = await this.createImage(
           userId,
@@ -105,9 +104,7 @@ export class ProfileService implements IProfileService {
         restData.profileImage = newProfileImage.s3Key;
         profileImagePresignedUrl = newProfileImage.presignedUrl;
       } else {
-        if (!profile.profileImage) {
-          throw new Error();
-        }
+        if (!profile.profileImage) throw new Error(ProfileExceptionMessage.PROFILE_IMAGE_NOT_FOUND);
         profileImagePresignedUrl = await this.s3Service.generatePresignedUrl(
           profile.profileImage,
           contentType,
@@ -116,8 +113,7 @@ export class ProfileService implements IProfileService {
     }
 
     if (certificationCount === 1) {
-      if (!contentType) throw new Error('Content type is required for updating certification.');
-
+      if (!contentType) throw new Error(ProfileExceptionMessage.CONTENT_TYPE_REQUIRED);
       if (profile.certification === 'img_default.jpg') {
         const newCertificationImage = await this.createImage(
           userId,
@@ -129,9 +125,7 @@ export class ProfileService implements IProfileService {
         restData.certification = newCertificationImage.s3Key;
         certificationPresignedUrl = newCertificationImage.presignedUrl;
       } else {
-        if (!profile.certification) {
-          throw new Error();
-        }
+        if (!profile.certification) throw new Error(ProfileExceptionMessage.CERTIFICATION_NOT_FOUND);
         certificationPresignedUrl = await this.s3Service.generatePresignedUrl(
           profile.certification,
           contentType,
