@@ -7,9 +7,10 @@ import { UserRepository } from '#user/user.repository.js';
 import { ProfileController } from '#profile/profile.controller.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 import { ProfileService } from '#profile/profile.service.js';
+import { S3Module } from '#s3/s3.module.js';
 
 @Module({
-  imports: [PrismaModule, AlsModule, AuthModule],
+  imports: [PrismaModule, AlsModule, AuthModule, S3Module],
   controllers: [ProfileController],
   providers: [ProfileService, ProfileRepository, UserRepository, AccessTokenGuard],
 })
