@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { LessonRequestStatus, LessonSubType, LessonType, LocationType } from '@prisma/client';
+import { Gender, LessonRequestStatus, LessonSubType, LessonType, LocationType, Region } from '@prisma/client';
 import { Transform } from 'class-transformer';
-import { IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateLessonDto {
   @IsNotEmpty()
@@ -99,6 +99,21 @@ export class QueryLessonDto {
   @IsIn(['asc', 'desc'])
   sort?: string = 'desc';
 
+  @IsOptional()
+  @Transform(({ value }) => (value ? value.split(',') : []))
+  @IsEnum(Gender, { each: true, message: '유효하지 않은 성별입니다.' })
+  gender?: Gender;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'false')
+  direct_quote_request?: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => (value ? value.split(',') : []))
+  @IsEnum(Region, { each: true, message: '유효하지 않은 지역입니다.' })
+  region?: Region[];
+
   // CamelCase 변환 메서드
   toCamelCase() {
     return {
@@ -111,6 +126,9 @@ export class QueryLessonDto {
       lessonSubType: this.lesson_sub_type,
       locationType: this.location_type,
       status: this.status,
+      gender: this.gender,
+      directQuoteRequest: this.direct_quote_request,
+      region: this.region,
     };
   }
 }
