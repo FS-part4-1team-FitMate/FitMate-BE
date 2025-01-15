@@ -3,9 +3,9 @@ import { QueryLessonDto } from '#lesson/dto/lesson.dto.js';
 import { CreateLesson, LessonResponse, PatchLesson } from '#lesson/type/lesson.type.js';
 
 export interface ILessonService {
-  createLesson(data: CreateLesson, userId: string, userRole: string): Promise<LessonResponse>;
+  createLesson(data: CreateLesson): Promise<LessonResponse>;
   getLessonById(id: string): Promise<LessonResponse>;
-  cancelLessonById(lessonId: string, userId: string): Promise<LessonResponse>;
+  cancelLessonById(lessonId: string): Promise<LessonResponse>;
   getLessons(
     query: QueryLessonDto,
     userId?: string,

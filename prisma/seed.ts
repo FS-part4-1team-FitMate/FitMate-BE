@@ -6,6 +6,10 @@ const prisma = new PrismaClient();
 
 async function main() {
   // 기존 데이터 삭제
+  await prisma.notification.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.lessonQuote.deleteMany();
+  await prisma.directLessonRequest.deleteMany();
   await prisma.lessonRequest.deleteMany();
   await prisma.profile.deleteMany();
   await prisma.user.deleteMany();
