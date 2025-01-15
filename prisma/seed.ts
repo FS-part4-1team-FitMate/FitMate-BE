@@ -11,7 +11,7 @@ async function main() {
   await prisma.notification.deleteMany();
   await prisma.review.deleteMany();
   await prisma.lessonQuote.deleteMany();
-  await prisma.directLessonRequest.deleteMany();
+  await prisma.directQuoteRequest.deleteMany();
   await prisma.lessonRequest.deleteMany();
   await prisma.profile.deleteMany();
   await prisma.user.deleteMany();

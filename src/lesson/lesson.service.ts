@@ -165,8 +165,42 @@ export class LessonService implements ILessonService {
     const skip = (page - 1) * limit;
     const take = limit;
 
+    const select = {
+      id: true,
+      userId: true,
+      lessonType: true,
+      lessonSubType: true,
+      startDate: true,
+      endDate: true,
+      lessonCount: true,
+      lessonTime: true,
+      quoteEndDate: true,
+      locationType: true,
+      postcode: true,
+      roadAddress: true,
+      detailAddress: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      directQuoteRequests: true,
+
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+          profile: {
+            select: {
+              name: true,
+              gender: true,
+              region: true,
+            },
+          },
+        },
+      },
+    };
+
     const [lessons, totalCount] = await Promise.all([
-      this.lessonRepository.findAll(where, orderBy, skip, take),
+      this.lessonRepository.findAll(where, orderBy, skip, take, select),
       this.lessonRepository.count(where),
     ]);
 

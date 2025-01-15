@@ -25,7 +25,7 @@ model User {
   profile              Profile?
   socialAccounts       SocialAccount[]
   lessonRequests       LessonRequest[]
-  directLessonRequests DirectLessonRequest[]
+  directQuoteRequests  DirectQuoteRequest[]
   lessonQuotes         LessonQuote[]
   reviews              Review[]
   favoriteTrainers     FavoriteTrainer[]     @relation("UserToFavoriteTrainers")
@@ -86,13 +86,13 @@ model LessonRequest {
   status              LessonRequestStatus   @default(PENDING)
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
-  LessonQuote         LessonQuote[]
-  DirectLessonRequest DirectLessonRequest[]
+  lessonQuotes        LessonQuote[]
+  directQuoteRequests DirectQuoteRequest[]
 
   user User @relation(fields: [userId], references: [id])
 }
 
-model DirectLessonRequest {
+model DirectQuoteRequest {
   id              String   @id @default(uuid())
   lessonRequestId String
   trainerId       String
