@@ -14,25 +14,23 @@ export class AccessTokenGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = request.headers['authorization']?.split(' ')[1];
 
-    if (!token) {
-      return false;
-    }
+    if (token) {
+      try {
+        const decoded = this.jwtService.verify(token, {
+          secret: process.env.JWT_SECRET,
+        });
+        request.user = decoded;
 
-    try {
-      const decoded = this.jwtService.verify(token, {
-        secret: process.env.JWT_SECRET,
-      });
-      request.user = decoded;
-
-      const store = this.als.getStore();
-      if (store) {
-        store.userId = decoded.userId;
-        store.userRole = decoded.role;
+        const store = this.als.getStore();
+        if (store) {
+          store.userId = decoded.userId;
+          store.userRole = decoded.role;
+        }
+      } catch (e) {
+        request.user = null;
       }
-
-      return true;
-    } catch (e) {
-      return false;
     }
+
+    return true;
   }
 }

@@ -16,7 +16,8 @@ export class AuthController {
     const accessToken = this.authService.createToken(user.id, 'USER', 'access');
     const refreshToken = this.authService.createToken(user.id, 'USER', 'refresh');
     const userInfo = await this.authService.updateUser(user.id, refreshToken);
-    return { accessToken, refreshToken, user: userInfo };
+    const hasProfile = await this.authService.hasProfile(user.id);
+    return { accessToken, refreshToken, user: userInfo, hasProfile };
   }
 
   @Post('signup/trainer')
@@ -25,7 +26,8 @@ export class AuthController {
     const accessToken = this.authService.createToken(trainer.id, 'TRAINER', 'access');
     const refreshToken = this.authService.createToken(trainer.id, 'TRAINER', 'refresh');
     const userInfo = await this.authService.updateUser(trainer.id, refreshToken);
-    return { accessToken, refreshToken, user: userInfo };
+    const hasProfile = await this.authService.hasProfile(trainer.id);
+    return { accessToken, refreshToken, user: userInfo, hasProfile };
   }
 
   @Post('login')
@@ -35,7 +37,8 @@ export class AuthController {
     const accessToken = this.authService.createToken(userId, role, 'access');
     const refreshToken = this.authService.createToken(userId, role, 'refresh');
     const userInfo = await this.authService.updateUser(userId, refreshToken);
-    return { accessToken, refreshToken, user: userInfo };
+    const hasProfile = await this.authService.hasProfile(userId);
+    return { accessToken, refreshToken, user: userInfo, hasProfile };
   }
 
   @Post('token/refresh')
@@ -45,7 +48,6 @@ export class AuthController {
     @Res() res: express.Response,
   ) {
     const { userId, role, refreshToken } = user;
-    console.log(userId, role);
     const accessToken = await this.authService.refreshToken(userId, role, refreshToken);
     res.setHeader('Authorization', `Bearer ${accessToken}`);
     return res.send();

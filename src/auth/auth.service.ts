@@ -6,6 +6,7 @@ import ExceptionMessages from '#exception/exception-message.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
 import type { CreateUser, FilterUser } from '#auth/type/auth.type';
 import { UserRepository } from '#user/user.repository.js';
+import { ProfileRepository } from '#profile/profile.repository.js';
 import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 import { hashingPassword, verifyPassword } from '#utils/hashing-password.js';
@@ -15,6 +16,7 @@ export class AuthService implements IAuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly profileRepository: ProfileRepository,
   ) {}
 
   async createUser(data: CreateUser): Promise<FilterUser> {
@@ -55,5 +57,10 @@ export class AuthService implements IAuthService {
     if (!user || user.refreshToken !== refreshToken)
       throw new UnauthorizedException(ExceptionMessages.INVALID_REFRESH_TOKEN);
     return this.createToken(user.id, role);
+  }
+
+  async hasProfile(userId: string): Promise<boolean> {
+    const profile = await this.profileRepository.findProfileById(userId);
+    return !!profile;
   }
 }
