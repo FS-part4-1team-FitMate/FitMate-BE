@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  UseGuards,
-  Query,
-} from '@nestjs/common';
-import { AlsStore } from '#common/als/store-validator.js';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Query } from '@nestjs/common';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { CreateLessonDto, QueryLessonDto } from './dto/lesson.dto.js';
@@ -16,10 +6,7 @@ import { LessonService } from './lesson.service.js';
 
 @Controller('lessons')
 export class LessonController {
-  constructor(
-    private readonly lessonService: LessonService,
-    private readonly alsStore: AlsStore,
-  ) {}
+  constructor(private readonly lessonService: LessonService) {}
 
   /*************************************************************************************
    * 요청 레슨 생성
@@ -28,8 +15,7 @@ export class LessonController {
   @Post()
   @UseGuards(AccessTokenGuard)
   async create(@Body() body: CreateLessonDto) {
-    const { userId, userRole } = this.alsStore.getStore();
-    return this.lessonService.createLesson(body, userId, userRole);
+    return this.lessonService.createLesson(body);
   }
 
   /*************************************************************************************
@@ -48,8 +34,7 @@ export class LessonController {
   @Get('me')
   @UseGuards(AccessTokenGuard)
   async getMyLessons(@Query() query: QueryLessonDto) {
-    const { userId } = this.alsStore.getStore();
-    return this.lessonService.getLessons(query, userId);
+    return this.lessonService.getMyLessons(query);
   }
 
   /*************************************************************************************
@@ -68,7 +53,6 @@ export class LessonController {
   @Patch(':id/cancel')
   @UseGuards(AccessTokenGuard)
   async cancelLesson(@Param('id', UUIDPipe) id: string) {
-    const { userId } = this.alsStore.getStore();
-    return this.lessonService.cancelLessonById(id, userId);
+    return this.lessonService.cancelLessonById(id);
   }
 }

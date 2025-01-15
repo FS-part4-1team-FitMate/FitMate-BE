@@ -1,4 +1,11 @@
-import { LessonRequest, LessonRequestStatus, LessonSubType, LessonType, LocationType } from '@prisma/client';
+import {
+  LessonRequest,
+  LessonRequestStatus,
+  LessonSubType,
+  LessonType,
+  LocationType,
+  Profile,
+} from '@prisma/client';
 
 export type CreateLesson = {
   lessonType: LessonType;
@@ -16,7 +23,11 @@ export type CreateLesson = {
 
 export type PatchLesson = Partial<CreateLesson>;
 
-export type LessonResponse = LessonRequest;
+export type LessonResponse = LessonRequest & {
+  user?: {
+    profile?: Profile;
+  };
+};
 
 export type UpdateLessonStatus = {
   status: LessonRequestStatus;

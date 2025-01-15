@@ -20,12 +20,14 @@ export class LessonRepository implements ILessonRepository {
     orderBy: Record<string, string> = { created_at: 'desc' },
     skip = 0,
     take = 10,
+    select?: Prisma.LessonRequestSelect,
   ): Promise<LessonRequest[]> {
     return await this.lessonRequest.findMany({
       where,
       orderBy,
       skip,
       take,
+      select,
     });
   }
 

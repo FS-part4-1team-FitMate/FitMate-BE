@@ -8,6 +8,6 @@ import { LessonService } from './lesson.service.js';
 @Module({
   controllers: [LessonController],
   providers: [LessonService, LessonRepository, UserRepository, PrismaService],
-  exports: [LessonService],
+  exports: [LessonService, LessonRepository],
 })
 export class LessonModule {}

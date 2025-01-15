@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { LessonRequestStatus } from '@prisma/client';
+import { LessonRequestStatus, Region } from '@prisma/client';
+import { contains } from 'class-validator';
+import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
@@ -13,16 +15,24 @@ export class LessonService implements ILessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
     private readonly userRepository: UserRepository,
+    private readonly alsStore: AlsStore,
   ) {}
 
+  private getUserId(): string {
+    const { userId } = this.alsStore.getStore();
+    if (!userId) {
+      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
+    }
+    return userId;
+  }
   /*************************************************************************************
    * 요청 레슨 생성
    * ***********************************************************************************
    */
-  async createLesson(data: CreateLesson, userId: string, userRole: string): Promise<LessonResponse> {
-    if (!userId) {
-      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
-    }
+  async createLesson(data: CreateLesson): Promise<LessonResponse> {
+    const userId = this.getUserId();
+    const { userRole } = this.alsStore.getStore();
+
     if (userRole !== 'USER') {
       throw new UnauthorizedException(LessonExceptionMessage.ONLY_USER_CAN_REQUEST_LESSON);
     }
@@ -43,17 +53,26 @@ export class LessonService implements ILessonService {
   }
 
   /*************************************************************************************
-   * 요청 레슨 목록 조회 (나의 요청 레슨 공통 조회)
+   * 나의 요청 레슨 목록 조회
+   * ***********************************************************************************
+   */
+  async getMyLessons(query: QueryLessonDto): Promise<{
+    list: LessonResponse[];
+    totalCount: number;
+    hasMore: boolean;
+  }> {
+    const userId = this.getUserId();
+    return this.getLessons(query, userId);
+  }
+
+  /*************************************************************************************
+   * 요청 레슨 목록 조회
    * ***********************************************************************************
    */
   async getLessons(
     query: QueryLessonDto,
     userId?: string,
   ): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
-    if (!userId) {
-      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
-    }
-
     const {
       page = 1,
       limit = 5,
@@ -64,6 +83,9 @@ export class LessonService implements ILessonService {
       lessonSubType,
       locationType,
       status,
+      gender,
+      directQuoteRequest,
+      region,
     } = query.toCamelCase();
 
     const orderMapping: Record<string, string> = {
@@ -78,6 +100,25 @@ export class LessonService implements ILessonService {
 
     const orderByField = orderMapping[order] || 'createdAt';
 
+    const regionMapping: Record<Region, string[]> = {
+      SEOUL: ['서울'],
+      GYEONGGI: ['경기'],
+      INCHEON: ['인천'],
+      GANGWON: ['강원', '강원특별자치도'],
+      CHUNGBUK: ['충북'],
+      CHUNGNAM: ['충남'],
+      JEONBUK: ['전북', '전북특별자치도'],
+      JEONNAM: ['전남'],
+      GYEONGBUK: ['경북'],
+      GYEONGNAM: ['경남'],
+      DAEGU: ['대구'],
+      DAEJEON: ['대전'],
+      BUSAN: ['부산'],
+      ULSAN: ['울산'],
+      GWANGJU: ['광주'],
+      JEJU: ['제주', '제주특별자치도'],
+    };
+
     // 필터 조건 구성
     const where = {
       ...(userId && { userId }),
@@ -85,9 +126,38 @@ export class LessonService implements ILessonService {
       ...(lessonSubType && { lessonSubType: { in: lessonSubType } }),
       ...(locationType && { locationType: { in: locationType } }),
       ...(status && { status: { in: status } }),
-      ...(keyword && {
-        OR: [{ roadAddress: { contains: keyword } }, { detailAddress: { contains: keyword } }],
+      ...(gender && {
+        user: {
+          profile: {
+            gender: { in: gender },
+          },
+        },
       }),
+      AND: [
+        ...(region
+          ? [
+              {
+                OR: region.flatMap(
+                  (r) =>
+                    regionMapping[r]?.map((koreanRegion) => ({
+                      roadAddress: { contains: koreanRegion },
+                    })) || [],
+                ),
+              },
+            ]
+          : []),
+        ...(keyword
+          ? [
+              {
+                OR: [
+                  { user: { nickname: { contains: keyword, mode: 'insensitive' } } },
+                  { user: { profile: { name: { contains: keyword, mode: 'insensitive' } } } },
+                ],
+              },
+            ]
+          : []),
+      ],
+      ...(directQuoteRequest !== undefined && { directQuoteRequest }),
     };
 
     const orderBy: Record<string, string> = {};
@@ -95,8 +165,42 @@ export class LessonService implements ILessonService {
     const skip = (page - 1) * limit;
     const take = limit;
 
+    const select = {
+      id: true,
+      userId: true,
+      lessonType: true,
+      lessonSubType: true,
+      startDate: true,
+      endDate: true,
+      lessonCount: true,
+      lessonTime: true,
+      quoteEndDate: true,
+      locationType: true,
+      postcode: true,
+      roadAddress: true,
+      detailAddress: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      directQuoteRequests: true,
+
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+          profile: {
+            select: {
+              name: true,
+              gender: true,
+              region: true,
+            },
+          },
+        },
+      },
+    };
+
     const [lessons, totalCount] = await Promise.all([
-      this.lessonRepository.findAll(where, orderBy, skip, take),
+      this.lessonRepository.findAll(where, orderBy, skip, take, select),
       this.lessonRepository.count(where),
     ]);
 
@@ -123,10 +227,8 @@ export class LessonService implements ILessonService {
    * 요청 레슨 취소
    * ***********************************************************************************
    */
-  async cancelLessonById(lessonId: string, userId: string): Promise<LessonResponse> {
-    if (!userId) {
-      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
-    }
+  async cancelLessonById(lessonId: string): Promise<LessonResponse> {
+    const userId = this.getUserId();
 
     const lesson = await this.lessonRepository.findOne(lessonId);
 
