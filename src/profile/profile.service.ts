@@ -1,17 +1,17 @@
 import {
-  BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
-import type { Profile } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import ExceptionMessages from '#exception/exception-message.js';
 import ProfileExceptionMessage from '#exception/profile-exception-message.js';
 import { IProfileService } from '#profile/interface/profile.service.interface.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
-import type { CreateProfile, UpdateProfile, CustomProfile, ContentType } from '#profile/type/profile.type.js';
+import type { CreateProfile, CustomProfile, UpdateProfile } from '#profile/type/profile.type.js';
+import { ContentType } from '#profile/type/profile.type.js';
 import { S3Service } from '#s3/s3.service.js';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class ProfileService implements IProfileService {
   ) {}
 
   async createProfile(data: CreateProfile): Promise<CustomProfile> {
-    const { userId } = await this.alsStore.getStore();
+    const { userId, userRole } = await this.alsStore.getStore();
 
     const profile = await this.profileRepository.findProfileById(userId);
     if (profile) throw new ConflictException(ProfileExceptionMessage.PROFILE_CONFLICT);
@@ -39,20 +39,23 @@ export class ProfileService implements IProfileService {
     );
     restData.profileImage = profileImage.s3Key;
 
-    const certificationImage = await this.createImage(
-      userId,
-      certificationCount,
-      'img_default.jpg',
-      'certification',
-      certificationCount === 0 ? undefined : contentType,
-    );
-    restData.certification = certificationImage.s3Key;
+    let certificationImage;
+    if (userRole !== 'USER') {
+      certificationImage = await this.createImage(
+        userId,
+        certificationCount,
+        'img-default.jpg',
+        'certification',
+        certificationCount === 0 ? undefined : contentType,
+      );
+      restData.certification = certificationImage.s3Key;
+    }
 
     const createProfile = await this.profileRepository.createProfile(userId, restData);
     return {
       profile: createProfile,
       profileImagePresignedUrl: profileImage.presignedUrl,
-      certificationPresignedUrl: certificationImage.presignedUrl,
+      certificationPresignedUrl: certificationImage?.presignedUrl,
     };
   }
 
@@ -85,34 +88,62 @@ export class ProfileService implements IProfileService {
     if (id !== userId) throw new ForbiddenException(ExceptionMessages.FORBIDDEN);
 
     const { profileImageCount, certificationCount, contentType, ...restData } = data;
+    let profileImagePresignedUrl;
+    let certificationPresignedUrl;
 
-    if (!profile.profileImage) {
-      throw new Error('Profile image key is required to generate a presigned URL.');
-    }
-    const profileImage =
-      profileImageCount === 1
-        ? await this.createImage(userId, profileImageCount, profile.profileImage, 'profile', contentType)
-        : { s3Key: profile.profileImage, presignedUrl: undefined };
+    if (profileImageCount === 1) {
+      if (!contentType) throw new Error('Content type is required for updating profile image.');
 
-    if (!profile.certification) {
-      throw new Error('Profile image key is required to generate a presigned URL.');
+      if (profile.profileImage === 'profile-default.jpg') {
+        const newProfileImage = await this.createImage(
+          userId,
+          profileImageCount,
+          'profile-default.jpg',
+          'profile',
+          contentType,
+        );
+        restData.profileImage = newProfileImage.s3Key;
+        profileImagePresignedUrl = newProfileImage.presignedUrl;
+      } else {
+        if (!profile.profileImage) {
+          throw new Error();
+        }
+        profileImagePresignedUrl = await this.s3Service.generatePresignedUrl(
+          profile.profileImage,
+          contentType,
+        );
+      }
     }
-    const certificationImage =
-      certificationCount === 1
-        ? await this.createImage(
-            userId,
-            certificationCount,
-            profile.certification,
-            'certification',
-            contentType,
-          )
-        : { s3Key: profile.certification, presignedUrl: undefined };
+
+    if (certificationCount === 1) {
+      if (!contentType) throw new Error('Content type is required for updating certification.');
+
+      if (profile.certification === 'img_default.jpg') {
+        const newCertificationImage = await this.createImage(
+          userId,
+          certificationCount,
+          'img_default.jpg',
+          'certification',
+          contentType,
+        );
+        restData.certification = newCertificationImage.s3Key;
+        certificationPresignedUrl = newCertificationImage.presignedUrl;
+      } else {
+        if (!profile.certification) {
+          throw new Error();
+        }
+        certificationPresignedUrl = await this.s3Service.generatePresignedUrl(
+          profile.certification,
+          contentType,
+        );
+      }
+    }
 
     const updateProfile = await this.profileRepository.updateProfile(id, restData);
     return {
       profile: updateProfile,
-      profileImagePresignedUrl: profileImage.presignedUrl,
-      certificationPresignedUrl: certificationImage.presignedUrl,
+      profileImagePresignedUrl: profileImagePresignedUrl,
+      certificationPresignedUrl: certificationPresignedUrl,
     };
   }
 
