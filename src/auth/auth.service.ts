@@ -3,6 +3,7 @@ import { Injectable, NotFoundException, UnauthorizedException, BadRequestExcepti
 import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Role } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
@@ -13,7 +14,6 @@ import { ProfileRepository } from '#profile/profile.repository.js';
 import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 import { hashingPassword, verifyPassword } from '#utils/hashing-password.js';
-import mapToRole from '#utils/map-to-role.js';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -77,8 +77,6 @@ export class AuthService implements IAuthService {
   }
 
   getGoogleRedirectUrl(role: string): string {
-    if (!['USER', 'TRAINER'].includes(role)) throw new BadRequestException(AuthExceptionMessage.INVALID_ROLE);
-
     const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
     const redirectUrI = this.configService.get<string>('GOOGLE_REDIRECT_URL');
     const scope = encodeURIComponent(
@@ -89,7 +87,7 @@ export class AuthService implements IAuthService {
     return url;
   }
 
-  async handleGoogleRedirect(code: string, role: string) {
+  async handleGoogleRedirect(code: string, role: Role) {
     const tokenUrl = 'https://oauth2.googleapis.com/token';
     const userInfoUrl = 'https://www.googleapis.com/oauth2/v2/userinfo';
 
@@ -118,7 +116,7 @@ export class AuthService implements IAuthService {
       email,
       nickname: name,
       password: '',
-      role: mapToRole(role),
+      role,
     });
 
     await this.userRepository.createSocialAccount(user.id, 'google', providerId);

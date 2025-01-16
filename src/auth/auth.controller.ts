@@ -5,28 +5,22 @@ import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
+import mapToRole from '#utils/map-to-role.js';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signup/user')
-  async createUser(@Body() body: CreateUserDTO) {
-    const user = await this.authService.createUser({ ...body, role: 'USER' });
-    const accessToken = this.authService.createToken(user.id, 'USER', 'access');
-    const refreshToken = this.authService.createToken(user.id, 'USER', 'refresh');
+  @Post('signup')
+  async handleSignup(@Body() body: CreateUserDTO, @Query('role') role: string) {
+    const validateRole = mapToRole(role);
+
+    const user = await this.authService.createUser({ ...body, role: validateRole });
+    const accessToken = this.authService.createToken(user.id, role, 'access');
+    const refreshToken = this.authService.createToken(user.id, role, 'refresh');
     const userInfo = await this.authService.updateUser(user.id, refreshToken);
     const hasProfile = await this.authService.hasProfile(user.id);
-    return { accessToken, refreshToken, user: userInfo, hasProfile };
-  }
 
-  @Post('signup/trainer')
-  async createTrainer(@Body() body: CreateUserDTO) {
-    const trainer = await this.authService.createUser({ ...body, role: 'TRAINER' });
-    const accessToken = this.authService.createToken(trainer.id, 'TRAINER', 'access');
-    const refreshToken = this.authService.createToken(trainer.id, 'TRAINER', 'refresh');
-    const userInfo = await this.authService.updateUser(trainer.id, refreshToken);
-    const hasProfile = await this.authService.hasProfile(trainer.id);
     return { accessToken, refreshToken, user: userInfo, hasProfile };
   }
 
@@ -61,7 +55,9 @@ export class AuthController {
 
   @Get('google/redirect')
   async googleRedirect(@Query('code') code: string, @Query('role') role: string) {
-    const user = await this.authService.handleGoogleRedirect(code, role);
+    const validateRole = mapToRole(role);
+
+    const user = await this.authService.handleGoogleRedirect(code, validateRole);
     const hasProfile = await this.authService.hasProfile(user.id);
     const AccessToken = this.authService.createToken(user.id, user.role, 'access');
     const RefreshToken = this.authService.createToken(user.id, user.role, 'refresh');
