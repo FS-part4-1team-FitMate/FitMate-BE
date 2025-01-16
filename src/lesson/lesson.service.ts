@@ -70,7 +70,7 @@ export class LessonService implements ILessonService {
    */
   async getLessons(
     query: QueryLessonDto,
-    userId?: string,
+    myLessonUserId?: string,
   ): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
     const {
       page = 1,
@@ -83,7 +83,6 @@ export class LessonService implements ILessonService {
       locationType,
       status,
       gender,
-      directQuoteRequest,
       region,
     } = query.toCamelCase();
 
@@ -120,7 +119,7 @@ export class LessonService implements ILessonService {
 
     // 필터 조건 구성
     const where = {
-      ...(userId && { userId }),
+      ...(myLessonUserId && { userId: myLessonUserId }),
       ...(lessonType && { lessonType: { in: lessonType } }),
       ...(lessonSubType && { lessonSubType: { in: lessonSubType } }),
       ...(locationType && { locationType: { in: locationType } }),
@@ -156,7 +155,6 @@ export class LessonService implements ILessonService {
             ]
           : []),
       ],
-      ...(directQuoteRequest !== undefined && { directQuoteRequest }),
     };
 
     const orderBy: Record<string, string> = {};
@@ -181,8 +179,11 @@ export class LessonService implements ILessonService {
       status: true,
       createdAt: true,
       updatedAt: true,
-      directQuoteRequests: true,
-
+      directQuoteRequests: {
+        select: {
+          trainerId: true,
+        },
+      },
       user: {
         select: {
           id: true,
@@ -203,8 +204,18 @@ export class LessonService implements ILessonService {
       this.lessonRepository.count(where),
     ]);
 
+    const currentUserId = this.getUserId();
+    console.log('currentUserId', currentUserId);
+
+    const lessonsWithDirectQuote = lessons.map((lesson) => ({
+      ...lesson,
+      isDirectQuote: currentUserId
+        ? (lesson.directQuoteRequests?.some((req) => req.trainerId === currentUserId) ?? false)
+        : false,
+    }));
+
     return {
-      list: lessons,
+      list: lessonsWithDirectQuote,
       totalCount,
       hasMore: totalCount > page * limit,
     };
@@ -215,11 +226,54 @@ export class LessonService implements ILessonService {
    * ***********************************************************************************
    */
   async getLessonById(id: string): Promise<LessonResponse> {
-    const lesson = await this.lessonRepository.findOne(id);
+    const select = {
+      id: true,
+      userId: true,
+      lessonType: true,
+      lessonSubType: true,
+      startDate: true,
+      endDate: true,
+      lessonCount: true,
+      lessonTime: true,
+      quoteEndDate: true,
+      locationType: true,
+      postcode: true,
+      roadAddress: true,
+      detailAddress: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      directQuoteRequests: {
+        select: {
+          trainerId: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+          profile: {
+            select: {
+              name: true,
+              gender: true,
+              region: true,
+            },
+          },
+        },
+      },
+    };
+
+    const lesson = await this.lessonRepository.findOne(id, select);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
-    return lesson;
+
+    const currentUserId = this.getUserId();
+    const isDirectQuote = currentUserId
+      ? (lesson.directQuoteRequests?.some((req) => req.trainerId === currentUserId) ?? false)
+      : false;
+
+    return { ...lesson, isDirectQuote };
   }
 
   /*************************************************************************************

@@ -27,6 +27,10 @@ export type LessonResponse = LessonRequest & {
   user?: {
     profile?: Profile;
   };
+  directQuoteRequests?: {
+    trainerId: string;
+  }[];
+  isDirectQuote?: boolean;
 };
 
 export type UpdateLessonStatus = {

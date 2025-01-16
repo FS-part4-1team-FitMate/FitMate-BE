@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DirectQuoteRequest, LessonRequest, LessonRequestStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { ILessonRepository } from './interface/lesson-repository.interface.js';
-import { CreateLesson, PatchLesson } from './type/lesson.type.js';
+import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
 
 @Injectable()
 export class LessonRepository implements ILessonRepository {
@@ -23,14 +23,15 @@ export class LessonRepository implements ILessonRepository {
     skip = 0,
     take = 10,
     select?: Prisma.LessonRequestSelect,
-  ): Promise<LessonRequest[]> {
-    return await this.lessonRequest.findMany({
+  ): Promise<LessonResponse[]> {
+    const lessons = await this.lessonRequest.findMany({
       where,
       orderBy,
       skip,
       take,
       select,
     });
+    return lessons as LessonResponse[];
   }
 
   async count(where: Record<string, any> = {}): Promise<number> {
@@ -47,8 +48,9 @@ export class LessonRepository implements ILessonRepository {
     return await this.lessonRequest.findMany({ where: whereClause });
   }
 
-  async findOne(id: string): Promise<LessonRequest | null> {
-    return await this.lessonRequest.findUnique({ where: { id } });
+  async findOne(id: string, select?: Prisma.LessonRequestSelect): Promise<LessonResponse | null> {
+    const lesson = await this.lessonRequest.findUnique({ where: { id }, select });
+    return lesson as LessonResponse | null;
   }
 
   async updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest> {

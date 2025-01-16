@@ -11,7 +11,6 @@ export interface ILessonService {
     userId?: string,
   ): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }>;
   createDirectQuoteRequest(lessonId: string, data: CreateDirectQuoteDto): Promise<DirectQuoteRequest>;
-
   updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse>;
   updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse>;
 }

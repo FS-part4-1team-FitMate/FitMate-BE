@@ -23,16 +23,17 @@ export class LessonController {
    * ***********************************************************************************
    */
   @Get()
+  @UseGuards(AccessTokenGuard) // 지정 견적 요청을 구분하기 위해
   async getLessons(@Query() query: QueryLessonDto) {
     return this.lessonService.getLessons(query);
   }
 
   /*************************************************************************************
-   * 나의 요청 레슨 목록 조회
+   * 나의 요청 레슨 목록 조회 (요청 레슨 등록한 사람 기준)
    * ***********************************************************************************
    */
   @Get('me')
-  @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard) // 요청 레슨 등록한 유저 구분하기 위해
   async getMyLessons(@Query() query: QueryLessonDto) {
     return this.lessonService.getMyLessons(query);
   }
@@ -42,6 +43,7 @@ export class LessonController {
    * ***********************************************************************************
    */
   @Get(':id')
+  @UseGuards(AccessTokenGuard) // 지정 견적 요청을 구분하기 위해
   async findOne(@Param('id', UUIDPipe) id: string) {
     return this.lessonService.getLessonById(id);
   }
