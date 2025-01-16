@@ -1,11 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { LessonRequestStatus, Region } from '@prisma/client';
-import { contains } from 'class-validator';
+import { DirectQuoteRequest, LessonRequestStatus, Region } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
-import { QueryLessonDto } from './dto/lesson.dto.js';
+import { CreateDirectQuoteDto, QueryLessonDto } from './dto/lesson.dto.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
 import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
@@ -247,11 +246,65 @@ export class LessonService implements ILessonService {
     return await this.lessonRepository.updateStatus(lessonId, LessonRequestStatus.CANCELED);
   }
 
+  /*************************************************************************************
+   * 내가 생성한 요청 레슨에 대해 지정 견적 요청 생성
+   * ***********************************************************************************
+   */
+  async createDirectQuoteRequest(
+    lessonId: string,
+    { trainerId }: CreateDirectQuoteDto,
+  ): Promise<DirectQuoteRequest> {
+    const userId = this.getUserId();
+    const lesson = await this.lessonRepository.findOne(lessonId);
+    if (!lesson) {
+      throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
+    }
+
+    if (lesson.userId !== userId) {
+      throw new UnauthorizedException(LessonExceptionMessage.NOT_MY_LESSON_DIRECT_QUOTE);
+    }
+
+    if (lesson.status !== LessonRequestStatus.PENDING) {
+      throw new BadRequestException(LessonExceptionMessage.INVALID_LESSON_STATUS_FOR_QUOTE);
+    }
+
+    const trainer = await this.userRepository.findUserById(trainerId);
+    if (!trainer || trainer.role !== 'TRAINER') {
+      throw new BadRequestException(LessonExceptionMessage.TRAINER_NOT_FOUND_OR_INVALID);
+    }
+
+    const existingRequest = await this.lessonRepository.findDirectQuoteRequest(lessonId, trainerId);
+    if (existingRequest) {
+      throw new BadRequestException(LessonExceptionMessage.DIRECT_QUOTE_ALREADY_EXISTS);
+    }
+
+    return await this.lessonRepository.createDirectQuoteRequest({
+      lessonRequestId: lessonId,
+      trainerId,
+    });
+  }
+
+  /*************************************************************************************
+   * 요청 레슨 수정
+   * ***********************************************************************************
+   */
   async updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse> {
+    const lesson = await this.lessonRepository.findOne(id);
+    if (!lesson) {
+      throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
+    }
     return await this.lessonRepository.update(id, data);
   }
 
+  /*************************************************************************************
+   * 요청 레슨 상태 업데이트
+   * ***********************************************************************************
+   */
   async updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse> {
+    const lesson = await this.lessonRepository.findOne(id);
+    if (!lesson) {
+      throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
+    }
     return await this.lessonRepository.updateStatus(id, status);
   }
 }

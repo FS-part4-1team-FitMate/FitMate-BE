@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LessonRequest, LessonRequestStatus, Prisma } from '@prisma/client';
+import { DirectQuoteRequest, LessonRequest, LessonRequestStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { ILessonRepository } from './interface/lesson-repository.interface.js';
 import { CreateLesson, PatchLesson } from './type/lesson.type.js';
@@ -7,8 +7,10 @@ import { CreateLesson, PatchLesson } from './type/lesson.type.js';
 @Injectable()
 export class LessonRepository implements ILessonRepository {
   private readonly lessonRequest;
+  private readonly directQuoteRequest;
   constructor(private readonly prisma: PrismaService) {
     this.lessonRequest = prisma.lessonRequest;
+    this.directQuoteRequest = prisma.directQuoteRequest;
   }
 
   async create(data: CreateLesson & { userId: string }): Promise<LessonRequest> {
@@ -55,5 +57,26 @@ export class LessonRepository implements ILessonRepository {
 
   async update(id: string, data: PatchLesson): Promise<LessonRequest> {
     return await this.lessonRequest.update({ where: { id }, data });
+  }
+
+  async findDirectQuoteRequest(
+    lessonRequestId: string,
+    trainerId: string,
+  ): Promise<DirectQuoteRequest | null> {
+    return await this.directQuoteRequest.findUnique({
+      where: {
+        lessonRequestId_trainerId: {
+          lessonRequestId,
+          trainerId,
+        },
+      },
+    });
+  }
+
+  async createDirectQuoteRequest(data: {
+    lessonRequestId: string;
+    trainerId: string;
+  }): Promise<DirectQuoteRequest> {
+    return await this.directQuoteRequest.create({ data });
   }
 }

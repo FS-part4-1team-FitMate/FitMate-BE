@@ -4,6 +4,10 @@ enum LessonExceptionMessage {
   LESSON_NOT_FOUND = '요청하신 Lesson이 존재하지 않습니다.',
   NOT_MY_LESSON = '본인의 레슨만 취소할 수 있습니다.',
   INVALID_STATUS_TOBE_PENDING = '대기중인 레슨만 취소할 수 있습니다.',
+  NOT_MY_LESSON_DIRECT_QUOTE = '본인의 요청 레슨에만 지정 견적 요청을 할 수 있습니다.',
+  INVALID_LESSON_STATUS_FOR_QUOTE = '대기중인 레슨에만 견적을 요청할 수 있습니다.',
+  TRAINER_NOT_FOUND_OR_INVALID = '해당 트레이너가 존재하지 않습니다.',
+  DIRECT_QUOTE_ALREADY_EXISTS = '이미 해당 트레이너에게 지정 견적 요청이 존재합니다..',
 }
 
 export default LessonExceptionMessage;

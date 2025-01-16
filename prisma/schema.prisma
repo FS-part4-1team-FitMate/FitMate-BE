@@ -101,6 +101,8 @@ model DirectQuoteRequest {
 
   lessonRequest LessonRequest @relation(fields: [lessonRequestId], references: [id], onDelete: Cascade)
   instructor    User          @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonRequestId, trainerId])
 }
 
 model LessonQuote {

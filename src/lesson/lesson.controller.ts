@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, Query } from '@nestjs/common';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
-import { CreateLessonDto, QueryLessonDto } from './dto/lesson.dto.js';
+import { CreateDirectQuoteDto, CreateLessonDto, QueryLessonDto } from './dto/lesson.dto.js';
 import { LessonService } from './lesson.service.js';
 
 @Controller('lessons')
@@ -54,5 +54,15 @@ export class LessonController {
   @UseGuards(AccessTokenGuard)
   async cancelLesson(@Param('id', UUIDPipe) id: string) {
     return this.lessonService.cancelLessonById(id);
+  }
+
+  /*************************************************************************************
+   * 내가 생성한 요청 레슨에 대해 지정 견적 요청 생성
+   * ***********************************************************************************
+   */
+  @Post(':id/direct-quote')
+  @UseGuards(AccessTokenGuard)
+  async createDirectQuote(@Param('id', UUIDPipe) lessonId: string, @Body() body: CreateDirectQuoteDto) {
+    return this.lessonService.createDirectQuoteRequest(lessonId, body);
   }
 }
