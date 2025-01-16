@@ -1,4 +1,4 @@
-import { UseGuards, Body, Controller, Post, Res } from '@nestjs/common';
+import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
 import { AuthService } from '#auth/auth.service.js';
@@ -51,5 +51,20 @@ export class AuthController {
     const accessToken = await this.authService.refreshToken(userId, role, refreshToken);
     res.setHeader('Authorization', `Bearer ${accessToken}`);
     return res.send();
+  }
+
+  @Get('google')
+  @Redirect()
+  getGoogleUrl(@Query('role') role: string) {
+    return this.authService.getGoogleRedirectUrl(role);
+  }
+
+  @Get('google/redirect')
+  async googleRedirect(@Query('code') code: string, @Query('role') role: string) {
+    const user = await this.authService.handleGoogleRedirect(code, role);
+    const hasProfile = await this.authService.hasProfile(user.id);
+    const AccessToken = this.authService.createToken(user.id, user.role, 'access');
+    const RefreshToken = this.authService.createToken(user.id, user.role, 'refresh');
+    return { AccessToken, RefreshToken, user, hasProfile };
   }
 }
