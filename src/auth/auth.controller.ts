@@ -62,12 +62,7 @@ export class AuthController {
     const hasProfile = await this.authService.hasProfile(user.id);
     const AccessToken = this.authService.createToken(user.id, user.role, 'access');
     const RefreshToken = this.authService.createToken(user.id, user.role, 'refresh');
-    return { AccessToken, RefreshToken, user, hasProfile };
+    const userInfo = await this.authService.updateUser(user.id, RefreshToken);
+    return { AccessToken, RefreshToken, user: userInfo, hasProfile };
   }
-
-  // @Get('google/redirect')
-  // async googleRedirect(@Query() role: any) {
-  //   console.log(role);
-  //   return true;
-  // }
 }
