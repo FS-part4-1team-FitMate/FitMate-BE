@@ -31,7 +31,7 @@ export class LessonRepository implements ILessonRepository {
       take,
       select,
     });
-    return lessons as LessonResponse[];
+    return lessons;
   }
 
   async count(where: Record<string, any> = {}): Promise<number> {
@@ -50,7 +50,7 @@ export class LessonRepository implements ILessonRepository {
 
   async findOne(id: string, select?: Prisma.LessonRequestSelect): Promise<LessonResponse | null> {
     const lesson = await this.lessonRequest.findUnique({ where: { id }, select });
-    return lesson as LessonResponse | null;
+    return lesson;
   }
 
   async updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest> {
