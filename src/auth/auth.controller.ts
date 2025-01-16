@@ -50,17 +50,24 @@ export class AuthController {
   @Get('google')
   @Redirect()
   getGoogleUrl(@Query('role') role: string) {
-    return this.authService.getGoogleRedirectUrl(role);
+    console.log('Received role:', role);
+    const googleUrl = this.authService.getGoogleRedirectUrl(role);
+    return { url: googleUrl };
   }
 
   @Get('google/redirect')
-  async googleRedirect(@Query('code') code: string, @Query('role') role: string) {
+  async googleRedirect(@Query('code') code: string, @Query('state') role: string) {
     const validateRole = mapToRole(role);
-
     const user = await this.authService.handleGoogleRedirect(code, validateRole);
     const hasProfile = await this.authService.hasProfile(user.id);
     const AccessToken = this.authService.createToken(user.id, user.role, 'access');
     const RefreshToken = this.authService.createToken(user.id, user.role, 'refresh');
     return { AccessToken, RefreshToken, user, hasProfile };
   }
+
+  // @Get('google/redirect')
+  // async googleRedirect(@Query() role: any) {
+  //   console.log(role);
+  //   return true;
+  // }
 }

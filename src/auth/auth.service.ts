@@ -78,11 +78,12 @@ export class AuthService implements IAuthService {
 
   getGoogleRedirectUrl(role: string): string {
     const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
-    const redirectUrI = this.configService.get<string>('GOOGLE_REDIRECT_URL');
+    const redirectUri = this.configService.get<string>('GOOGLE_REDIRECT_URI');
     const scope = encodeURIComponent(
       'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
     );
-    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUrI}&response_type=code&scope=${scope}}&access_type=offline&state=${role}`;
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&state=${role}&response_type=code&scope=${scope}&access_type=offline`;
+    console.log('url:', url);
 
     return url;
   }
@@ -96,7 +97,7 @@ export class AuthService implements IAuthService {
         code,
         client_id: this.configService.get<string>('GOOGLE_CLIENT_ID'),
         client_secret: this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
-        redirect_uri: this.configService.get<string>('GOOGLE_REDIRECT_URL'),
+        redirect_uri: this.configService.get<string>('GOOGLE_REDIRECT_URI'),
         grant_type: 'authorization_code',
       }),
     );
