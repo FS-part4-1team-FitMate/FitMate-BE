@@ -1,11 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { LessonRequestStatus, Region } from '@prisma/client';
-import { contains } from 'class-validator';
+import { DirectQuoteRequest, LessonRequestStatus, Region } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
-import { QueryLessonDto } from './dto/lesson.dto.js';
+import { CreateDirectQuoteDto, QueryLessonDto } from './dto/lesson.dto.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
 import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
@@ -71,7 +70,7 @@ export class LessonService implements ILessonService {
    */
   async getLessons(
     query: QueryLessonDto,
-    userId?: string,
+    myLessonUserId?: string,
   ): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
     const {
       page = 1,
@@ -84,7 +83,6 @@ export class LessonService implements ILessonService {
       locationType,
       status,
       gender,
-      directQuoteRequest,
       region,
     } = query.toCamelCase();
 
@@ -121,7 +119,7 @@ export class LessonService implements ILessonService {
 
     // 필터 조건 구성
     const where = {
-      ...(userId && { userId }),
+      ...(myLessonUserId && { userId: myLessonUserId }),
       ...(lessonType && { lessonType: { in: lessonType } }),
       ...(lessonSubType && { lessonSubType: { in: lessonSubType } }),
       ...(locationType && { locationType: { in: locationType } }),
@@ -157,7 +155,6 @@ export class LessonService implements ILessonService {
             ]
           : []),
       ],
-      ...(directQuoteRequest !== undefined && { directQuoteRequest }),
     };
 
     const orderBy: Record<string, string> = {};
@@ -182,8 +179,11 @@ export class LessonService implements ILessonService {
       status: true,
       createdAt: true,
       updatedAt: true,
-      directQuoteRequests: true,
-
+      directQuoteRequests: {
+        select: {
+          trainerId: true,
+        },
+      },
       user: {
         select: {
           id: true,
@@ -204,8 +204,18 @@ export class LessonService implements ILessonService {
       this.lessonRepository.count(where),
     ]);
 
+    const currentUserId = this.getUserId();
+    console.log('currentUserId', currentUserId);
+
+    const lessonsWithDirectQuote = lessons.map((lesson) => ({
+      ...lesson,
+      isDirectQuote: currentUserId
+        ? (lesson.directQuoteRequests?.some((req) => req.trainerId === currentUserId) ?? false)
+        : false,
+    }));
+
     return {
-      list: lessons,
+      list: lessonsWithDirectQuote,
       totalCount,
       hasMore: totalCount > page * limit,
     };
@@ -216,11 +226,54 @@ export class LessonService implements ILessonService {
    * ***********************************************************************************
    */
   async getLessonById(id: string): Promise<LessonResponse> {
-    const lesson = await this.lessonRepository.findOne(id);
+    const select = {
+      id: true,
+      userId: true,
+      lessonType: true,
+      lessonSubType: true,
+      startDate: true,
+      endDate: true,
+      lessonCount: true,
+      lessonTime: true,
+      quoteEndDate: true,
+      locationType: true,
+      postcode: true,
+      roadAddress: true,
+      detailAddress: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      directQuoteRequests: {
+        select: {
+          trainerId: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+          profile: {
+            select: {
+              name: true,
+              gender: true,
+              region: true,
+            },
+          },
+        },
+      },
+    };
+
+    const lesson = await this.lessonRepository.findOne(id, select);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
-    return lesson;
+
+    const currentUserId = this.getUserId();
+    const isDirectQuote = currentUserId
+      ? (lesson.directQuoteRequests?.some((req) => req.trainerId === currentUserId) ?? false)
+      : false;
+
+    return { ...lesson, isDirectQuote };
   }
 
   /*************************************************************************************
@@ -247,11 +300,65 @@ export class LessonService implements ILessonService {
     return await this.lessonRepository.updateStatus(lessonId, LessonRequestStatus.CANCELED);
   }
 
+  /*************************************************************************************
+   * 내가 생성한 요청 레슨에 대해 지정 견적 요청 생성
+   * ***********************************************************************************
+   */
+  async createDirectQuoteRequest(
+    lessonId: string,
+    { trainerId }: CreateDirectQuoteDto,
+  ): Promise<DirectQuoteRequest> {
+    const userId = this.getUserId();
+    const lesson = await this.lessonRepository.findOne(lessonId);
+    if (!lesson) {
+      throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
+    }
+
+    if (lesson.userId !== userId) {
+      throw new UnauthorizedException(LessonExceptionMessage.NOT_MY_LESSON_DIRECT_QUOTE);
+    }
+
+    if (lesson.status !== LessonRequestStatus.PENDING) {
+      throw new BadRequestException(LessonExceptionMessage.INVALID_LESSON_STATUS_FOR_QUOTE);
+    }
+
+    const trainer = await this.userRepository.findUserById(trainerId);
+    if (!trainer || trainer.role !== 'TRAINER') {
+      throw new BadRequestException(LessonExceptionMessage.TRAINER_NOT_FOUND_OR_INVALID);
+    }
+
+    const existingRequest = await this.lessonRepository.findDirectQuoteRequest(lessonId, trainerId);
+    if (existingRequest) {
+      throw new BadRequestException(LessonExceptionMessage.DIRECT_QUOTE_ALREADY_EXISTS);
+    }
+
+    return await this.lessonRepository.createDirectQuoteRequest({
+      lessonRequestId: lessonId,
+      trainerId,
+    });
+  }
+
+  /*************************************************************************************
+   * 요청 레슨 수정
+   * ***********************************************************************************
+   */
   async updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse> {
+    const lesson = await this.lessonRepository.findOne(id);
+    if (!lesson) {
+      throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
+    }
     return await this.lessonRepository.update(id, data);
   }
 
+  /*************************************************************************************
+   * 요청 레슨 상태 업데이트
+   * ***********************************************************************************
+   */
   async updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse> {
+    const lesson = await this.lessonRepository.findOne(id);
+    if (!lesson) {
+      throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
+    }
     return await this.lessonRepository.updateStatus(id, status);
   }
 }

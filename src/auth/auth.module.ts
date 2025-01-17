@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
@@ -18,6 +19,7 @@ import { ProfileRepository } from '#profile/profile.repository.js';
     }),
     PassportModule.register({ defaultStrategy: 'local' }),
     JwtConfigModule,
+    HttpModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, RefreshTokenStrategy, UserRepository, ProfileRepository],

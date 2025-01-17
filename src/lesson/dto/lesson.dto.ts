@@ -1,7 +1,17 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { Gender, LessonRequestStatus, LessonSubType, LessonType, LocationType, Region } from '@prisma/client';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsDate, IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class CreateLessonDto {
   @IsNotEmpty()
@@ -131,4 +141,10 @@ export class QueryLessonDto {
       region: this.region,
     };
   }
+}
+
+export class CreateDirectQuoteDto {
+  @IsNotEmpty()
+  @IsUUID('4', { message: '유효하지 않은 강사 ID입니다.' })
+  trainerId: string;
 }
