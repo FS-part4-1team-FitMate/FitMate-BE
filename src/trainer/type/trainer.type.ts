@@ -1,9 +1,9 @@
 export type CreateFavoriteTrainer = {
-  trainerId: string; // 찜할 강사의 ID
+  trainerId: string;
 };
 
 export type RemoveFavoriteTrainer = {
-  trainerId: string; // 찜에서 제거할 강사의 ID
+  trainerId: string;
 };
 
 export type FavoriteTrainerResponse = {

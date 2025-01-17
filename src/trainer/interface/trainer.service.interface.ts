@@ -2,9 +2,10 @@ import {
   CreateFavoriteTrainer,
   RemoveFavoriteTrainer,
   FavoriteTrainerResponse,
-} from '../type/trainer.type.js';
+} from '#trainer/type/trainer.type.js';
 
 export interface ITrainerService {
+  getTrainers(): Promise<{ trainers: any[]; totalCount: number }>;
   addFavoriteTrainer(data: CreateFavoriteTrainer): Promise<FavoriteTrainerResponse>;
   removeFavoriteTrainer(data: RemoveFavoriteTrainer): Promise<void>;
 }
