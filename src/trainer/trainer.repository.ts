@@ -5,6 +5,7 @@ import type {
   CreateFavoriteTrainer,
   RemoveFavoriteTrainer,
   FavoriteTrainerResponse,
+  TrainerWithFavorites,
 } from '#trainer/type/trainer.type';
 
 @Injectable()
@@ -15,7 +16,7 @@ export class TrainerRepository implements ITrainerRepository {
     this.user = prisma.user;
   }
 
-  async findFavoriteByUserId(userId: string): Promise<any[]> {
+  async findFavoriteByUserId(userId: string): Promise<TrainerWithFavorites[]> {
     const trainers = await this.user.findMany({
       where: { favoritedByUsers: { some: { userId } } },
       select: {
@@ -82,7 +83,7 @@ export class TrainerRepository implements ITrainerRepository {
     return this.user.count({ where: { role: 'TRAINER', ...where } });
   }
 
-  async findTrainersWithFavorites(userId?: string): Promise<any[]> {
+  async findTrainersWithFavorites(userId?: string): Promise<TrainerWithFavorites[]> {
     return this.findAll(userId || null, {}, { createdAt: 'desc' }, 0, 10);
   }
 

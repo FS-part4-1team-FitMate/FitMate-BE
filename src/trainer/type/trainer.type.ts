@@ -13,3 +13,23 @@ export type FavoriteTrainerResponse = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type TrainerProfile = {
+  profileImage: string | null;
+  intro: string;
+  lessonType: string[];
+  experience: number;
+  rating: number;
+  reviewCount: number;
+  lessonCount: number;
+};
+
+export type TrainerWithFavorites = {
+  id: string;
+  nickname: string;
+  email: string;
+  createdAt: Date;
+  updatedAt: Date;
+  profile: TrainerProfile;
+  favoritedByUsers?: { userId: string }[];
+};
