@@ -25,22 +25,10 @@ export class TrainerService {
 
     const favorites = await this.trainerRepository.findFavoriteByUserId(userId);
 
+    // 기본 값 처리가 이미 되어 있으므로 단순히 `isFavorite`만 추가
     return favorites.map((trainer) => ({
-      id: trainer.id,
-      nickname: trainer.nickname,
-      email: trainer.email,
-      createdAt: trainer.createdAt,
-      updatedAt: trainer.updatedAt,
-      profile: {
-        profileImage: trainer.profile?.profileImage || null,
-        intro: trainer.profile?.intro || '',
-        lessonType: trainer.profile?.lessonType || [],
-        experience: trainer.profile?.experience || 0,
-        rating: trainer.profile?.rating || 0,
-        reviewCount: trainer.profile?.reviewCount || 0,
-        lessonCount: trainer.profile?.lessonCount || 0,
-      },
-      isFavorite: true,
+      ...trainer,
+      isFavorite: true, // 서비스 계층에서 추가적인 가공
     }));
   }
 
@@ -124,7 +112,7 @@ export class TrainerService {
   }
 
   // 찜 삭제
-  async removeFavoriteTrainer(data: RemoveFavoriteTrainer): Promise<void> {
+  async removeFavoriteTrainer(data: RemoveFavoriteTrainer): Promise<{ message: string }> {
     const { userId } = this.alsStore.getStore();
     if (!userId) {
       throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
@@ -136,5 +124,7 @@ export class TrainerService {
     }
 
     await this.trainerRepository.removeFavoriteTrainer(userId, data);
+
+    return { message: TrainerExceptionMessage.SUCCESS_DELETE };
   }
 }

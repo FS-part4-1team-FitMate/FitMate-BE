@@ -9,21 +9,48 @@ import type {
 
 @Injectable()
 export class TrainerRepository implements ITrainerRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly user;
+
+  constructor(private readonly prisma: PrismaService) {
+    this.user = prisma.user;
+  }
 
   async findFavoriteByUserId(userId: string): Promise<any[]> {
-    return this.prisma.user.findMany({
-      where: {
-        favoritedByUsers: {
-          some: {
-            userId,
+    const trainers = await this.user.findMany({
+      where: { favoritedByUsers: { some: { userId } } },
+      select: {
+        id: true,
+        nickname: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        profile: {
+          select: {
+            profileImage: true,
+            intro: true,
+            lessonType: true,
+            experience: true,
+            rating: true,
+            reviewCount: true,
+            lessonCount: true,
           },
         },
       },
-      include: {
-        profile: true,
-      },
     });
+
+    // 기본 값 추가
+    return trainers.map((trainer) => ({
+      ...trainer,
+      profile: {
+        profileImage: trainer.profile?.profileImage || null,
+        intro: trainer.profile?.intro || '',
+        lessonType: trainer.profile?.lessonType || [],
+        experience: trainer.profile?.experience || 0,
+        rating: trainer.profile?.rating || 0,
+        reviewCount: trainer.profile?.reviewCount || 0,
+        lessonCount: trainer.profile?.lessonCount || 0,
+      },
+    }));
   }
 
   async findAll(
@@ -38,7 +65,7 @@ export class TrainerRepository implements ITrainerRepository {
       ? { profile: orderBy }
       : orderBy;
 
-    return this.prisma.user.findMany({
+    return this.user.findMany({
       where: { role: 'TRAINER', ...where },
       include: {
         profile: true,
@@ -51,12 +78,8 @@ export class TrainerRepository implements ITrainerRepository {
   }
 
   // 트레이너 수 조회
-  async count(where: Record<string, any>): Promise<number> {
-    return this.prisma.user.count({ where: { role: 'TRAINER', ...where } });
-  }
-
-  async countTrainers(): Promise<number> {
-    return this.count({});
+  async count(where: Record<string, any> = {}): Promise<number> {
+    return this.user.count({ where: { role: 'TRAINER', ...where } });
   }
 
   async findTrainersWithFavorites(userId?: string): Promise<any[]> {
