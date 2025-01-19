@@ -8,6 +8,7 @@ import type {
   CreateFavoriteTrainer,
   RemoveFavoriteTrainer,
   FavoriteTrainerResponse,
+  TrainerWithFavorites,
 } from '#trainer/type/trainer.type.js';
 
 @Injectable()
@@ -17,7 +18,7 @@ export class TrainerService {
     private readonly alsStore: AlsStore,
   ) {}
 
-  async getFavoriteTrainers(): Promise<any[]> {
+  async getFavoriteTrainers(): Promise<TrainerWithFavorites[]> {
     const { userId } = this.alsStore.getStore();
     if (!userId) {
       throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
@@ -90,7 +91,7 @@ export class TrainerService {
         reviewCount: trainer.profile?.reviewCount || 0,
         lessonCount: trainer.profile?.lessonCount || 0,
       },
-      isFavorite: userId ? trainer.favoritedByUsers.length > 0 : false,
+      isFavorite: userId ? (trainer.favoritedByUsers ?? []).length > 0 : false,
     }));
 
     return { trainers: trainersWithDetails, totalCount, hasMore: totalCount > page * limit };

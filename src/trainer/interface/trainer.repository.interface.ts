@@ -2,6 +2,7 @@ import {
   CreateFavoriteTrainer,
   RemoveFavoriteTrainer,
   FavoriteTrainerResponse,
+  TrainerWithFavorites,
 } from '#trainer/type/trainer.type.js';
 
 export interface ITrainerRepository {
@@ -11,10 +12,10 @@ export interface ITrainerRepository {
     orderBy: Record<string, string>,
     skip: number,
     take: number,
-  ): Promise<any[]>;
+  ): Promise<TrainerWithFavorites[]>;
   count(where: Record<string, any>): Promise<number>;
   addFavoriteTrainer(userId: string, data: CreateFavoriteTrainer): Promise<FavoriteTrainerResponse>;
   removeFavoriteTrainer(userId: string, data: RemoveFavoriteTrainer): Promise<void>;
   findFavoriteTrainer(userId: string, trainerId: string): Promise<FavoriteTrainerResponse | null>;
-  findTrainersWithFavorites(userId?: string): Promise<any[]>;
+  findTrainersWithFavorites(userId?: string): Promise<TrainerWithFavorites[]>;
 }

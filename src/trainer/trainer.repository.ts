@@ -36,12 +36,17 @@ export class TrainerRepository implements ITrainerRepository {
             lessonCount: true,
           },
         },
+        favoritedByUsers: false,
       },
     });
 
     // 기본 값 추가
-    return trainers.map((trainer) => ({
-      ...trainer,
+    return trainers.map<TrainerWithFavorites>((trainer) => ({
+      id: trainer.id,
+      nickname: trainer.nickname,
+      email: trainer.email,
+      createdAt: trainer.createdAt,
+      updatedAt: trainer.updatedAt,
       profile: {
         profileImage: trainer.profile?.profileImage || null,
         intro: trainer.profile?.intro || '',
@@ -60,7 +65,7 @@ export class TrainerRepository implements ITrainerRepository {
     orderBy: Record<string, any> = { createdAt: 'desc' },
     skip = 0,
     take = 10,
-  ): Promise<any[]> {
+  ): Promise<TrainerWithFavorites[]> {
     const profileOrderByFields = ['reviewCount', 'rating', 'lessonCount'];
     const orderByClause = profileOrderByFields.includes(Object.keys(orderBy)[0])
       ? { profile: orderBy }
