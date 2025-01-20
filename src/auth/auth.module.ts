@@ -6,6 +6,7 @@ import { PrismaModule } from '#prisma/prisma.module.js';
 import { JwtConfigModule } from '#common/jwt.module.js';
 import { AuthController } from '#auth/auth.controller.js';
 import { AuthService } from '#auth/auth.service.js';
+import { KakaoStrategy } from '#auth/strategy/kakao.strategy.js';
 import { LocalStrategy } from '#auth/strategy/local.strategy.js';
 import { NaverStrategy } from '#auth/strategy/naver.strategy.js';
 import { RefreshTokenStrategy } from '#auth/strategy/refresh-token.strategy.js';
@@ -30,6 +31,7 @@ import { ProfileRepository } from '#profile/profile.repository.js';
     UserRepository,
     ProfileRepository,
     NaverStrategy,
+    KakaoStrategy,
   ],
   exports: [],
 })

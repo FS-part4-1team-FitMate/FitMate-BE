@@ -15,14 +15,32 @@ export interface Payload {
   role: Role;
 }
 
-export interface ExtendedProfile extends Profile {
+export interface NaverProfile extends Profile {
   state: string;
 }
 
-export interface ValidateNaverUser {
+export interface ValidateSocialAccount {
   provider: string;
   providerId: string;
   email: string;
   nickname: string;
   role: string;
+}
+
+export interface KakaoAccount {
+  email?: string;
+  profile?: {
+    nickname?: string;
+    profile_image?: string;
+  };
+}
+
+export interface KakaoProfile {
+  id: string;
+  connected_at: string;
+  kakao_account?: KakaoAccount;
+}
+
+export interface ExtendKakaoProfile {
+  _json: KakaoProfile;
 }

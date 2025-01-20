@@ -4,6 +4,7 @@ import express from 'express';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
+import { KakaoAuthGuard } from '#auth/guard/kakao.guard.js';
 import { NaverAuthGuard } from '#auth/guard/naver.guard.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
 import mapToRole from '#utils/map-to-role.js';
@@ -75,7 +76,30 @@ export class AuthController {
   @UseGuards(NaverAuthGuard)
   async naverCallback(@ReqUser() socialAccountInfo: any, @Query('state') state: string) {
     const { provider, providerId, email, nickname } = socialAccountInfo;
-    const naverUser = await this.authService.handleNaverRedirect({
+    const naverUser = await this.authService.handleSocialAccount({
+      provider,
+      providerId,
+      email,
+      nickname,
+      role: state,
+    });
+    const AccessToken = this.authService.createToken(naverUser.id, state, 'access');
+    const RefreshToken = this.authService.createToken(naverUser.id, state, 'refresh');
+    const userInfo = await this.authService.updateUser(naverUser.id, RefreshToken);
+    const hasProfile = await this.authService.hasProfile(naverUser.id);
+
+    return { AccessToken, RefreshToken, user: userInfo, hasProfile };
+  }
+
+  @Get('kakao')
+  @UseGuards(KakaoAuthGuard)
+  async kakaoLogin() {}
+
+  @Get('kakao/redirect')
+  @UseGuards(KakaoAuthGuard)
+  async kakaoCallback(@ReqUser() socialAccountInfo: any, @Query('state') state: string) {
+    const { provider, providerId, email, nickname } = socialAccountInfo;
+    const naverUser = await this.authService.handleSocialAccount({
       provider,
       providerId,
       email,

@@ -7,7 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
-import type { CreateUser, FilterUser, ValidateNaverUser } from '#auth/type/auth.type';
+import type { CreateUser, FilterUser, ValidateSocialAccount } from '#auth/type/auth.type';
 import { UserRepository } from '#user/user.repository.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
@@ -114,6 +114,9 @@ export class AuthService implements IAuthService {
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
     if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
 
+    const userEmail = await this.userRepository.findByEmail(email);
+    if (userEmail) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
+
     const user = await this.userRepository.createUser({
       email,
       nickname: name,
@@ -126,15 +129,18 @@ export class AuthService implements IAuthService {
     return filterSensitiveUserData(user);
   }
 
-  async handleNaverRedirect({
+  async handleSocialAccount({
     provider,
     providerId,
     email,
     nickname,
     role,
-  }: ValidateNaverUser): Promise<FilterUser> {
+  }: ValidateSocialAccount): Promise<FilterUser> {
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
     if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
+
+    const userEmail = await this.userRepository.findByEmail(email);
+    if (userEmail) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
 
     const user = await this.userRepository.createUser({
       email,
