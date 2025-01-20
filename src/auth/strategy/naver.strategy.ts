@@ -26,13 +26,7 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     const { id: providerId, email, nickname } = profile._json;
     const provider = 'naver';
 
-    const user = await this.authService.handleNaverRedirect({
-      provider,
-      providerId,
-      email,
-      nickname,
-    });
-
-    return user;
+    const socialAccountInfo = { provider, providerId, email, nickname };
+    return socialAccountInfo;
   }
 }

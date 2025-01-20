@@ -4,7 +4,7 @@ import express from 'express';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
-// import { NaverAuthGuard } from '#auth/guard/naver.guard.js';
+import { NaverAuthGuard } from '#auth/guard/naver.guard.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
 import mapToRole from '#utils/map-to-role.js';
 
@@ -68,16 +68,25 @@ export class AuthController {
   }
 
   @Get('naver')
-  @UseGuards(AuthGuard('naver'))
+  @UseGuards(NaverAuthGuard)
   async naverLogin() {}
 
   @Get('naver/redirect')
-  @UseGuards(AuthGuard('naver'))
-  async naverCallback(@ReqUser() user: any, @Req() req: any) {
-    const AccessToken = this.authService.createToken(user.id, user.role, 'access');
-    const RefreshToken = this.authService.createToken(user.id, user.role, 'refresh');
-    const userInfo = await this.authService.updateUser(user.id, RefreshToken);
-    const hasProfile = await this.authService.hasProfile(user.id);
+  @UseGuards(NaverAuthGuard)
+  async naverCallback(@ReqUser() socialAccountInfo: any, @Query('state') state: string) {
+    const { provider, providerId, email, nickname } = socialAccountInfo;
+    const naverUser = await this.authService.handleNaverRedirect({
+      provider,
+      providerId,
+      email,
+      nickname,
+      role: state,
+    });
+    const AccessToken = this.authService.createToken(naverUser.id, state, 'access');
+    const RefreshToken = this.authService.createToken(naverUser.id, state, 'refresh');
+    const userInfo = await this.authService.updateUser(naverUser.id, RefreshToken);
+    const hasProfile = await this.authService.hasProfile(naverUser.id);
+
     return { AccessToken, RefreshToken, user: userInfo, hasProfile };
   }
 }

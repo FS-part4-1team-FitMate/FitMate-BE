@@ -3,7 +3,6 @@ import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/co
 import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
@@ -89,7 +88,7 @@ export class AuthService implements IAuthService {
     return url;
   }
 
-  async handleGoogleRedirect(code: string, role: Role) {
+  async handleGoogleRedirect(code: string, role: string): Promise<FilterUser> {
     const tokenUrl = 'https://oauth2.googleapis.com/token';
     const userInfoUrl = 'https://www.googleapis.com/oauth2/v2/userinfo';
 
@@ -119,15 +118,21 @@ export class AuthService implements IAuthService {
       email,
       nickname: name,
       password: '',
-      role,
+      role: mapToRole(role),
     });
 
     await this.userRepository.createSocialAccount(user.id, provider, providerId);
 
-    return user;
+    return filterSensitiveUserData(user);
   }
 
-  async handleNaverRedirect({ provider, providerId, email, nickname }: ValidateNaverUser) {
+  async handleNaverRedirect({
+    provider,
+    providerId,
+    email,
+    nickname,
+    role,
+  }: ValidateNaverUser): Promise<FilterUser> {
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
     if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
 
@@ -135,11 +140,11 @@ export class AuthService implements IAuthService {
       email,
       nickname,
       password: '',
-      role: 'USER',
+      role: mapToRole(role),
     });
 
     await this.userRepository.createSocialAccount(user.id, provider, providerId);
 
-    return user;
+    return filterSensitiveUserData(user);
   }
 }

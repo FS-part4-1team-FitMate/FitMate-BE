@@ -24,4 +24,5 @@ export interface ValidateNaverUser {
   providerId: string;
   email: string;
   nickname: string;
+  role: string;
 }

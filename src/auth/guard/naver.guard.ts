@@ -1,17 +1,13 @@
-// import { Injectable, ExecutionContext } from '@nestjs/common';
-// import { AuthGuard } from '@nestjs/passport';
+import { Injectable, ExecutionContext } from '@nestjs/common';
+import { AuthGuard, IAuthModuleOptions } from '@nestjs/passport';
 
-// @Injectable()
-// export class NaverAuthGuard extends AuthGuard('naver') {
-//   constructor() {
-//     super();
-//   }
-
-//   getAuthenticateOptions(context: ExecutionContext) {
-//     const request = context.switchToHttp().getRequest();
-//     const role = request.query.role;
-//     const state = role;
-//     console.log('Authorize State:', state);
-//     return { state };
-//   }
-// }
+@Injectable()
+export class NaverAuthGuard extends AuthGuard('naver') {
+  getAuthenticateOptions(context: ExecutionContext): IAuthModuleOptions {
+    const request = context.switchToHttp().getRequest();
+    const role = request.query.role;
+    return {
+      state: role,
+    };
+  }
+}
