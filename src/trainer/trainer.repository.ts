@@ -64,7 +64,7 @@ export class TrainerRepository implements ITrainerRepository {
     skip = 0,
     take = 10,
   ): Promise<TrainerWithFavorites[]> {
-    const profileOrderByFields = ['reviewCount', 'rating', 'lessonCount'];
+    const profileOrderByFields = ['reviewCount', 'rating', 'lessonCount', 'experience'];
     const orderByClause = profileOrderByFields.includes(Object.keys(orderBy)[0])
       ? { profile: orderBy }
       : orderBy;
