@@ -15,6 +15,13 @@ export interface Payload {
   role: Role;
 }
 
+export interface SocialAccountInfo {
+  provider: string;
+  providerId: string;
+  email: string;
+  nickname: string;
+}
+
 export interface NaverProfile extends Profile {
   state: string;
 }

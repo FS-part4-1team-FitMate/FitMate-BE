@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { Request } from 'express';
 import { Strategy } from 'passport-kakao';
 import type { ExtendKakaoProfile } from '#auth/type/auth.type.js';
 
@@ -14,7 +15,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     });
   }
 
-  async validate(req: any, accessToken: string, profile: ExtendKakaoProfile, done: Function) {
+  async validate(req: Request, accessToken: string, profile: ExtendKakaoProfile, done: Function) {
     // eslint-disable-next-line camelcase
     const { id, kakao_account } = profile._json;
     const provider = 'kakao';
