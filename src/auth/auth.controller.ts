@@ -1,9 +1,10 @@
-import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query } from '@nestjs/common';
+import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
+// import { NaverAuthGuard } from '#auth/guard/naver.guard.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
 import mapToRole from '#utils/map-to-role.js';
 
@@ -59,10 +60,24 @@ export class AuthController {
   async googleRedirect(@Query('code') code: string, @Query('state') role: string) {
     const validateRole = mapToRole(role);
     const user = await this.authService.handleGoogleRedirect(code, validateRole);
-    const hasProfile = await this.authService.hasProfile(user.id);
     const AccessToken = this.authService.createToken(user.id, user.role, 'access');
     const RefreshToken = this.authService.createToken(user.id, user.role, 'refresh');
     const userInfo = await this.authService.updateUser(user.id, RefreshToken);
+    const hasProfile = await this.authService.hasProfile(user.id);
+    return { AccessToken, RefreshToken, user: userInfo, hasProfile };
+  }
+
+  @Get('naver')
+  @UseGuards(AuthGuard('naver'))
+  async naverLogin() {}
+
+  @Get('naver/redirect')
+  @UseGuards(AuthGuard('naver'))
+  async naverCallback(@ReqUser() user: any, @Req() req: any) {
+    const AccessToken = this.authService.createToken(user.id, user.role, 'access');
+    const RefreshToken = this.authService.createToken(user.id, user.role, 'refresh');
+    const userInfo = await this.authService.updateUser(user.id, RefreshToken);
+    const hasProfile = await this.authService.hasProfile(user.id);
     return { AccessToken, RefreshToken, user: userInfo, hasProfile };
   }
 }

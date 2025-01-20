@@ -6,11 +6,10 @@ import { Strategy } from 'passport-local';
 import ExceptionMessages from '#exception/exception-message.js';
 import { AuthService } from '#auth/auth.service.js';
 import { LoginDTO } from '#auth/dto/auth.dto.js';
-import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
-  constructor(private authService: AuthService) {
+  constructor(private readonly authService: AuthService) {
     super({ usernameField: 'email', passwordField: 'password' });
   }
 

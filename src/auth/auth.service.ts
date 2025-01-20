@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -8,12 +8,13 @@ import { firstValueFrom } from 'rxjs';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
-import type { CreateUser, FilterUser } from '#auth/type/auth.type';
+import type { CreateUser, FilterUser, ValidateNaverUser } from '#auth/type/auth.type';
 import { UserRepository } from '#user/user.repository.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 import { hashingPassword, verifyPassword } from '#utils/hashing-password.js';
+import mapToRole from '#utils/map-to-role.js';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -109,8 +110,9 @@ export class AuthService implements IAuthService {
       }),
     );
     const { id: providerId, email, name } = userInfoResponse.data;
+    const provider = 'google';
 
-    const existingAccount = await this.userRepository.findSocialAccount('google', providerId);
+    const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
     if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
 
     const user = await this.userRepository.createUser({
@@ -120,7 +122,23 @@ export class AuthService implements IAuthService {
       role,
     });
 
-    await this.userRepository.createSocialAccount(user.id, 'google', providerId);
+    await this.userRepository.createSocialAccount(user.id, provider, providerId);
+
+    return user;
+  }
+
+  async handleNaverRedirect({ provider, providerId, email, nickname }: ValidateNaverUser) {
+    const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
+    if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
+
+    const user = await this.userRepository.createUser({
+      email,
+      nickname,
+      password: '',
+      role: 'USER',
+    });
+
+    await this.userRepository.createSocialAccount(user.id, provider, providerId);
 
     return user;
   }
