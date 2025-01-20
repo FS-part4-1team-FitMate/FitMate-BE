@@ -27,10 +27,9 @@ export class TrainerService implements ITrainerService {
 
     const favorites = await this.trainerRepository.findFavoriteByUserId(userId);
 
-    // 기본 값 처리가 이미 되어 있으므로 단순히 `isFavorite`만 추가
     return favorites.map((trainer) => ({
       ...trainer,
-      isFavorite: true, // 서비스 계층에서 추가적인 가공
+      isFavorite: true,
     }));
   }
 
@@ -85,23 +84,18 @@ export class TrainerService implements ITrainerService {
       this.trainerRepository.count(where),
     ]);
 
-    const trainersWithDetails = trainers.map((trainer) => ({
-      id: trainer.id,
-      nickname: trainer.nickname,
-      email: trainer.email,
-      profile: {
-        profileImage: trainer.profile?.profileImage || null,
-        intro: trainer.profile?.intro || '',
-        lessonType: trainer.profile?.lessonType || [],
-        experience: trainer.profile?.experience ?? 0,
-        rating: trainer.profile?.rating ?? 0,
-        reviewCount: trainer.profile?.reviewCount ?? 0,
-        lessonCount: trainer.profile?.lessonCount ?? 0,
-      },
-      isFavorite: userId ? (trainer.favoritedByUsers ?? []).length > 0 : false,
+    let favoriteTrainerIds: string[] = [];
+
+    if (userId) {
+      favoriteTrainerIds = await this.trainerRepository.findFavoriteTrainerIds(userId);
+    }
+
+    const trainersWithFavoriteStatus = trainers.map((trainer) => ({
+      ...trainer,
+      isFavorite: favoriteTrainerIds.includes(trainer.id),
     }));
 
-    return { trainers: trainersWithDetails, totalCount, hasMore: totalCount > page * limit };
+    return { trainers: trainersWithFavoriteStatus, totalCount, hasMore: totalCount > page * limit };
   }
 
   // 찜 등록

@@ -15,7 +15,7 @@ export type FavoriteTrainerResponse = {
 };
 
 export type TrainerProfile = {
-  profileImage?: string | null;
+  profileImage?: string;
   intro?: string;
   lessonType: string[];
   experience?: number;
@@ -23,12 +23,14 @@ export type TrainerProfile = {
   reviewCount?: number;
   lessonCount?: number;
 };
+
 export type TrainerWithFavorites = {
   id: string;
   nickname: string;
   email: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  profile: TrainerProfile | null;
+  createdAt: Date;
+  updatedAt: Date;
+  profile?: TrainerProfile;
   favoritedByUsers?: { userId: string }[];
+  favoriteCount?: number;
 };

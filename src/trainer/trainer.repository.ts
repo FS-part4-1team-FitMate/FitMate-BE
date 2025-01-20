@@ -36,27 +36,25 @@ export class TrainerRepository implements ITrainerRepository {
             lessonCount: true,
           },
         },
-        favoritedByUsers: false,
+        _count: {
+          select: {
+            favoritedByUsers: true,
+          },
+        },
+      },
+    });
+    return trainers as TrainerWithFavorites[];
+  }
+
+  async findFavoriteTrainerIds(userId: string): Promise<string[]> {
+    const favorites = await this.prisma.favoriteTrainer.findMany({
+      where: { userId },
+      select: {
+        trainerId: true,
       },
     });
 
-    // 기본 값 추가
-    return trainers.map<TrainerWithFavorites>((trainer) => ({
-      id: trainer.id,
-      nickname: trainer.nickname,
-      email: trainer.email,
-      createdAt: trainer.createdAt,
-      updatedAt: trainer.updatedAt,
-      profile: {
-        profileImage: trainer.profile?.profileImage || null,
-        intro: trainer.profile?.intro || '',
-        lessonType: trainer.profile?.lessonType || [],
-        experience: trainer.profile?.experience || 0,
-        rating: trainer.profile?.rating || 0,
-        reviewCount: trainer.profile?.reviewCount || 0,
-        lessonCount: trainer.profile?.lessonCount || 0,
-      },
-    }));
+    return favorites.map((fav) => fav.trainerId);
   }
 
   async findAll(
@@ -73,7 +71,12 @@ export class TrainerRepository implements ITrainerRepository {
 
     const trainers = await this.user.findMany({
       where: { role: 'TRAINER', ...where },
-      include: {
+      select: {
+        id: true,
+        nickname: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
         profile: {
           select: {
             profileImage: true,
@@ -85,32 +88,17 @@ export class TrainerRepository implements ITrainerRepository {
             lessonCount: true,
           },
         },
-        favoritedByUsers: userId ? { where: { userId } } : false,
+        _count: {
+          select: {
+            favoritedByUsers: true,
+          },
+        },
       },
       orderBy: orderByClause,
       skip,
       take,
     });
-
-    return trainers.map((trainer) => ({
-      id: trainer.id,
-      nickname: trainer.nickname,
-      email: trainer.email,
-      createdAt: trainer.createdAt,
-      updatedAt: trainer.updatedAt,
-      profile: trainer.profile
-        ? {
-            profileImage: trainer.profile.profileImage ?? null,
-            intro: trainer.profile.intro ?? '',
-            lessonType: trainer.profile.lessonType ?? [],
-            experience: trainer.profile.experience ?? 0,
-            rating: trainer.profile.rating ?? 0,
-            reviewCount: trainer.profile.reviewCount ?? 0,
-            lessonCount: trainer.profile.lessonCount ?? 0,
-          }
-        : null,
-      favoritedByUsers: trainer.favoritedByUsers ?? [],
-    }));
+    return trainers as TrainerWithFavorites[];
   }
 
   // 트레이너 수 조회
