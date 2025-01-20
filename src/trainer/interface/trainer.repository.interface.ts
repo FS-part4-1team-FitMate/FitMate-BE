@@ -9,7 +9,7 @@ export interface ITrainerRepository {
   findAll(
     userId: string | null,
     where: Record<string, any>,
-    orderBy: Record<string, string>,
+    orderBy: Record<string, 'asc' | 'desc'>,
     skip: number,
     take: number,
   ): Promise<TrainerWithFavorites[]>;

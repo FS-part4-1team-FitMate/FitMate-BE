@@ -15,20 +15,20 @@ export type FavoriteTrainerResponse = {
 };
 
 export type TrainerProfile = {
-  profileImage: string | null;
-  intro: string | null;
+  profileImage?: string | null;
+  intro?: string;
   lessonType: string[];
-  experience: number | null;
-  rating: number | null;
-  reviewCount: number | null;
-  lessonCount: number | null;
+  experience?: number;
+  rating?: number;
+  reviewCount?: number;
+  lessonCount?: number;
 };
 export type TrainerWithFavorites = {
   id: string;
   nickname: string;
   email: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
   profile: TrainerProfile | null;
   favoritedByUsers?: { userId: string }[];
 };

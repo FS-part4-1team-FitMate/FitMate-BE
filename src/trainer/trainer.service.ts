@@ -3,6 +3,7 @@ import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import TrainerExceptionMessage from '#exception/trainer-exception-message.js';
 import { QueryTrainerDto } from '#trainer/dto/trainer.dto.js';
+import { ITrainerService } from '#trainer/interface/trainer.service.interface.js';
 import { TrainerRepository } from '#trainer/trainer.repository.js';
 import type {
   CreateFavoriteTrainer,
@@ -12,7 +13,7 @@ import type {
 } from '#trainer/type/trainer.type.js';
 
 @Injectable()
-export class TrainerService {
+export class TrainerService implements ITrainerService {
   constructor(
     private readonly trainerRepository: TrainerRepository,
     private readonly alsStore: AlsStore,
@@ -36,7 +37,7 @@ export class TrainerService {
   // 강사 리스트 조회
   async getTrainers(
     query: QueryTrainerDto,
-  ): Promise<{ trainers: any[]; totalCount: number; hasMore: boolean }> {
+  ): Promise<{ trainers: TrainerWithFavorites[]; totalCount: number; hasMore: boolean }> {
     const store = this.alsStore.getStore();
     const userId = store?.userId || null;
 
@@ -50,7 +51,7 @@ export class TrainerService {
       gender,
     } = query.toCamelCase();
 
-    const orderMapping: Record<string, string> = {
+    const orderMapping: Record<string, 'reviewCount' | 'rating' | 'experience' | 'lessonCount'> = {
       review_count: 'reviewCount',
       rating: 'rating',
       experience: 'experience',
@@ -59,6 +60,15 @@ export class TrainerService {
 
     const orderByField = orderMapping[order] || 'reviewCount';
 
+    const validSortValues: ('asc' | 'desc')[] = ['asc', 'desc'];
+    const sortValue: 'asc' | 'desc' = validSortValues.includes(sort as 'asc' | 'desc')
+      ? (sort as 'asc' | 'desc')
+      : 'desc';
+
+    const orderBy: Record<string, 'asc' | 'desc'> = {
+      [orderByField]: sortValue,
+    };
+
     const where = {
       ...(keyword && { nickname: { contains: keyword, mode: 'insensitive' } }),
       profile: {
@@ -66,9 +76,6 @@ export class TrainerService {
         ...(gender && { gender }),
       },
     };
-
-    const orderBy: Record<string, string> = {};
-    orderBy[orderByField] = sort;
 
     const skip = (page - 1) * limit;
     const take = limit;
@@ -86,10 +93,10 @@ export class TrainerService {
         profileImage: trainer.profile?.profileImage || null,
         intro: trainer.profile?.intro || '',
         lessonType: trainer.profile?.lessonType || [],
-        experience: trainer.profile?.experience || 0,
-        rating: trainer.profile?.rating || 0,
-        reviewCount: trainer.profile?.reviewCount || 0,
-        lessonCount: trainer.profile?.lessonCount || 0,
+        experience: trainer.profile?.experience ?? 0,
+        rating: trainer.profile?.rating ?? 0,
+        reviewCount: trainer.profile?.reviewCount ?? 0,
+        lessonCount: trainer.profile?.lessonCount ?? 0,
       },
       isFavorite: userId ? (trainer.favoritedByUsers ?? []).length > 0 : false,
     }));

@@ -61,8 +61,8 @@ export class TrainerRepository implements ITrainerRepository {
 
   async findAll(
     userId: string | null,
-    where: Record<string, any> = {},
-    orderBy: Record<string, any> = { createdAt: 'desc' },
+    where: Record<string, unknown> = {},
+    orderBy: Record<string, 'asc' | 'desc'> = { createdAt: 'desc' },
     skip = 0,
     take = 10,
   ): Promise<TrainerWithFavorites[]> {
@@ -71,16 +71,46 @@ export class TrainerRepository implements ITrainerRepository {
       ? { profile: orderBy }
       : orderBy;
 
-    return this.user.findMany({
+    const trainers = await this.user.findMany({
       where: { role: 'TRAINER', ...where },
       include: {
-        profile: true,
+        profile: {
+          select: {
+            profileImage: true,
+            intro: true,
+            lessonType: true,
+            experience: true,
+            rating: true,
+            reviewCount: true,
+            lessonCount: true,
+          },
+        },
         favoritedByUsers: userId ? { where: { userId } } : false,
       },
       orderBy: orderByClause,
       skip,
       take,
     });
+
+    return trainers.map((trainer) => ({
+      id: trainer.id,
+      nickname: trainer.nickname,
+      email: trainer.email,
+      createdAt: trainer.createdAt,
+      updatedAt: trainer.updatedAt,
+      profile: trainer.profile
+        ? {
+            profileImage: trainer.profile.profileImage ?? null,
+            intro: trainer.profile.intro ?? '',
+            lessonType: trainer.profile.lessonType ?? [],
+            experience: trainer.profile.experience ?? 0,
+            rating: trainer.profile.rating ?? 0,
+            reviewCount: trainer.profile.reviewCount ?? 0,
+            lessonCount: trainer.profile.lessonCount ?? 0,
+          }
+        : null,
+      favoritedByUsers: trainer.favoritedByUsers ?? [],
+    }));
   }
 
   // 트레이너 수 조회
