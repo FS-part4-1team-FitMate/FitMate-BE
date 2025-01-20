@@ -225,7 +225,7 @@ export const PROFILES = [
     description: '',
     certification: '',
     certificationValidated: false,
-  },  
+  },
   // Trainer profiles
   {
     id: 'pro07386-d1a7-4430-a37d-9d1c5bdafd4d',

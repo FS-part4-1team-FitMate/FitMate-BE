@@ -8,6 +8,7 @@ const prisma = new PrismaClient();
 async function main() {
   // 1. 기존 데이터 삭제
   console.log('기존 데이터 삭제 중...');
+  await prisma.favoriteTrainer.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.review.deleteMany();
   await prisma.lessonQuote.deleteMany();
