@@ -1,4 +1,9 @@
-import type { CreateUser, FilterUser, ValidateSocialAccount } from '#auth/type/auth.type.js';
+import type {
+  CreateUser,
+  FilterUser,
+  ValidateSocialAccount,
+  SocialAccountInfo,
+} from '#auth/type/auth.type.js';
 
 export interface IAuthService {
   createUser(data: CreateUser): Promise<FilterUser>;
@@ -7,12 +12,17 @@ export interface IAuthService {
   createToken(userId: string, role: string, type: string): string;
   refreshToken(userId: string, role: string, refreshToken: string): Promise<string>;
   getGoogleRedirectUrl(role: string): string;
-  handleGoogleRedirect(code: string, role: string): Promise<FilterUser>;
-  handleSocialAccount({
+  handleGoogleSignUp(code: string, role: string): Promise<FilterUser>;
+  handleGoogleLogin(code: string): Promise<FilterUser>;
+  registerSocialAccount({
     provider,
     providerId,
     email,
     nickname,
     role,
   }: ValidateSocialAccount): Promise<FilterUser>;
+  loginSocialAccount({
+    provider,
+    providerId,
+  }: Omit<ValidateSocialAccount, 'email' | 'nickname' | 'role'>): Promise<FilterUser>;
 }

@@ -1,4 +1,5 @@
 import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query, Req } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
 import { AuthService } from '#auth/auth.service.js';
@@ -12,15 +13,25 @@ import mapToRole from '#utils/map-to-role.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   private async generateAuthResponse(userId: string, role: string) {
     const accessToken = this.authService.createToken(userId, role, 'access');
     const refreshToken = this.authService.createToken(userId, role, 'refresh');
     const userInfo = await this.authService.updateUser(userId, refreshToken);
     const hasProfile = await this.authService.hasProfile(userId);
+    const baseUrl = this.configService.get<string>('FRONTEND_BASE_URL') || 'http://localhost:3001';
+    const redirectUrl = `${baseUrl}/sns-login?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}&user=${encodeURIComponent(JSON.stringify(userInfo))}&hasProfile=${hasProfile}`;
 
-    return { accessToken, refreshToken, user: userInfo, hasProfile };
+    return { accessToken, refreshToken, user: userInfo, hasProfile, redirectUrl };
+  }
+
+  private async handleRedirectUrl(userId: string, role: string): Promise<{ redirectUrl: string }> {
+    const authResponse = await this.generateAuthResponse(userId, role);
+    return { redirectUrl: authResponse.redirectUrl };
   }
 
   @Post('signup')
@@ -28,14 +39,18 @@ export class AuthController {
     const validateRole = mapToRole(role);
 
     const user = await this.authService.createUser({ ...body, role: validateRole });
-    return this.generateAuthResponse(user.id, validateRole);
+    const authResponse = await this.generateAuthResponse(user.id, validateRole);
+    const { redirectUrl, ...rest } = authResponse;
+    return rest;
   }
 
   @Post('login')
   @UseGuards(AuthGuard('local'))
   async loginUser(@ReqUser() user: { userId: string; role: string }) {
     const { userId, role } = user;
-    return this.generateAuthResponse(userId, role);
+    const authResponse = await this.generateAuthResponse(userId, role);
+    const { redirectUrl, ...rest } = authResponse;
+    return rest;
   }
 
   @Post('token/refresh')
@@ -52,17 +67,19 @@ export class AuthController {
 
   @Get('google')
   @Redirect()
-  getGoogleUrl(@Query('role') role: string) {
+  getGoogleUrl(@Query('role') role?: string) {
     console.log('Received role:', role);
-    const googleUrl = this.authService.getGoogleRedirectUrl(role);
+    const googleUrl = this.authService.getGoogleRedirectUrl(role || '');
     return { url: googleUrl };
   }
 
   @Get('google/redirect')
-  async googleRedirect(@Query('code') code: string, @Query('state') role: string) {
-    const validateRole = mapToRole(role);
-    const user = await this.authService.handleGoogleRedirect(code, validateRole);
-    return this.generateAuthResponse(user.id, validateRole);
+  async googleRedirect(@Query('code') code: string, @Query('state') role?: string) {
+    const isSignUp = typeof role === 'string' && role.trim() !== '' && role !== 'undefined';
+    const user = isSignUp
+      ? await this.authService.handleGoogleSignUp(code, role!)
+      : await this.authService.handleGoogleLogin(code);
+    return this.handleRedirectUrl(user.id, user.role);
   }
 
   @Get('naver')
@@ -71,16 +88,24 @@ export class AuthController {
 
   @Get('naver/redirect')
   @UseGuards(NaverAuthGuard)
-  async naverCallback(@ReqUser() socialAccountInfo: SocialAccountInfo, @Query('state') state: string) {
+  async naverCallback(@ReqUser() socialAccountInfo: SocialAccountInfo, @Query('state') state?: string) {
     const { provider, providerId, email, nickname } = socialAccountInfo;
-    const naverUser = await this.authService.handleSocialAccount({
-      provider,
-      providerId,
-      email,
-      nickname,
-      role: state,
-    });
-    return this.generateAuthResponse(naverUser.id, state);
+    const isSignUp = typeof state === 'string' && state.trim() !== '' && state !== 'null';
+
+    const naverUser = isSignUp
+      ? await this.authService.registerSocialAccount({
+          provider,
+          providerId,
+          email,
+          nickname,
+          role: state,
+        })
+      : await this.authService.loginSocialAccount({
+          provider,
+          providerId,
+        });
+
+    return this.handleRedirectUrl(naverUser.id, naverUser.role);
   }
 
   @Get('kakao')
@@ -89,15 +114,23 @@ export class AuthController {
 
   @Get('kakao/redirect')
   @UseGuards(KakaoAuthGuard)
-  async kakaoCallback(@ReqUser() socialAccountInfo: SocialAccountInfo, @Query('state') state: string) {
+  async kakaoCallback(@ReqUser() socialAccountInfo: SocialAccountInfo, @Query('state') state?: string) {
     const { provider, providerId, email, nickname } = socialAccountInfo;
-    const kakaoUser = await this.authService.handleSocialAccount({
-      provider,
-      providerId,
-      email,
-      nickname,
-      role: state,
-    });
-    return this.generateAuthResponse(kakaoUser.id, state);
+    const isSignUp = typeof state === 'string' && state.trim() !== '';
+
+    const kakaoUser = isSignUp
+      ? await this.authService.registerSocialAccount({
+          provider,
+          providerId,
+          email,
+          nickname,
+          role: state,
+        })
+      : await this.authService.loginSocialAccount({
+          provider,
+          providerId,
+        });
+
+    return this.handleRedirectUrl(kakaoUser.id, kakaoUser.role);
   }
 }
