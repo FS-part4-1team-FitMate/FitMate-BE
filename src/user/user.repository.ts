@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { User } from '@prisma/client';
+import type { User, SocialAccount } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { IUserRepository } from '#user/interface/user.repository.interface.js';
 import { CreateUser } from '#user/type/user.type.js';
@@ -39,14 +39,14 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async findSocialAccount(provider: string, providerId: string) {
+  async findSocialAccount(provider: string, providerId: string): Promise<SocialAccount | null> {
     return this.socialAccount.findUnique({
       where: { provider_providerId: { provider, providerId } },
       include: { user: true },
     });
   }
 
-  async createSocialAccount(userId: string, provider: string, providerId: string) {
+  async createSocialAccount(userId: string, provider: string, providerId: string): Promise<SocialAccount> {
     return this.prisma.socialAccount.create({
       data: {
         provider,

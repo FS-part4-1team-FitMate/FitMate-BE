@@ -92,7 +92,7 @@ export class AuthController {
   @UseGuards(NaverAuthGuard)
   async naverCallback(@ReqUser() socialAccountInfo: SocialAccountInfo, @Query('state') state?: string) {
     const { provider, providerId, email, nickname } = socialAccountInfo;
-    const isSignUp = state && state! == null;
+    const isSignUp = typeof state === 'string' && state.trim() !== '' && state !== 'null';
 
     const naverUser = isSignUp
       ? await this.authService.registerSocialAccount({

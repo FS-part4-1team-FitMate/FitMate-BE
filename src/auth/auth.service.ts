@@ -120,12 +120,16 @@ export class AuthService implements IAuthService {
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
     if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
 
-    const user = await this.userRepository.createUser({
-      email,
-      nickname,
-      password: '',
-      role: mapToRole(role),
-    });
+    let user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      user = await this.userRepository.createUser({
+        email,
+        nickname,
+        password: '',
+        role: mapToRole(role),
+      });
+    }
 
     await this.userRepository.createSocialAccount(user.id, provider, providerId);
 
@@ -154,12 +158,16 @@ export class AuthService implements IAuthService {
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
     if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
 
-    const user = await this.userRepository.createUser({
-      email,
-      nickname,
-      password: '',
-      role: mapToRole(role),
-    });
+    let user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      user = await this.userRepository.createUser({
+        email,
+        nickname,
+        password: '',
+        role: mapToRole(role),
+      });
+    }
 
     await this.userRepository.createSocialAccount(user.id, provider, providerId);
 
