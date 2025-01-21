@@ -7,7 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
-import type { CreateUser, FilterUser, ValidateSocialAccount } from '#auth/type/auth.type';
+import type { CreateUser, FilterUser, ValidateSocialAccount, SocialAccountInfo } from '#auth/type/auth.type';
 import { UserRepository } from '#user/user.repository.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
@@ -76,7 +76,7 @@ export class AuthService implements IAuthService {
     return !!profile;
   }
 
-  getGoogleRedirectUrl(role: string): string {
+  getGoogleRedirectUrl(role?: string): string {
     const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
     const redirectUri = this.configService.get<string>('GOOGLE_REDIRECT_URI');
     const scope = encodeURIComponent(
@@ -88,7 +88,7 @@ export class AuthService implements IAuthService {
     return url;
   }
 
-  async handleGoogleRedirect(code: string, role: string): Promise<FilterUser> {
+  private async fetchGoogleUserInfo(code: string): Promise<SocialAccountInfo> {
     const tokenUrl = 'https://oauth2.googleapis.com/token';
     const userInfoUrl = 'https://www.googleapis.com/oauth2/v2/userinfo';
 
@@ -108,39 +108,17 @@ export class AuthService implements IAuthService {
         headers: { Authorization: `Bearer ${accessToken}` },
       }),
     );
-    const { id: providerId, email, name } = userInfoResponse.data;
+
+    const { id: providerId, email, name: nickname } = userInfoResponse.data;
     const provider = 'google';
-
-    const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
-    if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
-
-    const userEmail = await this.userRepository.findByEmail(email);
-    if (userEmail) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
-
-    const user = await this.userRepository.createUser({
-      email,
-      nickname: name,
-      password: '',
-      role: mapToRole(role),
-    });
-
-    await this.userRepository.createSocialAccount(user.id, provider, providerId);
-
-    return filterSensitiveUserData(user);
+    return { provider, providerId, email, nickname };
   }
 
-  async handleSocialAccount({
-    provider,
-    providerId,
-    email,
-    nickname,
-    role,
-  }: ValidateSocialAccount): Promise<FilterUser> {
+  async handleGoogleSignUp(code: string, role: string): Promise<FilterUser> {
+    const { provider, providerId, email, nickname } = await this.fetchGoogleUserInfo(code);
+
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
     if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
-
-    const userEmail = await this.userRepository.findByEmail(email);
-    if (userEmail) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
 
     const user = await this.userRepository.createUser({
       email,
@@ -150,6 +128,53 @@ export class AuthService implements IAuthService {
     });
 
     await this.userRepository.createSocialAccount(user.id, provider, providerId);
+
+    return filterSensitiveUserData(user);
+  }
+
+  async handleGoogleLogin(code: string): Promise<FilterUser> {
+    const { provider, providerId } = await this.fetchGoogleUserInfo(code);
+
+    const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
+    if (!existingAccount) throw new ConflictException(AuthExceptionMessage.USER_NOT_FOUND);
+
+    const user = await this.userRepository.findUserById(existingAccount.userId);
+    if (!user) throw new ConflictException(AuthExceptionMessage.USER_NOT_FOUND);
+
+    return filterSensitiveUserData(user);
+  }
+
+  async registerSocialAccount({
+    provider,
+    providerId,
+    email,
+    nickname,
+    role,
+  }: ValidateSocialAccount): Promise<FilterUser> {
+    const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
+    if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
+
+    const user = await this.userRepository.createUser({
+      email,
+      nickname,
+      password: '',
+      role: mapToRole(role),
+    });
+
+    await this.userRepository.createSocialAccount(user.id, provider, providerId);
+
+    return filterSensitiveUserData(user);
+  }
+
+  async loginSocialAccount({
+    provider,
+    providerId,
+  }: Omit<ValidateSocialAccount, 'email' | 'nickname' | 'role'>): Promise<FilterUser> {
+    const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
+    if (!existingAccount) throw new ConflictException(AuthExceptionMessage.USER_NOT_FOUND);
+
+    const user = await this.userRepository.findUserById(existingAccount.userId);
+    if (!user) throw new ConflictException(AuthExceptionMessage.USER_NOT_FOUND);
 
     return filterSensitiveUserData(user);
   }
