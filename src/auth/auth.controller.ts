@@ -23,15 +23,15 @@ export class AuthController {
     const refreshToken = this.authService.createToken(userId, role, 'refresh');
     const userInfo = await this.authService.updateUser(userId, refreshToken);
     const hasProfile = await this.authService.hasProfile(userId);
-    const baseUrl = this.configService.get<string>('FRONTEND_BASE_URL') || 'http://localhost:3001';
+    const baseUrl = this.configService.get<string>('FRONTEND_BASE_URL') || 'http://localhost:3000';
     const redirectUrl = `${baseUrl}/sns-login?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}&user=${encodeURIComponent(JSON.stringify(userInfo))}&hasProfile=${hasProfile}`;
 
     return { accessToken, refreshToken, user: userInfo, hasProfile, redirectUrl };
   }
 
-  private async handleRedirectUrl(userId: string, role: string): Promise<{ redirectUrl: string }> {
-    const authResponse = await this.generateAuthResponse(userId, role);
-    return { redirectUrl: authResponse.redirectUrl };
+  private async handleRedirectUrl(userId: string, role: string): Promise<string> {
+    const { redirectUrl } = await this.generateAuthResponse(userId, role);
+    return redirectUrl;
   }
 
   @Post('signup')
@@ -74,12 +74,17 @@ export class AuthController {
   }
 
   @Get('google/redirect')
-  async googleRedirect(@Query('code') code: string, @Query('state') role?: string) {
+  async googleRedirect(
+    @Res() res: express.Response,
+    @Query('code') code: string,
+    @Query('state') role?: string,
+  ) {
     const isSignUp = typeof role === 'string' && role.trim() !== '' && role !== 'undefined';
     const user = isSignUp
       ? await this.authService.handleGoogleSignUp(code, role!)
       : await this.authService.handleGoogleLogin(code);
-    return this.handleRedirectUrl(user.id, user.role);
+    const redirectUrl = await this.handleRedirectUrl(user.id, user.role);
+    res.redirect(redirectUrl);
   }
 
   @Get('naver')
@@ -88,7 +93,11 @@ export class AuthController {
 
   @Get('naver/redirect')
   @UseGuards(NaverAuthGuard)
-  async naverCallback(@ReqUser() socialAccountInfo: SocialAccountInfo, @Query('state') state?: string) {
+  async naverCallback(
+    @ReqUser() socialAccountInfo: SocialAccountInfo,
+    @Res() res: express.Response,
+    @Query('state') state?: string,
+  ) {
     const { provider, providerId, email, nickname } = socialAccountInfo;
     const isSignUp = typeof state === 'string' && state.trim() !== '' && state !== 'null';
 
@@ -105,7 +114,8 @@ export class AuthController {
           providerId,
         });
 
-    return this.handleRedirectUrl(naverUser.id, naverUser.role);
+    const redirectUrl = await this.handleRedirectUrl(naverUser.id, naverUser.role);
+    res.redirect(redirectUrl);
   }
 
   @Get('kakao')
@@ -114,7 +124,11 @@ export class AuthController {
 
   @Get('kakao/redirect')
   @UseGuards(KakaoAuthGuard)
-  async kakaoCallback(@ReqUser() socialAccountInfo: SocialAccountInfo, @Query('state') state?: string) {
+  async kakaoCallback(
+    @ReqUser() socialAccountInfo: SocialAccountInfo,
+    @Res() res: express.Response,
+    @Query('state') state?: string,
+  ) {
     const { provider, providerId, email, nickname } = socialAccountInfo;
     const isSignUp = typeof state === 'string' && state.trim() !== '';
 
@@ -131,6 +145,7 @@ export class AuthController {
           providerId,
         });
 
-    return this.handleRedirectUrl(kakaoUser.id, kakaoUser.role);
+    const redirectUrl = await this.handleRedirectUrl(kakaoUser.id, kakaoUser.role);
+    res.redirect(redirectUrl);
   }
 }
