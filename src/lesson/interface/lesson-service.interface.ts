@@ -9,7 +9,19 @@ export interface ILessonService {
   getLessons(
     query: QueryLessonDto,
     userId?: string,
-  ): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }>;
+  ): Promise<{
+    list: LessonResponse[];
+    totalCount: number;
+    hasMore: boolean;
+    lessonTypeCounts: Record<string, number>;
+    genderCounts: Record<string, number>;
+    directQuoteRequestCount : number;
+  }>;
+  getMyLessons(query: QueryLessonDto): Promise<{
+    list: LessonResponse[];
+    totalCount: number;
+    hasMore: boolean;
+  }>;
   createDirectQuoteRequest(lessonId: string, data: CreateDirectQuoteDto): Promise<DirectQuoteRequest>;
   updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse>;
   updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse>;

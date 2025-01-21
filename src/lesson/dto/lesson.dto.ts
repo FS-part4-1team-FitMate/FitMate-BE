@@ -115,14 +115,18 @@ export class QueryLessonDto {
   gender?: Gender;
 
   @IsOptional()
-  @IsBoolean()
-  @Transform(({ value }) => value === 'false')
-  direct_quote_request?: boolean;
-
-  @IsOptional()
   @Transform(({ value }) => (value ? value.split(',') : []))
   @IsEnum(Region, { each: true, message: '유효하지 않은 지역입니다.' })
   region?: Region[];
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean({ message: 'has_direct_quote는 true 또는 false 값이어야 합니다.' })
+  has_direct_quote?: boolean;
 
   // CamelCase 변환 메서드
   toCamelCase() {
@@ -137,7 +141,7 @@ export class QueryLessonDto {
       locationType: this.location_type,
       status: this.status,
       gender: this.gender,
-      directQuoteRequest: this.direct_quote_request,
+      hasDirectQuote: this.has_direct_quote,
       region: this.region,
     };
   }
