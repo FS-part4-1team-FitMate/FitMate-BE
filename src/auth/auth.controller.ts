@@ -23,21 +23,15 @@ export class AuthController {
     const refreshToken = this.authService.createToken(userId, role, 'refresh');
     const userInfo = await this.authService.updateUser(userId, refreshToken);
     const hasProfile = await this.authService.hasProfile(userId);
-    const redirectUrl = this.getRedirectUrl(role, userId, hasProfile);
+    const baseUrl = this.configService.get<string>('FRONTEND_BASE_URL') || 'http://localhost:3001';
+    const redirectUrl = `${baseUrl}/sns-login?accessToken=${encodeURIComponent(accessToken)}&refreshToken=${encodeURIComponent(refreshToken)}&user=${encodeURIComponent(JSON.stringify(userInfo))}&hasProfile=${hasProfile}`;
 
     return { accessToken, refreshToken, user: userInfo, hasProfile, redirectUrl };
   }
 
-  private getRedirectUrl(role: string, userId: string, hasProfile: boolean): string {
-    const baseUrl = this.configService.get<string>('FRONTEND_BASE_URL') || 'http://localhost:3001';
-    if (role === 'USER') {
-      return hasProfile ? `${baseUrl}/user/my-lesson/active-lesson` : `${baseUrl}/user/profile/regist`;
-    } else if (role === 'TRAINER') {
-      return hasProfile
-        ? `${baseUrl}/trainer/managing-request/sent-request`
-        : `${baseUrl}/trainer/${userId}/profile/regist`;
-    }
-    return '/';
+  private async handleRedirectUrl(userId: string, role: string): Promise<{ redirectUrl: string }> {
+    const authResponse = await this.generateAuthResponse(userId, role);
+    return { redirectUrl: authResponse.redirectUrl };
   }
 
   @Post('signup')
@@ -45,14 +39,18 @@ export class AuthController {
     const validateRole = mapToRole(role);
 
     const user = await this.authService.createUser({ ...body, role: validateRole });
-    return this.generateAuthResponse(user.id, validateRole);
+    const authResponse = await this.generateAuthResponse(user.id, validateRole);
+    const { redirectUrl, ...rest } = authResponse;
+    return rest;
   }
 
   @Post('login')
   @UseGuards(AuthGuard('local'))
   async loginUser(@ReqUser() user: { userId: string; role: string }) {
     const { userId, role } = user;
-    return this.generateAuthResponse(userId, role);
+    const authResponse = await this.generateAuthResponse(userId, role);
+    const { redirectUrl, ...rest } = authResponse;
+    return rest;
   }
 
   @Post('token/refresh')
@@ -81,7 +79,7 @@ export class AuthController {
     const user = isSignUp
       ? await this.authService.handleGoogleSignUp(code, role!)
       : await this.authService.handleGoogleLogin(code);
-    return this.generateAuthResponse(user.id, user.role);
+    return this.handleRedirectUrl(user.id, user.role);
   }
 
   @Get('naver')
@@ -107,7 +105,7 @@ export class AuthController {
           providerId,
         });
 
-    return this.generateAuthResponse(naverUser.id, naverUser.role);
+    return this.handleRedirectUrl(naverUser.id, naverUser.role);
   }
 
   @Get('kakao')
@@ -133,6 +131,6 @@ export class AuthController {
           providerId,
         });
 
-    return this.generateAuthResponse(kakaoUser.id, kakaoUser.role);
+    return this.handleRedirectUrl(kakaoUser.id, kakaoUser.role);
   }
 }
