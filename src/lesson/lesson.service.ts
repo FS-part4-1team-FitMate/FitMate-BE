@@ -4,7 +4,7 @@ import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
-import { CreateDirectQuoteDto, QueryLessonDto } from './dto/lesson.dto.js';
+import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from './dto/lesson.dto.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
 import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
@@ -220,7 +220,7 @@ export class LessonService implements ILessonService {
     ]);
 
     // 전체 레슨 타입 목록 정의 (초기값)
-    const allLessonTypes = ['SPORTS', 'FITNESS', 'REHAB']; 
+    const allLessonTypes = ['SPORTS', 'FITNESS', 'REHAB'];
     const lessonTypeCounts = allLessonTypes.reduce<Record<string, number>>((acc, type) => {
       acc[type] = 0;
       return acc;
@@ -382,6 +382,42 @@ export class LessonService implements ILessonService {
     return await this.lessonRepository.createDirectQuoteRequest({
       lessonRequestId: lessonId,
       trainerId,
+    });
+  }
+
+  /*************************************************************************************
+   * 지정 견적 요청에 대한 반려
+   * ***********************************************************************************
+   */
+  async rejectDirectQuoteRequest(
+    lessonId: string,
+    directQuoteRequestId: string,
+    rejectDirectQuoteDto: RejectDirectQuoteDto,
+  ): Promise<DirectQuoteRequest> {
+    const { rejectionReason } = rejectDirectQuoteDto;
+    const trainerId = this.getUserId();
+
+    const directQuoteRequest = await this.lessonRepository.findDirectQuoteRequestById(directQuoteRequestId);
+
+    if (!directQuoteRequest) {
+      throw new NotFoundException('지정 견적 요청을 찾을 수 없습니다.');
+    }
+
+    if (directQuoteRequest.trainerId != trainerId) {
+      throw new UnauthorizedException('본인의 지정 견적 요청만 반려할 수 있습니다.');
+    }
+
+    if (directQuoteRequest.lessonRequestId != lessonId) {
+      throw new BadRequestException('잘못된 요청입니다.');
+    }
+
+    if (directQuoteRequest.status != 'PENDING') {
+      throw new BadRequestException('이미 처리된 요청입니다다');
+    }
+
+    return await this.lessonRepository.updateDirectQuoteRequest(directQuoteRequestId, {
+      status: 'REJECTED',
+      rejectionReason,
     });
   }
 

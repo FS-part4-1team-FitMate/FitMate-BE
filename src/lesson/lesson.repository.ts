@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DirectQuoteRequest, LessonRequest, LessonRequestStatus, Prisma } from '@prisma/client';
+import { DirectQuoteRequest, DirectQuoteRequestStatus, LessonRequest, LessonRequestStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { ILessonRepository } from './interface/lesson-repository.interface.js';
 import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
@@ -75,11 +75,25 @@ export class LessonRepository implements ILessonRepository {
     });
   }
 
+  // 지정 견적 요청 생성
   async createDirectQuoteRequest(data: {
     lessonRequestId: string;
     trainerId: string;
   }): Promise<DirectQuoteRequest> {
     return await this.directQuoteRequest.create({ data });
+  }
+
+  // 지정 견적 요청 반려를 위한 조회
+  async findDirectQuoteRequestById(id: string): Promise<DirectQuoteRequest | null> {
+    return await this.directQuoteRequest.findUnique({ where: { id } });
+  }
+
+  // 지정 견적 요청 반려
+  async updateDirectQuoteRequest(
+    id: string,
+    data: { status: DirectQuoteRequestStatus; rejectionReason?: string },
+  ): Promise<DirectQuoteRequest> {
+    return await this.directQuoteRequest.update({ where: { id }, data });
   }
 
   /**
@@ -106,7 +120,7 @@ export class LessonRepository implements ILessonRepository {
     }));
   }
 
-  // lesson.repository.ts (예시)
+  // 남/여 카운트 계산을 위한 조회회
   async findAllForGenderCount() {
     return this.prisma.lessonRequest.findMany({
       select: {
