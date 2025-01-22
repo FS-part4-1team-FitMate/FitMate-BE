@@ -242,6 +242,7 @@ enum QuoteStatus {
 enum DirectQuoteRequestStatus {
   PENDING  // 요청됨
   REJECTED // 반려됨
+  PROPOSED // 제안됨
 }
 
 enum NotificationType {

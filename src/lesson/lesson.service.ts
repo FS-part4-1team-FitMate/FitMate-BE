@@ -196,7 +196,10 @@ export class LessonService implements ILessonService {
       updatedAt: true,
       directQuoteRequests: {
         select: {
+          lessonRequestId: true,
           trainerId: true,
+          status: true,
+          rejectionReason: true,
         },
       },
       user: {
@@ -400,19 +403,19 @@ export class LessonService implements ILessonService {
     const directQuoteRequest = await this.lessonRepository.findDirectQuoteRequestById(directQuoteRequestId);
 
     if (!directQuoteRequest) {
-      throw new NotFoundException('지정 견적 요청을 찾을 수 없습니다.');
+      throw new NotFoundException(LessonExceptionMessage.DIRECT_QUOTE_NOT_FOUND);
     }
 
     if (directQuoteRequest.trainerId != trainerId) {
-      throw new UnauthorizedException('본인의 지정 견적 요청만 반려할 수 있습니다.');
+      throw new UnauthorizedException(LessonExceptionMessage.NOT_MY_DIRECT_QUOTE_REQUEST);
     }
 
     if (directQuoteRequest.lessonRequestId != lessonId) {
-      throw new BadRequestException('잘못된 요청입니다.');
+      throw new BadRequestException(LessonExceptionMessage.INVALID_LESSON_REQUEST_MATCH);
     }
 
     if (directQuoteRequest.status != 'PENDING') {
-      throw new BadRequestException('이미 처리된 요청입니다다');
+      throw new BadRequestException(LessonExceptionMessage.INVALID_DIRECT_QUOTE_STATUS);
     }
 
     return await this.lessonRepository.updateDirectQuoteRequest(directQuoteRequestId, {
