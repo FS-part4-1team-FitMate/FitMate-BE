@@ -81,4 +81,51 @@ export class LessonRepository implements ILessonRepository {
   }): Promise<DirectQuoteRequest> {
     return await this.directQuoteRequest.create({ data });
   }
+
+  /**
+   * (where 조건 없이) 전체 레슨 데이터를 대상으로 lessonType을 groupBy
+   */
+  async groupByLessonTypeAll(): Promise<
+    {
+      lessonType: string; // 또는 LessonType
+      count: number;
+    }[]
+  > {
+    const results = await this.prisma.lessonRequest.groupBy({
+      by: ['lessonType'],
+      _count: {
+        lessonType: true,
+      },
+      // where: {} ← 명시 안 하면 전체 레코드 대상
+    });
+
+    // 반환값을 { lessonType, count } 형태로 가공
+    return results.map((item) => ({
+      lessonType: item.lessonType,
+      count: item._count.lessonType,
+    }));
+  }
+
+  // lesson.repository.ts (예시)
+  async findAllForGenderCount() {
+    return this.prisma.lessonRequest.findMany({
+      select: {
+        id: true,
+        user: {
+          select: {
+            profile: {
+              select: {
+                gender: true,
+              },
+            },
+          },
+        },
+        directQuoteRequests: {
+          select: {
+            trainerId: true, // 트레이너 ID만 필요
+          },
+        },
+      },
+    });
+  }
 }

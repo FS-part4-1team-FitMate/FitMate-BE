@@ -71,7 +71,14 @@ export class LessonService implements ILessonService {
   async getLessons(
     query: QueryLessonDto,
     myLessonUserId?: string,
-  ): Promise<{ list: LessonResponse[]; totalCount: number; hasMore: boolean }> {
+  ): Promise<{
+    list: LessonResponse[];
+    totalCount: number;
+    hasMore: boolean;
+    lessonTypeCounts: Record<string, number>;
+    genderCounts: Record<string, number>;
+    directQuoteRequestCount: number;
+  }> {
     const {
       page = 1,
       limit = 5,
@@ -84,6 +91,7 @@ export class LessonService implements ILessonService {
       status,
       gender,
       region,
+      hasDirectQuote,
     } = query.toCamelCase();
 
     const orderMapping: Record<string, string> = {
@@ -117,6 +125,8 @@ export class LessonService implements ILessonService {
       JEJU: ['제주', '제주특별자치도'],
     };
 
+    const currentUserId = this.getUserId();
+
     // 필터 조건 구성
     const where = {
       ...(myLessonUserId && { userId: myLessonUserId }),
@@ -130,6 +140,11 @@ export class LessonService implements ILessonService {
             gender: { in: gender },
           },
         },
+      }),
+      ...(hasDirectQuote !== undefined && {
+        directQuoteRequests: hasDirectQuote
+          ? { some: { trainerId: currentUserId } }
+          : { none: { trainerId: currentUserId } },
       }),
       AND: [
         ...(region
@@ -204,8 +219,37 @@ export class LessonService implements ILessonService {
       this.lessonRepository.count(where),
     ]);
 
-    const currentUserId = this.getUserId();
-    console.log('currentUserId', currentUserId);
+    // 전체 레슨 타입 목록 정의 (초기값)
+    const allLessonTypes = ['SPORTS', 'FITNESS', 'REHAB']; 
+    const lessonTypeCounts = allLessonTypes.reduce<Record<string, number>>((acc, type) => {
+      acc[type] = 0;
+      return acc;
+    }, {});
+
+    // lessonType별 통계 업데이트
+    const groupResult = await this.lessonRepository.groupByLessonTypeAll();
+    groupResult.forEach((result) => {
+      lessonTypeCounts[result.lessonType] = result.count;
+    });
+
+    // 전체 요청 레슨에 대한 남/여 수 (초기값)
+    const genderCounts = { male: 0, female: 0 };
+
+    // 남/여 카운트 계산
+    const allLessons = await this.lessonRepository.findAllForGenderCount();
+    allLessons.forEach((lr) => {
+      if (lr.user?.profile?.gender === 'MALE') {
+        genderCounts.male++;
+      } else if (lr.user?.profile?.gender === 'FEMALE') {
+        genderCounts.female++;
+      }
+    });
+
+    // 지정 견적 요청 수 계산
+    const directQuoteRequestCount = allLessons.reduce((count, lesson) => {
+      const hasDirectQuote = lesson.directQuoteRequests?.some((req) => req.trainerId === currentUserId);
+      return hasDirectQuote ? count + 1 : count;
+    }, 0);
 
     const lessonsWithDirectQuote = lessons.map((lesson) => ({
       ...lesson,
@@ -218,6 +262,9 @@ export class LessonService implements ILessonService {
       list: lessonsWithDirectQuote,
       totalCount,
       hasMore: totalCount > page * limit,
+      lessonTypeCounts,
+      genderCounts,
+      directQuoteRequestCount,
     };
   }
 

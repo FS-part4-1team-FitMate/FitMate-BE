@@ -1,4 +1,10 @@
-import type { DirectQuoteRequest, LessonRequest, LessonRequestStatus } from '@prisma/client';
+import type {
+  DirectQuoteRequest,
+  LessonRequest,
+  LessonRequestStatus,
+  LessonType,
+  Prisma,
+} from '@prisma/client';
 import type { CreateLesson, LessonResponse, PatchLesson } from '../type/lesson.type';
 
 export interface ILessonRepository {
