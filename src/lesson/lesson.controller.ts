@@ -1,7 +1,12 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, Query } from '@nestjs/common';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
-import { CreateDirectQuoteDto, CreateLessonDto, QueryLessonDto } from './dto/lesson.dto.js';
+import {
+  CreateDirectQuoteDto,
+  CreateLessonDto,
+  QueryLessonDto,
+  RejectDirectQuoteDto,
+} from './dto/lesson.dto.js';
 import { LessonService } from './lesson.service.js';
 
 @Controller('lessons')
@@ -66,5 +71,18 @@ export class LessonController {
   @UseGuards(AccessTokenGuard)
   async createDirectQuote(@Param('id', UUIDPipe) lessonId: string, @Body() body: CreateDirectQuoteDto) {
     return this.lessonService.createDirectQuoteRequest(lessonId, body);
+  }
+  /*************************************************************************************
+   * 지정 견적 요청에 대한 반려
+   * ***********************************************************************************
+   */
+  @Patch(':lessonId/direct_quote/:directQuoteRequestId/reject')
+  @UseGuards(AccessTokenGuard)
+  async rejectDirectQuoteRequest(
+    @Param('lessonId', UUIDPipe) lessonId: string,
+    @Param('directQuoteRequestId', UUIDPipe) directQuoteRequestId: string,
+    @Body() body: RejectDirectQuoteDto,
+  ) {
+    return this.lessonService.rejectDirectQuoteRequest(lessonId, directQuoteRequestId, body);
   }
 }

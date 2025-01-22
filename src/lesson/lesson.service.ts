@@ -4,7 +4,7 @@ import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
-import { CreateDirectQuoteDto, QueryLessonDto } from './dto/lesson.dto.js';
+import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from './dto/lesson.dto.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
 import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
@@ -196,7 +196,10 @@ export class LessonService implements ILessonService {
       updatedAt: true,
       directQuoteRequests: {
         select: {
+          lessonRequestId: true,
           trainerId: true,
+          status: true,
+          rejectionReason: true,
         },
       },
       user: {
@@ -220,7 +223,7 @@ export class LessonService implements ILessonService {
     ]);
 
     // 전체 레슨 타입 목록 정의 (초기값)
-    const allLessonTypes = ['SPORTS', 'FITNESS', 'REHAB']; 
+    const allLessonTypes = ['SPORTS', 'FITNESS', 'REHAB'];
     const lessonTypeCounts = allLessonTypes.reduce<Record<string, number>>((acc, type) => {
       acc[type] = 0;
       return acc;
@@ -382,6 +385,42 @@ export class LessonService implements ILessonService {
     return await this.lessonRepository.createDirectQuoteRequest({
       lessonRequestId: lessonId,
       trainerId,
+    });
+  }
+
+  /*************************************************************************************
+   * 지정 견적 요청에 대한 반려
+   * ***********************************************************************************
+   */
+  async rejectDirectQuoteRequest(
+    lessonId: string,
+    directQuoteRequestId: string,
+    rejectDirectQuoteDto: RejectDirectQuoteDto,
+  ): Promise<DirectQuoteRequest> {
+    const { rejectionReason } = rejectDirectQuoteDto;
+    const trainerId = this.getUserId();
+
+    const directQuoteRequest = await this.lessonRepository.findDirectQuoteRequestById(directQuoteRequestId);
+
+    if (!directQuoteRequest) {
+      throw new NotFoundException(LessonExceptionMessage.DIRECT_QUOTE_NOT_FOUND);
+    }
+
+    if (directQuoteRequest.trainerId != trainerId) {
+      throw new UnauthorizedException(LessonExceptionMessage.NOT_MY_DIRECT_QUOTE_REQUEST);
+    }
+
+    if (directQuoteRequest.lessonRequestId != lessonId) {
+      throw new BadRequestException(LessonExceptionMessage.INVALID_LESSON_REQUEST_MATCH);
+    }
+
+    if (directQuoteRequest.status != 'PENDING') {
+      throw new BadRequestException(LessonExceptionMessage.INVALID_DIRECT_QUOTE_STATUS);
+    }
+
+    return await this.lessonRepository.updateDirectQuoteRequest(directQuoteRequestId, {
+      status: 'REJECTED',
+      rejectionReason,
     });
   }
 

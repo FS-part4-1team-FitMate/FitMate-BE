@@ -152,3 +152,9 @@ export class CreateDirectQuoteDto {
   @IsUUID('4', { message: '유효하지 않은 강사 ID입니다.' })
   trainerId: string;
 }
+
+export class RejectDirectQuoteDto {
+  @IsNotEmpty()
+  @IsString()
+  rejectionReason: string;
+}
