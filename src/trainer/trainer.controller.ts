@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, UseGuards, Query, Param } from '@nestjs/common';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { TrainerService } from '#trainer/trainer.service.js';
 import type {
@@ -20,21 +20,23 @@ export class TrainerController {
     return this.trainerService.getTrainers(query);
   }
 
-  @Get('favorite')
+  @Get(':trainerId/favorite')
   @UseGuards(AccessTokenGuard)
-  async getFavoriteTrainers() {
-    return this.trainerService.getFavoriteTrainers();
+  async getFavoriteStatus(
+    @Param('trainerId') trainerId: string,
+  ): Promise<{ isFavorite: boolean; favoriteTotalCount: number }> {
+    return this.trainerService.getFavoriteStatus(trainerId);
   }
 
-  @Post('favorite')
+  @Post(':trainerId/favorite')
   @UseGuards(AccessTokenGuard)
-  async addFavoriteTrainer(@Body() data: CreateFavoriteTrainer) {
-    return this.trainerService.addFavoriteTrainer(data);
+  async addFavoriteTrainer(@Param('trainerId') trainerId: string) {
+    return this.trainerService.addFavoriteTrainer({ trainerId });
   }
 
-  @Delete('favorite')
+  @Delete(':trainerId/favorite')
   @UseGuards(AccessTokenGuard)
-  async removeFavoriteTrainer(@Body() data: RemoveFavoriteTrainer) {
-    return this.trainerService.removeFavoriteTrainer(data);
+  async removeFavoriteTrainer(@Param('trainerId') trainerId: string) {
+    return this.trainerService.removeFavoriteTrainer({ trainerId });
   }
 }
