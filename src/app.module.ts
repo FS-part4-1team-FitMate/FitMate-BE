@@ -7,6 +7,7 @@ import { AuthModule } from '#auth/auth.module.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { UserModule } from '#user/user.module.js';
 import { ProfileModule } from '#profile/profile.module.js';
+import { ReviewModule } from '#review/review.module.js';
 import { LessonModule } from './lesson/lesson.module.js';
 import { QuoteModule } from './quote/quote.module.js';
 import { TrainerModule } from './trainer/trainer.module.js';
@@ -25,6 +26,7 @@ import { TrainerModule } from './trainer/trainer.module.js';
     LessonModule,
     QuoteModule,
     TrainerModule,
+    ReviewModule,
   ],
   controllers: [],
   providers: [AccessTokenGuard],
