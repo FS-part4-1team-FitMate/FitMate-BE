@@ -7,9 +7,11 @@ import { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
 @Injectable()
 export class QuoteRepository implements IQuoteRepository {
   private readonly lessonQuote;
+  private readonly directQuoteRequest;
 
   constructor(private readonly prisma: PrismaService) {
     this.lessonQuote = prisma.lessonQuote;
+    this.directQuoteRequest = prisma.directQuoteRequest;
   }
 
   async create(data: CreateLessonQuote): Promise<LessonQuote> {
@@ -61,5 +63,13 @@ export class QuoteRepository implements IQuoteRepository {
     return await this.lessonQuote.findFirst({
       where: { lessonRequestId, trainerId },
     });
+  }
+
+  async findDirectQuoteRequestTrainers(lessonRequestId: string): Promise<string[]> {
+    const trainers = await this.directQuoteRequest.findMany({
+      where: { lessonRequestId },
+      select: { trainerId: true },
+    });
+    return trainers.map((t) => t.trainerId);
   }
 }

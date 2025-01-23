@@ -224,7 +224,7 @@ export const USERS = [
     updatedAt: new Date('2025-01-01T17:00:00.000Z'),
   },
   {
-    id: '337fc386-d1a7-4430-a37d-9d1c5bdafd5d',
+    id: '777fc386-d1a7-4430-a37d-9d1c5bdafd5d',
     email: 'trainer07@example.com',
     nickname: 'trainer07',
     password: '$2b$10$b54818.HbryISrxFcfNtIuNXsjz/0ClwWqqWknPVgMxWzF1c4xlUe',
@@ -234,7 +234,7 @@ export const USERS = [
     updatedAt: '2025-01-02T12:00:00.000Z',
   },
   {
-    id: '337fc386-d1a7-4430-a37d-9d1c5bdafd6d',
+    id: '888fc386-d1a7-4430-a37d-9d1c5bdafd6d',
     email: 'trainer08@example.com',
     nickname: 'trainer08',
     password: '$2b$10$b54818.HbryISrxFcfNtIuNXsjz/0ClwWqqWknPVgMxWzF1c4xlUe',
@@ -244,7 +244,7 @@ export const USERS = [
     updatedAt: '2025-01-02T12:01:00.000Z',
   },
   {
-    id: '337fc386-d1a7-4430-a37d-9d1c5bdafd7d',
+    id: '999fc386-d1a7-4430-a37d-9d1c5bdafd7d',
     email: 'trainer09@example.com',
     nickname: 'trainer09',
     password: '$2b$10$b54818.HbryISrxFcfNtIuNXsjz/0ClwWqqWknPVgMxWzF1c4xlUe',
@@ -254,7 +254,7 @@ export const USERS = [
     updatedAt: '2025-01-02T12:02:00.000Z',
   },
   {
-    id: '337fc386-d1a7-4430-a37d-9d1c5bdafd8d',
+    id: '100fc386-d1a7-4430-a37d-9d1c5bdafd8d',
     email: 'trainer10@example.com',
     nickname: 'trainer10',
     password: '$2b$10$b54818.HbryISrxFcfNtIuNXsjz/0ClwWqqWknPVgMxWzF1c4xlUe',
@@ -264,7 +264,7 @@ export const USERS = [
     updatedAt: '2025-01-02T12:03:00.000Z',
   },
   {
-    id: '337fc386-d1a7-4430-a37d-9d1c5bdafd9d',
+    id: '110fc386-d1a7-4430-a37d-9d1c5bdafd9d',
     email: 'trainer11@example.com',
     nickname: 'trainer11',
     password: '$2b$10$b54818.HbryISrxFcfNtIuNXsjz/0ClwWqqWknPVgMxWzF1c4xlUe',
