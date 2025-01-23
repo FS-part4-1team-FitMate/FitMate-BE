@@ -1,9 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DirectQuoteRequest, LessonRequestStatus, Prisma, Region } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
+import type { IQuoteService } from '#quote/interface/quote-service.inteface.js';
 import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from './dto/lesson.dto.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
@@ -14,6 +22,8 @@ export class LessonService implements ILessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
     private readonly userRepository: UserRepository,
+    @Inject(forwardRef(() => 'IQuoteService'))
+    private readonly quoteService: IQuoteService,
     private readonly alsStore: AlsStore,
   ) {}
 
@@ -379,6 +389,12 @@ export class LessonService implements ILessonService {
     const trainer = await this.userRepository.findUserById(trainerId);
     if (!trainer || trainer.role !== 'TRAINER') {
       throw new BadRequestException(LessonExceptionMessage.TRAINER_NOT_FOUND_OR_INVALID);
+    }
+
+    const hasSubmitted = await this.quoteService.hasTrainerSubmittedQuote(trainerId, lessonId);
+    console.log('hasSubmitted', hasSubmitted);
+    if (hasSubmitted) {
+      throw new BadRequestException(LessonExceptionMessage.TRAINER_ALREADY_SENT_QUOTE);
     }
 
     // 지정 견적 요청 개수 확인

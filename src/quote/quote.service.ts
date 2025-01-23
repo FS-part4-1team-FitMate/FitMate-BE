@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { LessonQuote, QuoteStatus } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
@@ -14,6 +14,7 @@ import { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
 export class QuoteService implements IQuoteService {
   constructor(
     private readonly quoteRepository: QuoteRepository,
+    @Inject(forwardRef(() => LessonService)) // forwardRef로 주입
     private readonly lessonService: LessonService,
     private readonly alsStore: AlsStore,
   ) {}
@@ -175,5 +176,13 @@ export class QuoteService implements IQuoteService {
       throw new NotFoundException(QuoteExceptionMessage.QUOTE_NOT_FOUND);
     }
     return await this.quoteRepository.update(id, data);
+  }
+
+  /**
+   * 특정 트레이너가 지정 견적 요청에 대해 이미 견적서를 제출했는지 확인 (lesson service 에서 사용)
+   */
+  async hasTrainerSubmittedQuote(trainerId: string, lessonRequestId: string): Promise<boolean> {
+    const existingQuote = await this.quoteRepository.findTrainerQuoteForLesson(trainerId, lessonRequestId);
+    return !!existingQuote;
   }
 }

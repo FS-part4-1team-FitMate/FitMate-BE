@@ -56,4 +56,10 @@ export class QuoteRepository implements IQuoteRepository {
       data: { status, rejectionReason },
     });
   }
+
+  async findTrainerQuoteForLesson(lessonRequestId: string, trainerId: string): Promise<LessonQuote | null> {
+    return await this.lessonQuote.findFirst({
+      where: { lessonRequestId, trainerId },
+    });
+  }
 }
