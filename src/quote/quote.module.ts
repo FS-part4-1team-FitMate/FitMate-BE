@@ -9,5 +9,6 @@ import { QuoteService } from './quote.service.js';
   imports: [LessonModule],
   controllers: [QuoteController],
   providers: [QuoteService, QuoteRepository, PrismaService],
+  exports: [QuoteService],
 })
 export class QuoteModule {}

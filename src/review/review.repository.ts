@@ -19,29 +19,9 @@ export class ReviewRepository implements IReviewRepository {
     });
   }
 
-  async findLessonQuoteById(lessonQuoteId: string): Promise<boolean> {
-    const quote = await this.prisma.lessonQuote.findUnique({
-      where: { id: lessonQuoteId },
-    });
-    return !!quote;
-  }
-
   async findByLessonQuoteId(lessonQuoteId: string): Promise<Review | null> {
     return await this.prisma.review.findFirst({
       where: { lessonQuoteId },
     });
-  }
-
-  async findLessonRequestStatusByQuoteId(lessonQuoteId: string): Promise<string | null> {
-    const quote = await this.prisma.lessonQuote.findUnique({
-      where: { id: lessonQuoteId },
-      select: {
-        lessonRequest: {
-          select: { status: true },
-        },
-      },
-    });
-
-    return quote?.lessonRequest?.status || null;
   }
 }
