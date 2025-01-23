@@ -196,6 +196,7 @@ export class LessonService implements ILessonService {
       updatedAt: true,
       directQuoteRequests: {
         select: {
+          id: true,
           lessonRequestId: true,
           trainerId: true,
           status: true,
