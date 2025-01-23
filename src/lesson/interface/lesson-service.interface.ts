@@ -1,5 +1,5 @@
 import { DirectQuoteRequest, LessonRequestStatus } from '@prisma/client';
-import { CreateDirectQuoteDto, QueryLessonDto } from '#lesson/dto/lesson.dto.js';
+import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from '#lesson/dto/lesson.dto.js';
 import { CreateLesson, LessonResponse, PatchLesson } from '#lesson/type/lesson.type.js';
 
 export interface ILessonService {
@@ -15,7 +15,7 @@ export interface ILessonService {
     hasMore: boolean;
     lessonTypeCounts: Record<string, number>;
     genderCounts: Record<string, number>;
-    directQuoteRequestCount : number;
+    directQuoteRequestCount: number;
   }>;
   getMyLessons(query: QueryLessonDto): Promise<{
     list: LessonResponse[];
@@ -23,6 +23,11 @@ export interface ILessonService {
     hasMore: boolean;
   }>;
   createDirectQuoteRequest(lessonId: string, data: CreateDirectQuoteDto): Promise<DirectQuoteRequest>;
+  rejectDirectQuoteRequest(
+    lessonId: string,
+    directQuoteRequestId: string,
+    rejectDirectQuoteDto: RejectDirectQuoteDto,
+  ): Promise<DirectQuoteRequest>;
   updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse>;
   updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse>;
 }

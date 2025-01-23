@@ -1,6 +1,6 @@
 import { QuoteStatus } from '@prisma/client';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateQuoteDto {
   @IsNotEmpty({ message: '레슨 요청 ID는 필수 입력 값입니다.' })
@@ -45,25 +45,59 @@ export class UpdateQuoteStatusDto {
 export class QueryQuoteDto {
   @IsOptional()
   @IsInt()
-  @Transform(({ value }) => Number(value) || 1)
-  page?: number;
+  @Transform(({ value }) => (value ? Number(value) : 1))
+  page?: number = 1;
 
   @IsOptional()
   @IsInt()
-  @Transform(({ value }) => Number(value) || 5)
-  @IsOptional()
-  @IsEnum(QuoteStatus, { message: '유효하지 않은 상태 값입니다.' })
-  status?: QuoteStatus;
+  @Transform(({ value }) => (value ? Number(value) : 10))
+  limit?: number = 5;
 
   @IsOptional()
   @IsString()
-  keyword?: string;
+  @IsIn(['created_at', 'price', 'updated_at'])
+  order?: string = 'created_at';
 
   @IsOptional()
   @IsString()
-  order?: string = 'createdAt';
-
-  @IsOptional()
-  @IsString()
+  @IsIn(['asc', 'desc'])
   sort?: string = 'desc';
+
+  @IsOptional()
+  @Transform(({ value }) => (value ? value.split(',') : []))
+  @IsEnum(QuoteStatus, { each: true, message: '유효하지 않은 견적 상태입니다.' })
+  status?: QuoteStatus[]; // 견적 상태 필터링
+
+  @IsOptional()
+  @IsString()
+  trainer_id?: string; // 특정 트레이너의 견적 필터링
+
+  @IsOptional()
+  @Transform(({ value }) => (value ? Number(value) : null))
+  @IsInt({ message: 'min_price는 숫자여야 합니다.' })
+  min_price?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => (value ? Number(value) : null))
+  @IsInt({ message: 'max_price는 숫자여야 합니다.' })
+  max_price?: number;
+
+  @IsOptional()
+  @IsString()
+  lesson_request_id?: string; // 특정 레슨 요청 ID
+
+  // CamelCase 변환 메서드
+  toCamelCase() {
+    return {
+      page: this.page,
+      limit: this.limit,
+      order: this.order,
+      sort: this.sort,
+      status: this.status,
+      trainerId: this.trainer_id,
+      minPrice: this.min_price,
+      maxPrice: this.max_price,
+      lessonRequestId: this.lesson_request_id,
+    };
+  }
 }

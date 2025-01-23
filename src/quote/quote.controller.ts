@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, UseGuards, Query } from '@nestjs/common';
 import { AlsStore } from '#common/als/store-validator.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
-import { CreateQuoteDto, UpdateQuoteDto, UpdateQuoteStatusDto } from './dto/quote.dto.js';
+import { CreateQuoteDto, QueryQuoteDto, UpdateQuoteDto, UpdateQuoteStatusDto } from './dto/quote.dto.js';
 import { QuoteService } from './quote.service.js';
 import { CreateLessonQuote } from './type/quote.type.js';
 
@@ -49,8 +49,8 @@ export class QuoteController {
    * ***********************************************************************************
    */
   @Get()
-  async getLessonQuotes() {
-    return this.quoteService.getLessonQuotes();
+  async getLessonQuotes(@Query() query: QueryQuoteDto) {
+    return this.quoteService.getLessonQuotes(query);
   }
 
   /*************************************************************************************

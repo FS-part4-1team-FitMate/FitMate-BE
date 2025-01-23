@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LessonQuote, QuoteStatus } from '@prisma/client';
+import { LessonQuote, Prisma, QuoteStatus } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { IQuoteRepository } from './interface/quote-repository.interface.js';
 import { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
@@ -16,8 +16,24 @@ export class QuoteRepository implements IQuoteRepository {
     return await this.lessonQuote.create({ data });
   }
 
-  async findAll(): Promise<LessonQuote[]> {
-    return await this.lessonQuote.findMany();
+  async findAll(
+    where?: Record<string, any>,
+    orderBy?: Record<string, string>,
+    skip?: number,
+    take?: number,
+    select?: Prisma.LessonQuoteSelect,
+  ): Promise<LessonQuote[]> {
+    return await this.prisma.lessonQuote.findMany({
+      where,
+      orderBy,
+      skip,
+      take,
+      select,
+    });
+  }
+
+  async count(where?: Record<string, any>): Promise<number> {
+    return await this.prisma.lessonQuote.count({ where });
   }
 
   async findOne(id: string): Promise<LessonQuote | null> {
