@@ -148,4 +148,10 @@ export class LessonRepository implements ILessonRepository {
       },
     });
   }
+
+  async findDirectQuoteRequestByLessonId(lessonId: string): Promise<DirectQuoteRequest[]> {
+    return await this.directQuoteRequest.findMany({
+      where: { lessonRequestId: lessonId },
+    });
+  }
 }
