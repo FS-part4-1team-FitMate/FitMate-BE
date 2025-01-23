@@ -1,4 +1,5 @@
 import { LessonQuote, QuoteStatus, Role } from '@prisma/client';
+import { QueryQuoteDto } from '#quote/dto/quote.dto.js';
 import { CreateLessonQuote, PatchLessonQuote } from '#quote/type/quote.type.js';
 
 export interface IQuoteService {
@@ -10,7 +11,11 @@ export interface IQuoteService {
     status: QuoteStatus,
     rejectionReason?: string,
   ): Promise<LessonQuote | null>;
-  getLessonQuotes(): Promise<LessonQuote[]>;
+  getLessonQuotes(query: QueryQuoteDto): Promise<{
+    list: LessonQuote[];
+    totalCount: number;
+    hasMore: boolean;
+  }>;
   getLessonQuoteById(id: string): Promise<LessonQuote | null>;
   updateLessonQuote(id: string, data: PatchLessonQuote): Promise<LessonQuote | null>;
 }

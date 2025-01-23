@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PROFILES } from '#prisma/mock/profile.mock.js';
 import { USERS } from '#prisma/mock/user.mock.js';
+import { LESSON_QUOTES } from './mock/lesson_quote.mock.js';
 import { LESSON_REQUESTS } from './mock/lesson_request.mock.js';
 
 const prisma = new PrismaClient();
@@ -38,6 +39,14 @@ async function main() {
   for (const lessonRequest of LESSON_REQUESTS) {
     await prisma.lessonRequest.create({
       data: lessonRequest,
+    });
+  }
+
+  // 5. LessonQuote 데이터 삽입
+  console.log('LessonQuote 데이터 삽입 중...');
+  for (const lessonQuote of LESSON_QUOTES) {
+    await prisma.lessonQuote.create({
+      data: lessonQuote,
     });
   }
 

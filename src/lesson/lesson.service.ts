@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { DirectQuoteRequest, LessonRequestStatus, Region } from '@prisma/client';
+import { DirectQuoteRequest, LessonRequestStatus, Prisma, Region } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
@@ -82,7 +82,7 @@ export class LessonService implements ILessonService {
     const {
       page = 1,
       limit = 5,
-      order = 'created_at',
+      order = 'createdAt',
       sort = 'desc',
       keyword,
       lessonType,
@@ -177,7 +177,7 @@ export class LessonService implements ILessonService {
     const skip = (page - 1) * limit;
     const take = limit;
 
-    const select = {
+    const select: Prisma.LessonRequestSelect = {
       id: true,
       userId: true,
       lessonType: true,
@@ -196,6 +196,7 @@ export class LessonService implements ILessonService {
       updatedAt: true,
       directQuoteRequests: {
         select: {
+          id: true,
           lessonRequestId: true,
           trainerId: true,
           status: true,
