@@ -226,17 +226,18 @@ enum LocationType {
 }
 
 enum LessonRequestStatus {
-  PENDING // ACTIVE
-  COMPLETED
-  CANCELED
-  EXPIRED
+  PENDING         // 레슨 요청이 생성됨 (견적 대기 상태)
+  QUOTE_CONFIRMED // 견적이 확정되고 레슨 진행 중
+  COMPLETED       // 레슨 완료
+  CANCELED        // 요청 취소
+  EXPIRED         // 요청 기간 만료
 }
 
 enum QuoteStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  CANCELED
+  PENDING       // 견적 요청됨
+  ACCEPTED      // 견적 수락됨  
+  REJECTED      // 견적 거절됨
+  CANCELED      // 견적 취소됨
 }
 
 enum DirectQuoteRequestStatus {
