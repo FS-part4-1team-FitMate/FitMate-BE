@@ -1,0 +1,87 @@
+### user 회원가입
+POST http://localhost:3000/auth/signUp?role=USER
+Content-Type: application/json
+
+{
+"nickname": "user99",
+"email": "user99@example.com",
+"password": "a123456!"
+}
+
+### trainer 회원가입
+POST http://localhost:3000/auth/signUp?role=TRAINER
+Content-Type: application/json
+
+{
+"nickname": "trainer999",
+"email": "user999@example.com",
+"password": "a123456!"
+}
+
+### 로그인 (일반유저)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+"email": "user99@example.com",
+"password": "a123456!"
+}
+
+### 로그인 (트레이너)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+"email": "user999@example.com",
+"password": "a123456!"
+}
+
+//**************************************************************
+### 레슨 요청
+POST http://localhost:3000/lessons
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNTA0NWE4MS0xYWU0LTRiODItOWNiZC1lNGFjYTdhMDY5NjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNzUyMzAzNywiZXhwIjoxNzM4NzMyNjM3fQ.EGkxCKcf7lBJJcQYWZ-2GoRPOSfOVA-P0dbZd1T2cw8
+
+{
+  "lessonType": "FITNESS",
+  "lessonSubType": "YOGA",
+  "startDate": "2024-01-20T10:00:00.000Z",
+  "endDate": "2024-01-25T23:59:59.000Z",
+  "lessonCount": 5,
+  "lessonTime": 40,
+  "quoteEndDate": "2024-01-24T23:59:59.000Z",
+  "locationType": "OFFLINE",
+  "postcode": "13529",
+  "roadAddress": "경기 성남시 분당구 판교역로 166",
+  "detailAddress": "101호"
+}
+
+
+### 견적보내기
+POST  http://localhost:3000/quotes
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwYWRjNjQ5Yy00YzE3LTQzODItYjczZC02ZmU2YzRiYmIwNWMiLCJyb2xlIjoiVFJBSU5FUiIsImlhdCI6MTczNzUzNTc1NiwiZXhwIjoxNzM4NzQ1MzU2fQ.oHd4WLEH3IxtBrnzekpjl_cDGi6YZiERiCuq88W9wg0
+
+{
+  "lessonRequestId": "0430ea63-eb4a-4310-9260-29fe0bc16e15",
+  "price": 200000,
+  "message": "견적 요청드립니다. 긍정적인 검토 부탁드립니다."
+}
+
+### 견적 상태 확정
+PATCH http://localhost:3000/quotes/9c62d838-4cfd-4703-9620-ba9f7629fc5d
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNTA0NWE4MS0xYWU0LTRiODItOWNiZC1lNGFjYTdhMDY5NjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNzUzNTc5MSwiZXhwIjoxNzM4NzQ1MzkxfQ.6vym_Le33Q1CUDH4tUTv4GHkf8CyJDoHKXdBJrkTluM
+
+//****************************************************************
+
+### 리뷰 작성
+POST http://localhost:3000/quotes/reviews
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNTA0NWE4MS0xYWU0LTRiODItOWNiZC1lNGFjYTdhMDY5NjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNzUzNTE1MCwiZXhwIjoxNzM4NzQ0NzUwfQ.uNdwwCo88rHvdusNZdXsD0u47goDM82TezhpU9ixUrI
+
+{
+  "lessonQuoteId": "9c62d838-4cfd-4703-9620-ba9f7629fc5d",
+  "rating": 5,
+  "content": "훌륭한 강사입니다. 적극 추천합니다!"
+}
