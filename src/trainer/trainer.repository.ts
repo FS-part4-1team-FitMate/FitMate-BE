@@ -134,4 +134,10 @@ export class TrainerRepository implements ITrainerRepository {
       },
     });
   }
+
+  async findFavoriteTrainerCount(trainerId: string): Promise<number> {
+    return await this.prisma.favoriteTrainer.count({
+      where: { trainerId },
+    });
+  }
 }

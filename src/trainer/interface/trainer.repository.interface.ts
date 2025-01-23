@@ -18,4 +18,5 @@ export interface ITrainerRepository {
   removeFavoriteTrainer(userId: string, data: RemoveFavoriteTrainer): Promise<void>;
   findFavoriteTrainer(userId: string, trainerId: string): Promise<FavoriteTrainerResponse | null>;
   findTrainersWithFavorites(userId?: string): Promise<TrainerWithFavorites[]>;
+  findFavoriteTrainerCount(trainerId: string): Promise<number>;
 }

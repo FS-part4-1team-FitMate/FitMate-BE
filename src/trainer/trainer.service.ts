@@ -19,18 +19,19 @@ export class TrainerService implements ITrainerService {
     private readonly alsStore: AlsStore,
   ) {}
 
-  async getFavoriteTrainers(): Promise<TrainerWithFavorites[]> {
+  async getFavoriteStatus(trainerId: string): Promise<{ isFavorite: boolean; favoriteTotalCount: number }> {
     const { userId } = this.alsStore.getStore();
     if (!userId) {
       throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
     }
 
-    const favorites = await this.trainerRepository.findFavoriteByUserId(userId);
+    const favoriteTrainer = await this.trainerRepository.findFavoriteTrainer(userId, trainerId);
+    const favoriteTotalCount = await this.trainerRepository.findFavoriteTrainerCount(trainerId);
 
-    return favorites.map((trainer) => ({
-      ...trainer,
-      isFavorite: true,
-    }));
+    return {
+      isFavorite: !!favoriteTrainer,
+      favoriteTotalCount,
+    };
   }
 
   // 강사 리스트 조회
