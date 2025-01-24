@@ -163,7 +163,9 @@ export class QuoteService implements IQuoteService {
     };
 
     const [quotes, totalCount] = await Promise.all([
-      this.quoteRepository.findAll(where, orderBy, skip, take),
+      this.quoteRepository.findAll(where, orderBy, skip, take, {
+        lessonRequest: true,
+      }),
       this.quoteRepository.count(where),
     ]);
 

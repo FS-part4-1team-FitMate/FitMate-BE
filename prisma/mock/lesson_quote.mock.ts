@@ -67,9 +67,6 @@ export const LESSON_QUOTES = [
     createdAt: new Date('2025-01-13T06:31:51.060Z'),
     updatedAt: new Date('2025-01-13T06:31:51.060Z'),
   },
-
-
-
   {
     id: '1a1f489c0-a951-44c4-8d52-bec26edf0ccd',
     trainerId: '11752641-132b-4ec3-ab67-bb2116cc3c94',
@@ -80,10 +77,7 @@ export const LESSON_QUOTES = [
     rejectionReason: null,
     createdAt: new Date('2025-01-17T06:30:12.460Z'),
     updatedAt: new Date('2025-01-17T06:30:12.460Z'),
-  },  
-
-
-
+  },
   {
     id: '8df489c0-a951-44c4-8d52-bec26edf0ccd',
     trainerId: '11752641-132b-4ec3-ab67-bb2116cc3c94',
