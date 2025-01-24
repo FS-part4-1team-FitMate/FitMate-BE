@@ -393,7 +393,6 @@ export class LessonService implements ILessonService {
 
     // 트레이너가 해당 요청 레슨에 이미 견적을 제출했는지 확인
     const hasSubmitted = await this.quoteService.hasTrainerSubmittedQuote(lessonId, trainerId);
-    console.log('lesson service: hasSubmitted', hasSubmitted);
     if (hasSubmitted) {
       throw new BadRequestException(LessonExceptionMessage.TRAINER_ALREADY_SENT_QUOTE);
     }

@@ -14,4 +14,7 @@ export interface IQuoteRepository {
   update(id: string, data: PatchLessonQuote): Promise<LessonQuote | null>;
   updateStatus(id: string, status: QuoteStatus, rejectionReason?: string): Promise<LessonQuote | null>;
   findTrainerQuoteForLesson(lessonRequestId: string, trainerId: string): Promise<LessonQuote | null>;
+  findDirectQuoteRequestTrainers(lessonRequestId: string): Promise<string[]>;
+  findReviewableQuotes(userId: string, skip: number, take: number): Promise<LessonQuote[]>;
+  countReviewableQuotes(userId: string): Promise<number>;
 }

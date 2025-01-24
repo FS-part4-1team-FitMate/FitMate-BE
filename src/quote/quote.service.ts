@@ -110,9 +110,10 @@ export class QuoteService implements IQuoteService {
       throw new BadRequestException(QuoteExceptionMessage.INVALID_STATUS_TO_REJECT);
     }
 
-    if (!rejectionReason?.trim()) {
-      throw new BadRequestException(QuoteExceptionMessage.REJECTION_REASON_REQUIRED);
-    }
+    // 프론트엔드 요청에 의해 반려 사유 옵션 처리
+    // if (!rejectionReason?.trim()) {
+    //   throw new BadRequestException(QuoteExceptionMessage.REJECTION_REASON_REQUIRED);
+    // }
 
     return await this.quoteRepository.updateStatus(id, QuoteStatus.REJECTED, rejectionReason);
   }
@@ -197,6 +198,32 @@ export class QuoteService implements IQuoteService {
     return await this.quoteRepository.update(id, data);
   }
 
+  /*************************************************************************************
+   * 리뷰 가능 견적 목록 조회
+   * ***********************************************************************************
+   */
+  async getReviewableQuotes(
+    page = 1,
+    limit = 5,
+  ): Promise<{
+    list: LessonQuote[];
+    totalCount: number;
+    hasMore: boolean;
+  }> {
+    const skip = (page - 1) * limit;
+    const { userId } = this.alsStore.getStore();
+
+    const [quotes, totalCount] = await Promise.all([
+      this.quoteRepository.findReviewableQuotes(userId, skip, limit),
+      this.quoteRepository.countReviewableQuotes(userId),
+    ]);
+
+    return {
+      list: quotes,
+      totalCount,
+      hasMore: totalCount > page * limit,
+    };
+  }
   /**
    * 특정 트레이너가 지정 견적 요청에 대해 이미 견적서를 제출했는지 확인 (lesson service 에서 사용)
    */
