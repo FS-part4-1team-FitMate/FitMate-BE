@@ -5,3 +5,10 @@ export type CreateReview = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type ReviewResponse = {
+  nickanme: string;
+  rating: number;
+  content: string;
+  createdAt: Date;
+};

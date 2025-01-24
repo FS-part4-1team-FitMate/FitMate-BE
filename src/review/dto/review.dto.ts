@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsInt, Min, Max, IsUUID, IsString, Length } from 'class-validator';
+import { IsNotEmpty, IsInt, Min, Max, IsUUID, IsString, Length, IsOptional } from 'class-validator';
 
 export class CreateReviewDto {
   @IsNotEmpty()
@@ -15,4 +15,20 @@ export class CreateReviewDto {
   @IsString()
   @Length(5, 500, { message: '리뷰 내용은 최소 5자에서 최대 500자까지 입력 가능합니다.' })
   content: string;
+}
+
+export class GetReviewsQueryDto {
+  @IsOptional()
+  @IsUUID('4', { message: '유효하지 않은 트레이너 ID입니다.' })
+  trainer_id?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1, { message: '페이지는 최소 1 이상이어야 합니다.' })
+  page?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1, { message: '리밋은 최소 1 이상이어야 합니다.' })
+  limit?: number;
 }

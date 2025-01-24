@@ -3,6 +3,7 @@ import { PROFILES } from '#prisma/mock/profile.mock.js';
 import { USERS } from '#prisma/mock/user.mock.js';
 import { LESSON_QUOTES } from './mock/lesson_quote.mock.js';
 import { LESSON_REQUESTS } from './mock/lesson_request.mock.js';
+import { REVIEWS } from './mock/review.mock.js';
 
 const prisma = new PrismaClient();
 
@@ -49,6 +50,13 @@ async function main() {
       data: lessonQuote,
     });
   }
+
+  // 6. Review 데이터 삽입
+  console.log('Review 데이터 삽입 중...');
+  await prisma.review.createMany({
+    data: REVIEWS,
+    skipDuplicates: true,
+  });
 
   console.log('모든 데이터 삽입 완료!');
 }
