@@ -110,9 +110,10 @@ export class QuoteService implements IQuoteService {
       throw new BadRequestException(QuoteExceptionMessage.INVALID_STATUS_TO_REJECT);
     }
 
-    if (!rejectionReason?.trim()) {
-      throw new BadRequestException(QuoteExceptionMessage.REJECTION_REASON_REQUIRED);
-    }
+    // 프론트엔드 요청에 의해 반려 사유 옵션 처리
+    // if (!rejectionReason?.trim()) {
+    //   throw new BadRequestException(QuoteExceptionMessage.REJECTION_REASON_REQUIRED);
+    // }
 
     return await this.quoteRepository.updateStatus(id, QuoteStatus.REJECTED, rejectionReason);
   }
