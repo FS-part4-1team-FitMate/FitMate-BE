@@ -54,6 +54,16 @@ export class QuoteController {
   }
 
   /*************************************************************************************
+   * 리뷰 가능 견적 목록 조회
+   * ***********************************************************************************
+   */
+  @Get('reviewable')
+  @UseGuards(AccessTokenGuard)
+  async getReviewableQuotes(@Query('page') page = 1, @Query('limit') limit = 5) {
+    return this.quoteService.getReviewableQuotes(+page, +limit);
+  }
+
+  /*************************************************************************************
    * 레슨 견적 상세 조회
    * ***********************************************************************************
    */
@@ -69,15 +79,5 @@ export class QuoteController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() body: UpdateQuoteDto) {
     return this.quoteService.updateLessonQuote(id, body);
-  }
-
-  /*************************************************************************************
-   * 리뷰 가능 견적 목록 조회
-   * ***********************************************************************************
-   */
-  @Get('reviewable')
-  @UseGuards(AccessTokenGuard)
-  async getReviewableQuotes(@Query('page') page = 1, @Query('limit') limit = 5) {
-    return this.quoteService.getReviewableQuotes(+page, +limit);
   }
 }
