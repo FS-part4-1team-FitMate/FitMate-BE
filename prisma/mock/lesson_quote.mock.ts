@@ -67,6 +67,23 @@ export const LESSON_QUOTES = [
     createdAt: new Date('2025-01-13T06:31:51.060Z'),
     updatedAt: new Date('2025-01-13T06:31:51.060Z'),
   },
+
+
+
+  {
+    id: '1a1f489c0-a951-44c4-8d52-bec26edf0ccd',
+    trainerId: '11752641-132b-4ec3-ab67-bb2116cc3c94',
+    lessonRequestId: '399fc386-d1a7-4430-a37d-9d1c5bdafd03',
+    price: 130000.0,
+    message: 'trainer01 완료된 레슨.',
+    status: QuoteStatus.ACCEPTED,
+    rejectionReason: null,
+    createdAt: new Date('2025-01-17T06:30:12.460Z'),
+    updatedAt: new Date('2025-01-17T06:30:12.460Z'),
+  },  
+
+
+
   {
     id: '8df489c0-a951-44c4-8d52-bec26edf0ccd',
     trainerId: '11752641-132b-4ec3-ab67-bb2116cc3c94',

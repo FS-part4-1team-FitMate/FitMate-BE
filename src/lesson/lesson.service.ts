@@ -213,6 +213,30 @@ export class LessonService implements ILessonService {
           rejectionReason: true,
         },
       },
+      lessonQuotes: {
+        select: {
+          id: true,
+          lessonRequestId: true,
+          trainerId: true,
+          price: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+          rejectionReason: true,
+          trainer: {
+            select: {
+              id: true,
+              nickname: true,
+              profile: {
+                select: {
+                  name: true,
+                  region: true,
+                },
+              },
+            },
+          },
+        },
+      },
       user: {
         select: {
           id: true,
