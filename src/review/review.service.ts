@@ -14,7 +14,7 @@ import QuoteExceptionMessage from '#exception/quote-exception-message.js';
 import ReviewExceptionMessage from '#exception/review-exception-message.js';
 import { LessonService } from '#lesson/lesson.service.js';
 import type { IQuoteService } from '#quote/interface/quote-service.inteface.js';
-import { CreateReviewDto } from './dto/review.dto.js';
+import { CreateReviewDto, GetReviewsQueryDto } from './dto/review.dto.js';
 import { IReviewService } from './interface/review.service.interface.js';
 import { ReviewRepository } from './review.repository.js';
 
@@ -57,5 +57,9 @@ export class ReviewService implements IReviewService {
     }
 
     return await this.reviewRepository.create(data, userId);
+  }
+
+  async getReviews(trainerId?: string, page = 1, limit = 10) {
+    return this.reviewRepository.getReviews(trainerId, page, limit);
   }
 }
