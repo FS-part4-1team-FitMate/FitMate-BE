@@ -6,5 +6,6 @@ enum QuoteExceptionMessage {
   INVALID_STATUS_TO_ACCEPT = '확정할 수 있는 상태가 아닙니다.',
   INVALID_STATUS_TO_REJECT = '반려할 수 있는 상태가 아닙니다.',
   REJECTION_REASON_REQUIRED = '거절 사유를 입력해주세요.',
+  QUOTE_LIMIT_REACHED = '이 요청 레슨에 대해 제출할 수 있는 일반 견적이 이미 모두 제출되었습니다.'
 }
 export default QuoteExceptionMessage;

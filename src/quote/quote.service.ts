@@ -1,4 +1,11 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { LessonQuote, QuoteStatus } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
@@ -14,6 +21,7 @@ import { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
 export class QuoteService implements IQuoteService {
   constructor(
     private readonly quoteRepository: QuoteRepository,
+    @Inject(forwardRef(() => LessonService)) // forwardRef로 주입
     private readonly lessonService: LessonService,
     private readonly alsStore: AlsStore,
   ) {}
@@ -40,6 +48,18 @@ export class QuoteService implements IQuoteService {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
 
+    // 지정 견적 요청에 포함되지 않은 일반 견적 개수 확인
+    const nonDirectQuotesCount = await this.quoteRepository.count({
+      lessonRequestId: data.lessonRequestId,
+      trainerId: {
+        notIn: await this.quoteRepository.findDirectQuoteRequestTrainers(data.lessonRequestId),
+      },
+    });
+
+    // 최대 견적 제한 확인
+    if (nonDirectQuotesCount >= 5) {
+      throw new BadRequestException(QuoteExceptionMessage.QUOTE_LIMIT_REACHED);
+    }
     return await this.quoteRepository.create({ ...data, trainerId: userId });
   }
 
@@ -175,5 +195,13 @@ export class QuoteService implements IQuoteService {
       throw new NotFoundException(QuoteExceptionMessage.QUOTE_NOT_FOUND);
     }
     return await this.quoteRepository.update(id, data);
+  }
+
+  /**
+   * 특정 트레이너가 지정 견적 요청에 대해 이미 견적서를 제출했는지 확인 (lesson service 에서 사용)
+   */
+  async hasTrainerSubmittedQuote(lessonRequestId: string, trainerId: string): Promise<boolean> {
+    const existingQuote = await this.quoteRepository.findTrainerQuoteForLesson(lessonRequestId, trainerId);
+    return !!existingQuote;
   }
 }

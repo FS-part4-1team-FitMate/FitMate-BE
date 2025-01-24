@@ -1,9 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DirectQuoteRequest, LessonRequestStatus, Prisma, Region } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserRepository } from '#user/user.repository.js';
+import type { IQuoteService } from '#quote/interface/quote-service.inteface.js';
 import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from './dto/lesson.dto.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
@@ -14,6 +22,8 @@ export class LessonService implements ILessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
     private readonly userRepository: UserRepository,
+    @Inject(forwardRef(() => 'IQuoteService'))
+    private readonly quoteService: IQuoteService,
     private readonly alsStore: AlsStore,
   ) {}
 
@@ -360,6 +370,8 @@ export class LessonService implements ILessonService {
     { trainerId }: CreateDirectQuoteDto,
   ): Promise<DirectQuoteRequest> {
     const userId = this.getUserId();
+
+    // 요청 레슨 확인
     const lesson = await this.lessonRepository.findOne(lessonId);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
@@ -373,11 +385,26 @@ export class LessonService implements ILessonService {
       throw new BadRequestException(LessonExceptionMessage.INVALID_LESSON_STATUS_FOR_QUOTE);
     }
 
+    // 트레이너 확인
     const trainer = await this.userRepository.findUserById(trainerId);
     if (!trainer || trainer.role !== 'TRAINER') {
       throw new BadRequestException(LessonExceptionMessage.TRAINER_NOT_FOUND_OR_INVALID);
     }
 
+    // 트레이너가 해당 요청 레슨에 이미 견적을 제출했는지 확인
+    const hasSubmitted = await this.quoteService.hasTrainerSubmittedQuote(lessonId, trainerId);
+    console.log('lesson service: hasSubmitted', hasSubmitted);
+    if (hasSubmitted) {
+      throw new BadRequestException(LessonExceptionMessage.TRAINER_ALREADY_SENT_QUOTE);
+    }
+
+    // 지정 견적 요청 개수 확인
+    const existingDirectQuotes = await this.lessonRepository.findDirectQuoteRequestByLessonId(lessonId);
+    if (existingDirectQuotes.length >= 3) {
+      throw new BadRequestException(LessonExceptionMessage.DIRECT_QUOTE_LIMIT_REACHED);
+    }
+
+    // 중복 요청 확인
     const existingRequest = await this.lessonRepository.findDirectQuoteRequest(lessonId, trainerId);
     if (existingRequest) {
       throw new BadRequestException(LessonExceptionMessage.DIRECT_QUOTE_ALREADY_EXISTS);

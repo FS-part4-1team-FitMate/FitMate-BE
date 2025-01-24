@@ -28,4 +28,5 @@ export interface ILessonRepository {
     id: string,
     data: { status: DirectQuoteRequestStatus; rejectionReason?: string },
   ): Promise<DirectQuoteRequest>;
+  findDirectQuoteRequestByLessonId(lessonId: string): Promise<DirectQuoteRequest[]>;
 }

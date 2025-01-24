@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -12,7 +13,7 @@ import ExceptionMessages from '#exception/exception-message.js';
 import QuoteExceptionMessage from '#exception/quote-exception-message.js';
 import ReviewExceptionMessage from '#exception/review-exception-message.js';
 import { LessonService } from '#lesson/lesson.service.js';
-import { QuoteService } from '#quote/quote.service.js';
+import type { IQuoteService } from '#quote/interface/quote-service.inteface.js';
 import { CreateReviewDto } from './dto/review.dto.js';
 import { IReviewService } from './interface/review.service.interface.js';
 import { ReviewRepository } from './review.repository.js';
@@ -22,7 +23,8 @@ export class ReviewService implements IReviewService {
   constructor(
     private readonly reviewRepository: ReviewRepository,
     private readonly lessonService: LessonService,
-    private readonly quoteService: QuoteService,
+    @Inject('IQuoteService')
+    private readonly quoteService: IQuoteService,
     private readonly alsStore: AlsStore,
   ) {}
   async createReview(data: CreateReviewDto): Promise<Review> {

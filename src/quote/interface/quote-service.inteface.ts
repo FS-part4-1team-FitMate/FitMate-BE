@@ -18,4 +18,5 @@ export interface IQuoteService {
   }>;
   getLessonQuoteById(id: string): Promise<LessonQuote | null>;
   updateLessonQuote(id: string, data: PatchLessonQuote): Promise<LessonQuote | null>;
+  hasTrainerSubmittedQuote(lessonRequestId: string, trainerId: string): Promise<boolean>;
 }
