@@ -72,4 +72,40 @@ export class QuoteRepository implements IQuoteRepository {
     });
     return trainers.map((t) => t.trainerId);
   }
+
+  async findReviewableQuotes(userId: string, skip: number, take: number): Promise<LessonQuote[]> {
+    return await this.lessonQuote.findMany({
+      where: {
+        status: 'ACCEPTED',
+        lessonRequest: {
+          userId: userId,
+          status: 'COMPLETED',
+        },
+        Review: {
+          none: {},
+        },
+      },
+      skip,
+      take,
+      include: {
+        lessonRequest: true,
+        Review: true,
+      },
+    });
+  }
+
+  async countReviewableQuotes(userId: string): Promise<number> {
+    return await this.lessonQuote.count({
+      where: {
+        status: 'ACCEPTED',
+        lessonRequest: {
+          userId: userId,
+          status: 'COMPLETED',
+        },
+        Review: {
+          none: {},
+        },
+      },
+    });
+  }
 }

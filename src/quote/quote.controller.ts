@@ -70,4 +70,14 @@ export class QuoteController {
   update(@Param('id') id: string, @Body() body: UpdateQuoteDto) {
     return this.quoteService.updateLessonQuote(id, body);
   }
+
+  /*************************************************************************************
+   * 리뷰 가능 견적 목록 조회
+   * ***********************************************************************************
+   */
+  @Get('reviewable')
+  @UseGuards(AccessTokenGuard)
+  async getReviewableQuotes(@Query('page') page = 1, @Query('limit') limit = 5) {
+    return this.quoteService.getReviewableQuotes(+page, +limit);
+  }
 }

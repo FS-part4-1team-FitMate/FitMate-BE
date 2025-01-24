@@ -197,6 +197,32 @@ export class QuoteService implements IQuoteService {
     return await this.quoteRepository.update(id, data);
   }
 
+  /*************************************************************************************
+   * 리뷰 가능 견적 목록 조회
+   * ***********************************************************************************
+   */
+  async getReviewableQuotes(
+    page = 1,
+    limit = 5,
+  ): Promise<{
+    list: LessonQuote[];
+    totalCount: number;
+    hasMore: boolean;
+  }> {
+    const skip = (page - 1) * limit;
+    const { userId } = this.alsStore.getStore();
+
+    const [quotes, totalCount] = await Promise.all([
+      this.quoteRepository.findReviewableQuotes(userId, skip, limit),
+      this.quoteRepository.countReviewableQuotes(userId),
+    ]);
+
+    return {
+      list: quotes,
+      totalCount,
+      hasMore: totalCount > page * limit,
+    };
+  }
   /**
    * 특정 트레이너가 지정 견적 요청에 대해 이미 견적서를 제출했는지 확인 (lesson service 에서 사용)
    */
