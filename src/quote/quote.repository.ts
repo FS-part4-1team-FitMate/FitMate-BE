@@ -23,14 +23,14 @@ export class QuoteRepository implements IQuoteRepository {
     orderBy?: Record<string, string>,
     skip?: number,
     take?: number,
-    select?: Prisma.LessonQuoteSelect,
+    include?: Prisma.LessonQuoteInclude,
   ): Promise<LessonQuote[]> {
     return await this.prisma.lessonQuote.findMany({
       where,
       orderBy,
       skip,
       take,
-      select,
+      include,
     });
   }
 
