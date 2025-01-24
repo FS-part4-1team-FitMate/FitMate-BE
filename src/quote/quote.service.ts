@@ -202,7 +202,6 @@ export class QuoteService implements IQuoteService {
    */
   async hasTrainerSubmittedQuote(lessonRequestId: string, trainerId: string): Promise<boolean> {
     const existingQuote = await this.quoteRepository.findTrainerQuoteForLesson(lessonRequestId, trainerId);
-    console.log('quote.service : existingQuote', existingQuote);
     return !!existingQuote;
   }
 }
