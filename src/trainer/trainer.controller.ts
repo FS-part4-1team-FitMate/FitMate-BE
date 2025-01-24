@@ -20,6 +20,12 @@ export class TrainerController {
     return this.trainerService.getTrainers(query);
   }
 
+  @Get('favorite')
+  @UseGuards(AccessTokenGuard)
+  async getFavoriteTrainers(): Promise<TrainerWithFavorites[]> {
+    return this.trainerService.getFavoriteTrainers();
+  }
+
   @Get(':trainerId/favorite')
   @UseGuards(AccessTokenGuard)
   async getFavoriteStatus(
