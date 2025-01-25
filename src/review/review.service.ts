@@ -62,4 +62,13 @@ export class ReviewService implements IReviewService {
   async getReviews(trainerId?: string, page = 1, limit = 10) {
     return this.reviewRepository.getReviews(trainerId, page, limit);
   }
+
+  async getMyReviews(page = 1, limit = 10) {
+    const { userId } = this.alsStore.getStore();
+    if (!userId) {
+      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
+    }
+
+    return this.reviewRepository.getMyReviews(userId, page, limit);
+  }
 }

@@ -32,3 +32,15 @@ export class GetReviewsQueryDto {
   @Min(1, { message: '리밋은 최소 1 이상이어야 합니다.' })
   limit?: number;
 }
+
+export class GetMyReviewsQueryDto {
+  @IsOptional()
+  @IsInt()
+  @Min(1, { message: '페이지는 최소 1 이상이어야 합니다.' })
+  page?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1, { message: '리밋은 최소 1 이상이어야 합니다.' })
+  limit?: number;
+}

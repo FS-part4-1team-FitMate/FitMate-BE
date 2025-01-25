@@ -1,4 +1,4 @@
-import { Review } from '@prisma/client';
+import { LessonType, Review } from '@prisma/client';
 import { CreateReviewDto } from '../dto/review.dto';
 
 export interface IReviewRepository {
@@ -18,6 +18,14 @@ export interface IReviewRepository {
         nickname: string;
       };
     }[];
+    totalCount: number;
+  }>;
+  getMyReviews(
+    userId: string,
+    page?: number,
+    limit?: number,
+  ): Promise<{
+    reviews: any[];
     totalCount: number;
   }>;
 }

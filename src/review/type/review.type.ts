@@ -12,3 +12,13 @@ export type ReviewResponse = {
   content: string;
   createdAt: Date;
 };
+
+export type MyReviewResponse = {
+  nickname: string;
+  createdAt: Date;
+  price: number;
+  profileImage: string;
+  quoteEndDate: Date;
+  content: string;
+  lessonType: string;
+};

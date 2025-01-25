@@ -60,4 +60,47 @@ export class ReviewRepository implements IReviewRepository {
 
     return { reviews, totalCount };
   }
+
+  async getMyReviews(userId: string, page = 1, limit = 10) {
+    const reviews = await this.prisma.review.findMany({
+      where: { userId },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        content: true,
+        createdAt: true,
+        lessonQuote: {
+          select: {
+            price: true,
+            trainer: {
+              select: {
+                nickname: true,
+                profile: {
+                  select: {
+                    profileImage: true,
+                  },
+                },
+              },
+            },
+            lessonRequest: {
+              select: {
+                quoteEndDate: true,
+                lessonType: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const totalCount = await this.prisma.review.count({
+      where: { userId },
+    });
+
+    return {
+      reviews,
+      totalCount,
+    };
+  }
 }
