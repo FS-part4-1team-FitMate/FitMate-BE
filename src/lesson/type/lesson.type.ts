@@ -1,10 +1,12 @@
 import {
+  Gender,
   LessonRequest,
   LessonRequestStatus,
   LessonSubType,
   LessonType,
   LocationType,
   Profile,
+  Region,
   Role,
 } from '@prisma/client';
 
@@ -25,14 +27,14 @@ export type CreateLesson = {
 export type PatchLesson = Partial<CreateLesson>;
 
 export type LessonResponse = LessonRequest & {
-  // user?: {
-  //   profile?: Profile;
-  // };
   user?: {
-    // Prisma에서 오는 필드 전부
     id: string;
     nickname: string;
-    profile?: Profile;
+    profile?: {
+      name: string | null;
+      gender: Gender;
+      region: Region[];
+    } | null;
   };
   directQuoteRequests?: {
     trainerId: string;

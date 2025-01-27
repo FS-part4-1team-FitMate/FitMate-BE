@@ -154,45 +154,8 @@ export class LessonService implements ILessonService {
    * 요청 레슨 상세조회
    * ***********************************************************************************
    */
-  async getLessonById(id: string): Promise<LessonResponse> {
-    const select = {
-      id: true,
-      userId: true,
-      lessonType: true,
-      lessonSubType: true,
-      startDate: true,
-      endDate: true,
-      lessonCount: true,
-      lessonTime: true,
-      quoteEndDate: true,
-      locationType: true,
-      postcode: true,
-      roadAddress: true,
-      detailAddress: true,
-      status: true,
-      createdAt: true,
-      updatedAt: true,
-      directQuoteRequests: {
-        select: {
-          trainerId: true,
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          nickname: true,
-          profile: {
-            select: {
-              name: true,
-              gender: true,
-              region: true,
-            },
-          },
-        },
-      },
-    };
-
-    const lesson = await this.lessonRepository.findOne(id, select);
+  async getLessonById(lessonId: string): Promise<LessonResponse> {
+    const lesson = await this.lessonRepository.findOneById(lessonId);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
@@ -212,7 +175,7 @@ export class LessonService implements ILessonService {
   async cancelLessonById(lessonId: string): Promise<LessonResponse> {
     const userId = this.getUserId();
 
-    const lesson = await this.lessonRepository.findOne(lessonId);
+    const lesson = await this.lessonRepository.findOneById(lessonId);
 
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
@@ -240,7 +203,7 @@ export class LessonService implements ILessonService {
     const userId = this.getUserId();
 
     // 요청 레슨 확인
-    const lesson = await this.lessonRepository.findOne(lessonId);
+    const lesson = await this.lessonRepository.findOneById(lessonId);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
@@ -324,7 +287,7 @@ export class LessonService implements ILessonService {
    * ***********************************************************************************
    */
   async updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse> {
-    const lesson = await this.lessonRepository.findOne(id);
+    const lesson = await this.lessonRepository.findOneById(id);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
@@ -336,7 +299,7 @@ export class LessonService implements ILessonService {
    * ***********************************************************************************
    */
   async updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse> {
-    const lesson = await this.lessonRepository.findOne(id);
+    const lesson = await this.lessonRepository.findOneById(id);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }

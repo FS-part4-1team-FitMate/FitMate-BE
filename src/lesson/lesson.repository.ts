@@ -54,29 +54,6 @@ export class LessonRepository implements ILessonRepository {
     return await this.lessonRequest.create({ data });
   }
 
-  async findAll(
-    where: Record<string, any> = {},
-    orderBy: Record<string, string> = { created_at: 'desc' },
-    skip = 0,
-    take = 10,
-    select?: Prisma.LessonRequestSelect,
-  ): Promise<LessonResponse[]> {
-    const lessons = await this.lessonRequest.findMany({
-      where,
-      orderBy,
-      skip,
-      take,
-      select,
-    });
-    return lessons;
-  }
-
-  async count(where: Record<string, any> = {}): Promise<number> {
-    return await this.lessonRequest.count({
-      where,
-    });
-  }
-
   async findLessons(
     query: QueryLessonDto,
     currentUserId: string,
@@ -266,9 +243,46 @@ export class LessonRepository implements ILessonRepository {
     return await this.lessonRequest.findMany({ where: whereClause });
   }
 
-  async findOne(id: string, select?: Prisma.LessonRequestSelect): Promise<LessonResponse | null> {
-    const lesson = await this.lessonRequest.findUnique({ where: { id }, select });
-    return lesson;
+  async findOneById(id: string): Promise<LessonResponse | null> {
+    return this.lessonRequest.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        lessonType: true,
+        lessonSubType: true,
+        startDate: true,
+        endDate: true,
+        lessonCount: true,
+        lessonTime: true,
+        quoteEndDate: true,
+        locationType: true,
+        postcode: true,
+        roadAddress: true,
+        detailAddress: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        directQuoteRequests: {
+          select: {
+            trainerId: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            nickname: true,
+            profile: {
+              select: {
+                name: true,
+                gender: true,
+                region: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
   async updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest> {
