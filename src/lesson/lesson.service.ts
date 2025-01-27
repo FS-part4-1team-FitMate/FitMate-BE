@@ -89,173 +89,14 @@ export class LessonService implements ILessonService {
     genderCounts: Record<string, number>;
     directQuoteRequestCount: number;
   }> {
-    const {
-      page = 1,
-      limit = 5,
-      order = 'createdAt',
-      sort = 'desc',
-      keyword,
-      lessonType,
-      lessonSubType,
-      locationType,
-      status,
-      gender,
-      region,
-      hasDirectQuote,
-    } = query.toCamelCase();
-
-    const orderMapping: Record<string, string> = {
-      created_at: 'createdAt',
-      start_date: 'startDate',
-      end_date: 'endDate',
-      quote_end_date: 'quoteEndDate',
-      rating: 'rating',
-      lesson_count: 'lessonCount',
-      lesson_time: 'lessonTime',
-    };
-
-    const orderByField = orderMapping[order] || 'createdAt';
-
-    const regionMapping: Record<Region, string[]> = {
-      SEOUL: ['서울'],
-      GYEONGGI: ['경기'],
-      INCHEON: ['인천'],
-      GANGWON: ['강원', '강원특별자치도'],
-      CHUNGBUK: ['충북'],
-      CHUNGNAM: ['충남'],
-      JEONBUK: ['전북', '전북특별자치도'],
-      JEONNAM: ['전남'],
-      GYEONGBUK: ['경북'],
-      GYEONGNAM: ['경남'],
-      DAEGU: ['대구'],
-      DAEJEON: ['대전'],
-      BUSAN: ['부산'],
-      ULSAN: ['울산'],
-      GWANGJU: ['광주'],
-      JEJU: ['제주', '제주특별자치도'],
-    };
-
     const currentUserId = this.getUserId();
 
-    // 필터 조건 구성
-    const where = {
-      ...(myLessonUserId && { userId: myLessonUserId }),
-      ...(lessonType && { lessonType: { in: lessonType } }),
-      ...(lessonSubType && { lessonSubType: { in: lessonSubType } }),
-      ...(locationType && { locationType: { in: locationType } }),
-      ...(status && { status: { in: status } }),
-      ...(gender && {
-        user: {
-          profile: {
-            gender: { in: gender },
-          },
-        },
-      }),
-      ...(hasDirectQuote !== undefined && {
-        directQuoteRequests: hasDirectQuote
-          ? { some: { trainerId: currentUserId } }
-          : { none: { trainerId: currentUserId } },
-      }),
-      AND: [
-        ...(region
-          ? [
-              {
-                OR: region.flatMap(
-                  (r) =>
-                    regionMapping[r]?.map((koreanRegion) => ({
-                      roadAddress: { contains: koreanRegion },
-                    })) || [],
-                ),
-              },
-            ]
-          : []),
-        ...(keyword
-          ? [
-              {
-                OR: [
-                  { user: { nickname: { contains: keyword, mode: 'insensitive' } } },
-                  { user: { profile: { name: { contains: keyword, mode: 'insensitive' } } } },
-                ],
-              },
-            ]
-          : []),
-      ],
-    };
-
-    const orderBy: Record<string, string> = {};
-    orderBy[orderByField] = sort;
-    const skip = (page - 1) * limit;
-    const take = limit;
-
-    const select: Prisma.LessonRequestSelect = {
-      id: true,
-      userId: true,
-      lessonType: true,
-      lessonSubType: true,
-      startDate: true,
-      endDate: true,
-      lessonCount: true,
-      lessonTime: true,
-      quoteEndDate: true,
-      locationType: true,
-      postcode: true,
-      roadAddress: true,
-      detailAddress: true,
-      status: true,
-      createdAt: true,
-      updatedAt: true,
-      directQuoteRequests: {
-        select: {
-          id: true,
-          lessonRequestId: true,
-          trainerId: true,
-          status: true,
-          rejectionReason: true,
-        },
-      },
-      lessonQuotes: {
-        select: {
-          id: true,
-          lessonRequestId: true,
-          trainerId: true,
-          price: true,
-          status: true,
-          createdAt: true,
-          updatedAt: true,
-          rejectionReason: true,
-          trainer: {
-            select: {
-              id: true,
-              nickname: true,
-              profile: {
-                select: {
-                  name: true,
-                  region: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          nickname: true,
-          profile: {
-            select: {
-              name: true,
-              gender: true,
-              region: true,
-            },
-          },
-        },
-      },
-    };
-
-    const [lessons, totalCount] = await Promise.all([
-      this.lessonRepository.findAll(where, orderBy, skip, take, select),
-      this.lessonRepository.count(where),
-    ]);
+    // Repository에서 처리하도록 변경
+    const { lessons, totalCount } = await this.lessonRepository.findLessons(
+      query,
+      currentUserId,
+      myLessonUserId,
+    );
 
     // 전체 레슨 타입 목록 정의 (초기값)
     const allLessonTypes = ['SPORTS', 'FITNESS', 'REHAB'];
@@ -288,6 +129,9 @@ export class LessonService implements ILessonService {
       const hasDirectQuote = lesson.directQuoteRequests?.some((req) => req.trainerId === currentUserId);
       return hasDirectQuote ? count + 1 : count;
     }, 0);
+
+    // 현재 페이지, limit
+    const { page = 1, limit = 5 } = query.toCamelCase();
 
     const lessonsWithDirectQuote = lessons.map((lesson) => ({
       ...lesson,
