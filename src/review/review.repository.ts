@@ -3,6 +3,7 @@ import { Review } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { CreateReviewDto } from './dto/review.dto.js';
 import { IReviewRepository } from './interface/review.repository.interface.js';
+import { MyReviewResponse } from './type/review.type.js';
 
 @Injectable()
 export class ReviewRepository implements IReviewRepository {
@@ -61,7 +62,11 @@ export class ReviewRepository implements IReviewRepository {
     return { reviews, totalCount };
   }
 
-  async getMyReviews(userId: string, page = 1, limit = 10) {
+  async getMyReviews(
+    userId: string,
+    page = 1,
+    limit = 10,
+  ): Promise<{ reviews: MyReviewResponse[]; totalCount: number }> {
     const reviews = await this.prisma.review.findMany({
       where: { userId },
       skip: (page - 1) * limit,
