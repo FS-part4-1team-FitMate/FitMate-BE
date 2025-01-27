@@ -100,7 +100,7 @@ GET http://localhost:3000/reviews
 Content-Type: application/json
 
 ### 특정 강사 리뷰 조회
-GET http://localhost:3000/reviews?trainer_id=11752641-132b-4ec3-ab67-bb2116cc3c93
+GET http://localhost:3000/reviews?trainer_id=11752641-132b-4ec3-ab67-bb2116cc3c94&limit=1
 Content-Type: application/json
 
 ### 나의 리뷰
