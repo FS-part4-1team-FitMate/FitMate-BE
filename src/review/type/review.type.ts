@@ -12,3 +12,21 @@ export type ReviewResponse = {
   content: string;
   createdAt: Date;
 };
+
+export type MyReviewResponse = {
+  content: string;
+  createdAt: Date;
+  lessonQuote: {
+    price: number;
+    trainer: {
+      nickname: string;
+      profile: {
+        profileImage: string | null;
+      } | null;
+    };
+    lessonRequest: {
+      quoteEndDate: Date;
+      lessonType: string;
+    };
+  };
+};

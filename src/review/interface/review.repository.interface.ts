@@ -1,4 +1,5 @@
 import { Review } from '@prisma/client';
+import { MyReviewResponse } from '#review/type/review.type.js';
 import { CreateReviewDto } from '../dto/review.dto';
 
 export interface IReviewRepository {
@@ -18,6 +19,14 @@ export interface IReviewRepository {
         nickname: string;
       };
     }[];
+    totalCount: number;
+  }>;
+  getMyReviews(
+    userId: string,
+    page?: number,
+    limit?: number,
+  ): Promise<{
+    reviews: MyReviewResponse[];
     totalCount: number;
   }>;
 }

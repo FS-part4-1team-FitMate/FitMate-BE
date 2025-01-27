@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsInt, Min, Max, IsUUID, IsString, Length, IsOptional } from 'class-validator';
 
 export class CreateReviewDto {
@@ -22,6 +23,20 @@ export class GetReviewsQueryDto {
   @IsUUID('4', { message: '유효하지 않은 트레이너 ID입니다.' })
   trainer_id?: string;
 
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
+  @Min(1, { message: '페이지는 최소 1 이상이어야 합니다.' })
+  page?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
+  @Min(1, { message: '리밋은 최소 1 이상이어야 합니다.' })
+  limit?: number;
+}
+
+export class GetMyReviewsQueryDto {
   @IsOptional()
   @IsInt()
   @Min(1, { message: '페이지는 최소 1 이상이어야 합니다.' })
