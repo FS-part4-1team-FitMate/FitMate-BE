@@ -6,23 +6,24 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { DirectQuoteRequest, LessonRequestStatus, Prisma, Region } from '@prisma/client';
+import type { DirectQuoteRequest } from '@prisma/client';
+import { LessonRequestStatus, Prisma } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import { UserService } from '#user/user.service.js';
 import type { IQuoteService } from '#quote/interface/quote-service.inteface.js';
 import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from './dto/lesson.dto.js';
-import { ILessonService } from './interface/lesson-service.interface.js';
+import type { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
-import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
+import type { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
 
 @Injectable()
 export class LessonService implements ILessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
     private readonly userService: UserService,
-    @Inject(forwardRef(() => 'IQuoteService'))
+    @Inject('IQuoteService')
     private readonly quoteService: IQuoteService,
     private readonly alsStore: AlsStore,
   ) {}

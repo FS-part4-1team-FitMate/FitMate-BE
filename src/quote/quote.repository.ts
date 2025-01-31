@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { LessonQuote, Prisma, QuoteStatus } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
-import { IQuoteRepository } from './interface/quote-repository.interface.js';
-import { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
+import type { IQuoteRepository } from './interface/quote-repository.interface.js';
+import type { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
 
 @Injectable()
 export class QuoteRepository implements IQuoteRepository {

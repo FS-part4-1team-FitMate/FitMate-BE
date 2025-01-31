@@ -6,7 +6,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { LessonQuote, LessonRequestStatus, QuoteStatus } from '@prisma/client';
+import type { LessonQuote } from '@prisma/client';
+import { LessonRequestStatus, QuoteStatus } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
@@ -84,7 +85,7 @@ export class QuoteService implements IQuoteService {
     }
 
     if (lessonRequest.status != LessonRequestStatus.PENDING) {
-      throw new BadRequestException(QuoteExceptionMessage.INVALID_LESSON_STATUS_FOR_ACCEPT)
+      throw new BadRequestException(QuoteExceptionMessage.INVALID_LESSON_STATUS_FOR_ACCEPT);
     }
 
     if (lessonQuote.status !== QuoteStatus.PENDING) {

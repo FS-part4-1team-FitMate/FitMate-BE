@@ -1,16 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DirectQuoteRequest,
-  DirectQuoteRequestStatus,
-  LessonRequest,
-  LessonRequestStatus,
-  Prisma,
-  Region,
-} from '@prisma/client';
+import type { DirectQuoteRequest, LessonRequest } from '@prisma/client';
+import { DirectQuoteRequestStatus, LessonRequestStatus, Prisma, Region } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { QueryLessonDto } from './dto/lesson.dto.js';
-import { ILessonRepository } from './interface/lesson-repository.interface.js';
-import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
+import type { ILessonRepository } from './interface/lesson-repository.interface.js';
+import type { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
 
 @Injectable()
 export class LessonRepository implements ILessonRepository {

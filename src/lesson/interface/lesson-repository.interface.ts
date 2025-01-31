@@ -1,12 +1,7 @@
-import type {
-  DirectQuoteRequest,
-  DirectQuoteRequestStatus,
-  LessonRequest,
-  LessonRequestStatus,
-  Prisma,
-} from '@prisma/client';
+import type { DirectQuoteRequest, LessonRequest } from '@prisma/client';
+import { DirectQuoteRequestStatus, LessonRequestStatus, Prisma } from '@prisma/client';
 import { QueryLessonDto } from '#lesson/dto/lesson.dto.js';
-import type { CreateLesson, LessonResponse, PatchLesson } from '../type/lesson.type';
+import type { CreateLesson, LessonResponse, PatchLesson } from '#lesson/type/lesson.type.js';
 
 export interface ILessonRepository {
   create(data: CreateLesson & { userId: string }): Promise<LessonRequest>;

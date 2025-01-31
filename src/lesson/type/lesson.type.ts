@@ -5,9 +5,7 @@ import {
   LessonSubType,
   LessonType,
   LocationType,
-  Profile,
   Region,
-  Role,
 } from '@prisma/client';
 
 export type CreateLesson = {

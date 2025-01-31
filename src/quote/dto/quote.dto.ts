@@ -7,10 +7,6 @@ export class CreateQuoteDto {
   @IsString()
   lessonRequestId: string;
 
-  // @IsNotEmpty({ message: '트레이너 ID는 필수 입력 값입니다.' })
-  // @IsString()
-  // trainerId: string;
-
   @IsNotEmpty({ message: '가격은 필수 입력 값입니다.' })
   @IsNumber()
   @Min(0)

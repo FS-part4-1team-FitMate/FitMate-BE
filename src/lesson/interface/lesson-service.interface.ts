@@ -1,6 +1,7 @@
-import { DirectQuoteRequest, LessonRequestStatus, Prisma } from '@prisma/client';
+import type { DirectQuoteRequest } from '@prisma/client';
+import { LessonRequestStatus, Prisma } from '@prisma/client';
 import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from '#lesson/dto/lesson.dto.js';
-import { CreateLesson, LessonResponse, PatchLesson } from '#lesson/type/lesson.type.js';
+import type { CreateLesson, LessonResponse, PatchLesson } from '#lesson/type/lesson.type.js';
 
 export interface ILessonService {
   createLesson(data: CreateLesson): Promise<LessonResponse>;
