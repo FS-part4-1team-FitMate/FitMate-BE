@@ -1,4 +1,4 @@
-import { DirectQuoteRequest, LessonRequestStatus } from '@prisma/client';
+import { DirectQuoteRequest, LessonRequestStatus, Prisma } from '@prisma/client';
 import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from '#lesson/dto/lesson.dto.js';
 import { CreateLesson, LessonResponse, PatchLesson } from '#lesson/type/lesson.type.js';
 
@@ -30,4 +30,9 @@ export interface ILessonService {
   ): Promise<DirectQuoteRequest>;
   updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse>;
   updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse>;
+  updateLessonStatusWithTx(
+    tx: Prisma.TransactionClient,
+    lessonRequestId: string,
+    status: LessonRequestStatus,
+  ): Promise<void>;
 }

@@ -305,4 +305,12 @@ export class LessonService implements ILessonService {
     }
     return await this.lessonRepository.updateStatus(id, status);
   }
+
+  async updateLessonStatusWithTx(
+    tx: Prisma.TransactionClient,
+    lessonRequestId: string,
+    status: LessonRequestStatus,
+  ): Promise<void> {
+    await this.lessonRepository.updateLessonStatustWithTx(tx, lessonRequestId, status);
+  }
 }

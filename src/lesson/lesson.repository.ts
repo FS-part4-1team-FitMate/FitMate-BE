@@ -289,6 +289,16 @@ export class LessonRepository implements ILessonRepository {
     return await this.lessonRequest.update({ where: { id }, data: { status } });
   }
 
+  async updateLessonStatustWithTx(
+    tx: Prisma.TransactionClient,
+    lessonRequestId: string,
+    status: LessonRequestStatus,
+  ): Promise<void> {
+    await tx.lessonRequest.update({
+      where: { id: lessonRequestId },
+      data: { status },
+    });
+  }
   async update(id: string, data: PatchLesson): Promise<LessonRequest> {
     return await this.lessonRequest.update({ where: { id }, data });
   }

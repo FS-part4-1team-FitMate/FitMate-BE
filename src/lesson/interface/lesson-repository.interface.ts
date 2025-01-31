@@ -12,6 +12,11 @@ export interface ILessonRepository {
   findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]>;
   findOneById(id: string): Promise<LessonResponse | null>;
   updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest>;
+  updateLessonStatustWithTx(
+    tx: Prisma.TransactionClient,
+    lessonRequestId: string,
+    status: LessonRequestStatus,
+  ): Promise<void>;
   update(id: string, data: PatchLesson): Promise<LessonRequest>;
   findDirectQuoteRequest(lessonRequestId: string, trainerId: string): Promise<DirectQuoteRequest | null>;
   createDirectQuoteRequest(data: { lessonRequestId: string; trainerId: string }): Promise<DirectQuoteRequest>;
