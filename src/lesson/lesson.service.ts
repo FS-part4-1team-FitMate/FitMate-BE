@@ -10,7 +10,7 @@ import { DirectQuoteRequest, LessonRequestStatus, Prisma, Region } from '@prisma
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
-import { UserRepository } from '#user/user.repository.js';
+import { UserService } from '#user/user.service.js';
 import type { IQuoteService } from '#quote/interface/quote-service.inteface.js';
 import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from './dto/lesson.dto.js';
 import { ILessonService } from './interface/lesson-service.interface.js';
@@ -21,7 +21,7 @@ import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js
 export class LessonService implements ILessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
-    private readonly userRepository: UserRepository,
+    private readonly userService: UserService,
     @Inject(forwardRef(() => 'IQuoteService'))
     private readonly quoteService: IQuoteService,
     private readonly alsStore: AlsStore,
@@ -45,10 +45,8 @@ export class LessonService implements ILessonService {
     if (userRole !== 'USER') {
       throw new UnauthorizedException(LessonExceptionMessage.ONLY_USER_CAN_REQUEST_LESSON);
     }
-    const userExists = await this.userRepository.findUserById(userId);
-    if (!userExists) {
-      throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
-    }
+    // userService 에서 userId가 존재하는지 검증
+    await this.userService.findUserById(userId);
 
     const pendingLesson = await this.lessonRepository.findLessonsByUserId(
       userId,
@@ -214,7 +212,7 @@ export class LessonService implements ILessonService {
     }
 
     // 트레이너 확인
-    const trainer = await this.userRepository.findUserById(trainerId);
+    const trainer = await this.userService.findUserById(trainerId);
     if (!trainer || trainer.role !== 'TRAINER') {
       throw new BadRequestException(LessonExceptionMessage.TRAINER_NOT_FOUND_OR_INVALID);
     }
