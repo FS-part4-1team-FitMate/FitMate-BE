@@ -6,8 +6,8 @@ export const LESSON_REQUESTS = [
     userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f', // User01 // 여하늘
     lessonType: LessonType.FITNESS,
     lessonSubType: LessonSubType.PILATES,
-    startDate: new Date('2025-01-28T10:00:00.000Z'),
-    endDate: new Date('2025-01-31T23:59:59.000Z'),
+    startDate: new Date('2025-02-05T10:00:00.000Z'),
+    endDate: new Date('2025-02-11T23:59:59.000Z'),
     lessonCount: 5,
     lessonTime: 40,
     quoteEndDate: new Date('2025-01-27T23:59:59.000Z'),

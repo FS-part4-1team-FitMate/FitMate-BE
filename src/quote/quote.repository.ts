@@ -59,6 +59,17 @@ export class QuoteRepository implements IQuoteRepository {
     });
   }
 
+  async updateStatusWithTx(
+    tx: Prisma.TransactionClient,
+    quoteId: string,
+    status: QuoteStatus,
+  ): Promise<LessonQuote> {
+    return await tx.lessonQuote.update({
+      where: { id: quoteId },
+      data: { status },
+    });
+  }
+
   async findTrainerQuoteForLesson(lessonRequestId: string, trainerId: string): Promise<LessonQuote | null> {
     return await this.lessonQuote.findFirst({
       where: { lessonRequestId, trainerId },
