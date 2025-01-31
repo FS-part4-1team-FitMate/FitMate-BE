@@ -5,11 +5,17 @@ import type {
   LessonRequestStatus,
   Prisma,
 } from '@prisma/client';
+import { QueryLessonDto } from '#lesson/dto/lesson.dto.js';
 import type { CreateLesson, LessonResponse, PatchLesson } from '../type/lesson.type';
 
 export interface ILessonRepository {
   create(data: CreateLesson & { userId: string }): Promise<LessonRequest>;
   findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]>;
+  findLessons(
+    query: QueryLessonDto,
+    currentUserId: string,
+    myLessonUserId?: string,
+  ): Promise<{ lessons: LessonResponse[]; totalCount: number; hasMore: boolean }>;
   findOneById(id: string): Promise<LessonResponse | null>;
   updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest>;
   updateLessonStatustWithTx(

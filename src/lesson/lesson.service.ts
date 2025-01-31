@@ -92,7 +92,7 @@ export class LessonService implements ILessonService {
     const currentUserId = this.getUserId();
 
     // Repository에서 처리하도록 변경
-    const { lessons, totalCount } = await this.lessonRepository.findLessons(
+    const { lessons, totalCount, hasMore } = await this.lessonRepository.findLessons(
       query,
       currentUserId,
       myLessonUserId,
@@ -130,9 +130,6 @@ export class LessonService implements ILessonService {
       return hasDirectQuote ? count + 1 : count;
     }, 0);
 
-    // 현재 페이지, limit
-    const { page = 1, limit = 5 } = query.toCamelCase();
-
     const lessonsWithDirectQuote = lessons.map((lesson) => ({
       ...lesson,
       isDirectQuote: currentUserId
@@ -143,7 +140,7 @@ export class LessonService implements ILessonService {
     return {
       list: lessonsWithDirectQuote,
       totalCount,
-      hasMore: totalCount > page * limit,
+      hasMore,
       lessonTypeCounts,
       genderCounts,
       directQuoteRequestCount,

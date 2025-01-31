@@ -58,7 +58,7 @@ export class LessonRepository implements ILessonRepository {
     query: QueryLessonDto,
     currentUserId: string,
     myLessonUserId?: string,
-  ): Promise<{ lessons: LessonResponse[]; totalCount: number }> {
+  ): Promise<{ lessons: LessonResponse[]; totalCount: number; hasMore: boolean }> {
     const {
       page = 1,
       limit = 5,
@@ -156,70 +156,70 @@ export class LessonRepository implements ILessonRepository {
     const skip = (page - 1) * limit;
     const take = limit;
 
-    const select: Prisma.LessonRequestSelect = {
-      id: true,
-      userId: true,
-      lessonType: true,
-      lessonSubType: true,
-      startDate: true,
-      endDate: true,
-      lessonCount: true,
-      lessonTime: true,
-      quoteEndDate: true,
-      locationType: true,
-      postcode: true,
-      roadAddress: true,
-      detailAddress: true,
-      status: true,
-      createdAt: true,
-      updatedAt: true,
-      directQuoteRequests: {
-        select: {
-          id: true,
-          lessonRequestId: true,
-          trainerId: true,
-          status: true,
-          rejectionReason: true,
-        },
-      },
-      lessonQuotes: {
-        select: {
-          id: true,
-          lessonRequestId: true,
-          trainerId: true,
-          price: true,
-          status: true,
-          createdAt: true,
-          updatedAt: true,
-          rejectionReason: true,
-          trainer: {
-            select: {
-              id: true,
-              nickname: true,
-              profile: {
-                select: {
-                  name: true,
-                  region: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          nickname: true,
-          profile: {
-            select: {
-              name: true,
-              gender: true,
-              region: true,
-            },
-          },
-        },
-      },
-    };
+    // const select: Prisma.LessonRequestSelect = {
+    //   id: true,
+    //   userId: true,
+    //   lessonType: true,
+    //   lessonSubType: true,
+    //   startDate: true,
+    //   endDate: true,
+    //   lessonCount: true,
+    //   lessonTime: true,
+    //   quoteEndDate: true,
+    //   locationType: true,
+    //   postcode: true,
+    //   roadAddress: true,
+    //   detailAddress: true,
+    //   status: true,
+    //   createdAt: true,
+    //   updatedAt: true,
+    //   directQuoteRequests: {
+    //     select: {
+    //       id: true,
+    //       lessonRequestId: true,
+    //       trainerId: true,
+    //       status: true,
+    //       rejectionReason: true,
+    //     },
+    //   },
+    //   lessonQuotes: {
+    //     select: {
+    //       id: true,
+    //       lessonRequestId: true,
+    //       trainerId: true,
+    //       price: true,
+    //       status: true,
+    //       createdAt: true,
+    //       updatedAt: true,
+    //       rejectionReason: true,
+    //       trainer: {
+    //         select: {
+    //           id: true,
+    //           nickname: true,
+    //           profile: {
+    //             select: {
+    //               name: true,
+    //               region: true,
+    //             },
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    //   user: {
+    //     select: {
+    //       id: true,
+    //       nickname: true,
+    //       profile: {
+    //         select: {
+    //           name: true,
+    //           gender: true,
+    //           region: true,
+    //         },
+    //       },
+    //     },
+    //   },
+    // };
 
     const [lessons, totalCount] = await Promise.all([
       this.lessonRequest.findMany({
@@ -227,12 +227,53 @@ export class LessonRepository implements ILessonRepository {
         orderBy,
         skip,
         take,
-        select,
+        include: {
+          directQuoteRequests: {
+            select: {
+              id: true,
+              lessonRequestId: true,
+              trainerId: true,
+              status: true,
+              rejectionReason: true,
+            },
+          },
+          lessonQuotes: {
+            include: {
+              trainer: {
+                select: {
+                  id: true,
+                  nickname: true,
+                  profile: {
+                    select: {
+                      name: true,
+                      region: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              nickname: true,
+              profile: {
+                select: {
+                  name: true,
+                  gender: true,
+                  region: true,
+                },
+              },
+            },
+          },
+        },
       }),
       this.lessonRequest.count({ where }),
     ]);
 
-    return { lessons, totalCount };
+    const hasMore = totalCount > page * limit;
+
+    return { lessons, totalCount, hasMore };
   }
 
   async findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]> {
