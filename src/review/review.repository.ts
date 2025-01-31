@@ -108,4 +108,42 @@ export class ReviewRepository implements IReviewRepository {
       totalCount,
     };
   }
+
+  async getReviewRatingStats(trainerId: string): Promise<{ rating: number; count: number }[]> {
+    const ratings = await this.prisma.review.groupBy({
+      by: ['rating'],
+      where: {
+        lessonQuote: {
+          trainerId,
+        },
+      },
+      _count: {
+        rating: true,
+      },
+      orderBy: {
+        rating: 'asc',
+      },
+    });
+
+    const defaultRatings = [1, 2, 3, 4, 5].map((rating) => ({
+      rating,
+      count: 0,
+    }));
+
+    ratings.forEach((r) => {
+      const index = defaultRatings.findIndex((d) => d.rating === r.rating);
+      if (index !== -1) {
+        defaultRatings[index].count = r._count.rating;
+      }
+    });
+
+    return defaultRatings;
+  }
+
+  async isTrainerExists(trainerId: string): Promise<boolean> {
+    const trainer = await this.prisma.user.findUnique({
+      where: { id: trainerId, role: 'TRAINER' }, // 역할이 'TRAINER'인지 확인
+    });
+    return !!trainer;
+  }
 }

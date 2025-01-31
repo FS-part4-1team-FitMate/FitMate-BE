@@ -21,6 +21,7 @@ export interface IReviewRepository {
     }[];
     totalCount: number;
   }>;
+
   getMyReviews(
     userId: string,
     page?: number,
@@ -29,4 +30,7 @@ export interface IReviewRepository {
     reviews: MyReviewResponse[];
     totalCount: number;
   }>;
+
+  getReviewRatingStats(trainerId: string): Promise<{ rating: number; count: number }[]>;
+  isTrainerExists(trainerId: string): Promise<boolean>;
 }
