@@ -71,4 +71,13 @@ export class ReviewService implements IReviewService {
 
     return this.reviewRepository.getMyReviews(userId, page, limit);
   }
+
+  async getReviewRatingStats(trainerId: string) {
+    const isTrainerExists = await this.reviewRepository.isTrainerExists(trainerId);
+    if (!isTrainerExists) {
+      throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
+    }
+
+    return this.reviewRepository.getReviewRatingStats(trainerId);
+  }
 }

@@ -23,4 +23,9 @@ export class ReviewController {
   async getMyReviews(@Query() query: GetMyReviewsQueryDto) {
     return this.reviewService.getMyReviews(query.page, query.limit);
   }
+  @Get('rating-stats/:trainerId')
+  @UseGuards(AccessTokenGuard)
+  async getReviewRatingStats(@Param('trainerId') trainerId: string) {
+    return this.reviewService.getReviewRatingStats(trainerId);
+  }
 }

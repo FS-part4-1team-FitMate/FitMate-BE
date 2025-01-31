@@ -107,3 +107,8 @@ Content-Type: application/json
 GET http://localhost:3000/reviews/me
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzOTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2QiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNzgxMDc4MCwiZXhwIjoxNzM5MDIwMzgwfQ.hFlashrS4X-UuhjuGazbxA5zz-yd2vUmgBvrIKoD7fw
+
+
+### 리뷰 점수 확인
+GET http://localhost:3000/reviews/rating-stats?trainer_id=11752641-132b-4ec3-ab67-bb2116cc3c94
+Content-Type: application/json

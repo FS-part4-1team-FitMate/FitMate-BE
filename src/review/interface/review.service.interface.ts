@@ -27,4 +27,6 @@ export interface IReviewService {
     reviews: MyReviewResponse[];
     totalCount: number;
   }>;
+
+  getReviewRatingStats(trainerId: string): Promise<{ rating: number; count: number }[]>;
 }
