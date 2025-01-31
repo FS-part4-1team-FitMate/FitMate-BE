@@ -2,6 +2,28 @@ import { QuoteStatus } from '@prisma/client';
 
 export const LESSON_QUOTES = [
   {
+    id: '11g489c0-a951-44c4-8d52-bec26edf0bbe', // 완료된 레슨에 대한 견적
+    trainerId: '11752641-132b-4ec3-ab67-bb2116cc3c94',
+    lessonRequestId: '6ccfc386-d1a7-4430-a37d-9d1c5bdafd01',
+    price: 110000.0,
+    message: 'trainer01 견적 드립니다. 긍정적인 검토 부탁드립니다.',
+    status: QuoteStatus.ACCEPTED,
+    rejectionReason: null,
+    createdAt: new Date('2025-01-22T06:30:12.460Z'),
+    updatedAt: new Date('2025-01-22T09:30:12.460Z'),
+  },
+  {
+    id: 'd695d222-7486-44a7-b851-5ffae053d8c8', // 완료된 레슨에 대한 견적
+    trainerId: '22752641-132b-4ec3-ab67-bb2116cc3c94',
+    lessonRequestId: '6ccfc386-d1a7-4430-a37d-9d1c5bdafd01',
+    price: 120000.0,
+    message: 'trainer02 견적 드립니다. 긍정적인 검토 부탁드립니다.',
+    status: QuoteStatus.PENDING,
+    rejectionReason: null,
+    createdAt: new Date('2025-01-22T06:30:26.329Z'),
+    updatedAt: new Date('2025-01-22T06:30:26.329Z'),
+  },
+  {
     id: '8df489c0-a951-44c4-8d52-bec26edf0bbe',
     trainerId: '11752641-132b-4ec3-ab67-bb2116cc3c94',
     lessonRequestId: '699fc386-d1a7-4430-a37d-9d1c5bdafd01',
@@ -75,8 +97,8 @@ export const LESSON_QUOTES = [
     message: 'trainer01 완료된 레슨.',
     status: QuoteStatus.ACCEPTED,
     rejectionReason: null,
-    createdAt: new Date('2025-01-17T06:30:12.460Z'),
-    updatedAt: new Date('2025-01-17T06:30:12.460Z'),
+    createdAt: new Date('2025-01-17T16:30:12.460Z'),
+    updatedAt: new Date('2025-01-17T16:30:12.460Z'),
   },
   {
     id: '8df489c0-a951-44c4-8d52-bec26edf0ccd',
@@ -86,8 +108,8 @@ export const LESSON_QUOTES = [
     message: 'trainer01 완료된 레슨.',
     status: QuoteStatus.ACCEPTED,
     rejectionReason: null,
-    createdAt: new Date('2025-01-18T06:30:12.460Z'),
-    updatedAt: new Date('2025-01-18T06:30:12.460Z'),
+    createdAt: new Date('2025-01-19T16:30:12.460Z'),
+    updatedAt: new Date('2025-01-19T16:30:12.460Z'),
   },
   {
     id: '8df489c0-a951-44c4-8d52-bec26edf0ffg',
