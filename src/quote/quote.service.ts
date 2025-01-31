@@ -6,7 +6,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { LessonQuote, QuoteStatus } from '@prisma/client';
+import { LessonQuote, LessonRequestStatus, QuoteStatus } from '@prisma/client';
+import { PrismaService } from '#prisma/prisma.service.js';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
@@ -24,6 +25,7 @@ export class QuoteService implements IQuoteService {
     @Inject(forwardRef(() => LessonService)) // forwardRef로 주입
     private readonly lessonService: LessonService,
     private readonly alsStore: AlsStore,
+    private readonly prisma: PrismaService,
   ) {}
 
   private getUserId(): string {
@@ -81,11 +83,25 @@ export class QuoteService implements IQuoteService {
       throw new ForbiddenException(QuoteExceptionMessage.NOT_AUTHORIZED_TO_ACCEPT_QUOTE);
     }
 
+    if (lessonRequest.status != LessonRequestStatus.PENDING) {
+      throw new BadRequestException(QuoteExceptionMessage.INVALID_LESSON_STATUS_FOR_ACCEPT)
+    }
+
     if (lessonQuote.status !== QuoteStatus.PENDING) {
       throw new BadRequestException(QuoteExceptionMessage.INVALID_STATUS_TO_ACCEPT);
     }
 
-    return await this.quoteRepository.updateStatus(id, QuoteStatus.ACCEPTED);
+    // 트랜잭션 처리
+    const reusult = await this.prisma.$transaction(async (tx) => {
+      const updatedQuote = await this.quoteRepository.updateStatusWithTx(tx, id, QuoteStatus.ACCEPTED);
+      await this.lessonService.updateLessonStatusWithTx(
+        tx,
+        lessonQuote.lessonRequestId,
+        LessonRequestStatus.QUOTE_CONFIRMED,
+      );
+      return updatedQuote;
+    });
+    return reusult;
   }
 
   /*************************************************************************************

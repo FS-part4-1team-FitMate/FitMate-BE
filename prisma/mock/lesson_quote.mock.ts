@@ -2,6 +2,28 @@ import { QuoteStatus } from '@prisma/client';
 
 export const LESSON_QUOTES = [
   {
+    id: '11g489c0-a951-44c4-8d52-bec26edf0bbe', // 완료된 레슨에 대한 견적
+    trainerId: '11752641-132b-4ec3-ab67-bb2116cc3c94',
+    lessonRequestId: '6ccfc386-d1a7-4430-a37d-9d1c5bdafd01',
+    price: 110000.0,
+    message: 'trainer01 견적 드립니다. 긍정적인 검토 부탁드립니다.',
+    status: QuoteStatus.ACCEPTED,
+    rejectionReason: null,
+    createdAt: new Date('2025-01-22T06:30:12.460Z'),
+    updatedAt: new Date('2025-01-22T09:30:12.460Z'),
+  },
+  {
+    id: 'd695d222-7486-44a7-b851-5ffae053d8c8', // 완료된 레슨에 대한 견적
+    trainerId: '22752641-132b-4ec3-ab67-bb2116cc3c94',
+    lessonRequestId: '6ccfc386-d1a7-4430-a37d-9d1c5bdafd01',
+    price: 120000.0,
+    message: 'trainer02 견적 드립니다. 긍정적인 검토 부탁드립니다.',
+    status: QuoteStatus.PENDING,
+    rejectionReason: null,
+    createdAt: new Date('2025-01-22T06:30:26.329Z'),
+    updatedAt: new Date('2025-01-22T06:30:26.329Z'),
+  },
+  {
     id: '8df489c0-a951-44c4-8d52-bec26edf0bbe',
     trainerId: '11752641-132b-4ec3-ab67-bb2116cc3c94',
     lessonRequestId: '699fc386-d1a7-4430-a37d-9d1c5bdafd01',
@@ -9,8 +31,8 @@ export const LESSON_QUOTES = [
     message: 'trainer01 견적 드립니다. 긍정적인 검토 부탁드립니다.',
     status: QuoteStatus.PENDING,
     rejectionReason: null,
-    createdAt: new Date('2025-01-22T06:30:12.460Z'),
-    updatedAt: new Date('2025-01-22T06:30:12.460Z'),
+    createdAt: new Date('2025-01-25T06:30:12.460Z'),
+    updatedAt: new Date('2025-01-25T06:30:12.460Z'),
   },
   {
     id: 'd695d827-7486-44a7-b851-5ffae053d8c8',
@@ -20,8 +42,8 @@ export const LESSON_QUOTES = [
     message: 'trainer02 견적 드립니다. 긍정적인 검토 부탁드립니다.',
     status: QuoteStatus.PENDING,
     rejectionReason: null,
-    createdAt: new Date('2025-01-22T06:30:26.329Z'),
-    updatedAt: new Date('2025-01-22T06:30:26.329Z'),
+    createdAt: new Date('2025-01-26T06:30:26.329Z'),
+    updatedAt: new Date('2025-01-26T06:30:26.329Z'),
   },
   {
     id: 'dbe3d4c4-dc14-43d3-9197-74744b5e5d51',
@@ -31,8 +53,8 @@ export const LESSON_QUOTES = [
     message: 'trainer03 견적 드립니다. 긍정적인 검토 부탁드립니다.',
     status: QuoteStatus.PENDING,
     rejectionReason: null,
-    createdAt: new Date('2025-01-22T06:30:40.413Z'),
-    updatedAt: new Date('2025-01-22T06:30:40.413Z'),
+    createdAt: new Date('2025-01-27T06:30:40.413Z'),
+    updatedAt: new Date('2025-01-27T06:30:40.413Z'),
   },
   {
     id: 'dc7a3d08-7735-49e7-94c7-c1347382f23d',
@@ -42,8 +64,8 @@ export const LESSON_QUOTES = [
     message: 'trainer04 견적 드립니다. 긍정적인 검토 부탁드립니다.',
     status: QuoteStatus.PENDING,
     rejectionReason: null,
-    createdAt: new Date('2025-01-22T06:30:54.351Z'),
-    updatedAt: new Date('2025-01-22T06:30:54.351Z'),
+    createdAt: new Date('2025-01-28T08:30:54.351Z'),
+    updatedAt: new Date('2025-01-28T08:30:54.351Z'),
   },
   {
     id: '921fc1af-60aa-49aa-8f24-2c390646d4b4',
@@ -53,8 +75,8 @@ export const LESSON_QUOTES = [
     message: 'trainer05 견적 드립니다. 긍정적인 검토 부탁드립니다.',
     status: QuoteStatus.PENDING,
     rejectionReason: null,
-    createdAt: new Date('2025-01-22T06:31:08.020Z'),
-    updatedAt: new Date('2025-01-22T06:31:08.020Z'),
+    createdAt: new Date('2025-01-29T06:31:08.020Z'),
+    updatedAt: new Date('2025-01-29T06:31:08.020Z'),
   },
   {
     id: '673805e8-2c0a-4ec0-9edd-034db8563474',
@@ -75,8 +97,8 @@ export const LESSON_QUOTES = [
     message: 'trainer01 완료된 레슨.',
     status: QuoteStatus.ACCEPTED,
     rejectionReason: null,
-    createdAt: new Date('2025-01-17T06:30:12.460Z'),
-    updatedAt: new Date('2025-01-17T06:30:12.460Z'),
+    createdAt: new Date('2025-01-17T16:30:12.460Z'),
+    updatedAt: new Date('2025-01-17T16:30:12.460Z'),
   },
   {
     id: '8df489c0-a951-44c4-8d52-bec26edf0ccd',
@@ -86,8 +108,8 @@ export const LESSON_QUOTES = [
     message: 'trainer01 완료된 레슨.',
     status: QuoteStatus.ACCEPTED,
     rejectionReason: null,
-    createdAt: new Date('2025-01-18T06:30:12.460Z'),
-    updatedAt: new Date('2025-01-18T06:30:12.460Z'),
+    createdAt: new Date('2025-01-19T16:30:12.460Z'),
+    updatedAt: new Date('2025-01-19T16:30:12.460Z'),
   },
   {
     id: '8df489c0-a951-44c4-8d52-bec26edf0ffg',
