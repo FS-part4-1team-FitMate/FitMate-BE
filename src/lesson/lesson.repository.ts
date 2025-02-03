@@ -136,7 +136,7 @@ export class LessonRepository implements ILessonRepository {
     }));
   }
 
-  // 남/여 카운트 계산을 위한 조회회
+  // 남/여 카운트 계산을 위한 조회
   async findAllForGenderCount() {
     return this.prisma.lessonRequest.findMany({
       select: {
@@ -162,6 +162,20 @@ export class LessonRepository implements ILessonRepository {
   async findDirectQuoteRequestByLessonId(lessonId: string): Promise<DirectQuoteRequest[]> {
     return await this.directQuoteRequest.findMany({
       where: { lessonRequestId: lessonId },
+    });
+  }
+
+  /**
+   * lesson-scheduler.service.ts에서 사용
+   * 현재 시간(now) 기준으로 quoteEndDate가 지난 PENDING 상태의 LessonRequest를 EXPIRED로 업데이트합니다.
+   */
+  async updateExpiredLesson(now: Date): Promise<{ count: number }> {
+    return await this.lessonRequest.updateMany({
+      where: {
+        status: 'PENDING',
+        quoteEndDate: { lt: now },
+      },
+      data: { status: 'EXPIRED' },
     });
   }
 }

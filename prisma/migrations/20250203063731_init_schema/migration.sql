@@ -17,13 +17,16 @@ CREATE TYPE "Region" AS ENUM ('SEOUL', 'GYEONGGI', 'INCHEON', 'GANGWON', 'CHUNGB
 CREATE TYPE "LocationType" AS ENUM ('ONLINE', 'OFFLINE');
 
 -- CreateEnum
-CREATE TYPE "LessonRequestStatus" AS ENUM ('PENDING', 'COMPLETED', 'CANCELED', 'EXPIRED');
+CREATE TYPE "LessonRequestStatus" AS ENUM ('PENDING', 'QUOTE_CONFIRMED', 'COMPLETED', 'CANCELED', 'EXPIRED');
 
 -- CreateEnum
 CREATE TYPE "QuoteStatus" AS ENUM ('PENDING', 'ACCEPTED', 'REJECTED', 'CANCELED');
 
 -- CreateEnum
-CREATE TYPE "NotificationType" AS ENUM ('CHAT_MESSAGE', 'LESSON_CONFIRMATION', 'LESSON_DATE_REMINDER', 'NEW_REQUEST', 'NEW_DIRECT_LESSON');
+CREATE TYPE "DirectQuoteRequestStatus" AS ENUM ('PENDING', 'REJECTED', 'PROPOSED');
+
+-- CreateEnum
+CREATE TYPE "NotificationType" AS ENUM ('CHAT_MESSAGE', 'LESSON_QUOTE', 'ETC');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -31,7 +34,6 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "nickname" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "phone" TEXT,
     "refreshToken" TEXT,
     "role" "Role" NOT NULL DEFAULT 'USER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -46,6 +48,7 @@ CREATE TABLE "Profile" (
     "userId" TEXT NOT NULL,
     "name" TEXT,
     "profileImage" TEXT,
+    "phone" TEXT,
     "gender" "Gender" NOT NULL,
     "lessonType" "LessonType"[],
     "region" "Region"[],
@@ -98,14 +101,16 @@ CREATE TABLE "LessonRequest" (
 );
 
 -- CreateTable
-CREATE TABLE "DirectLessonRequest" (
+CREATE TABLE "DirectQuoteRequest" (
     "id" TEXT NOT NULL,
     "lessonRequestId" TEXT NOT NULL,
     "trainerId" TEXT NOT NULL,
+    "status" "DirectQuoteRequestStatus" NOT NULL DEFAULT 'PENDING',
+    "rejectionReason" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "DirectLessonRequest_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "DirectQuoteRequest_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -140,6 +145,7 @@ CREATE TABLE "Review" (
 CREATE TABLE "FavoriteTrainer" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
+    "trainerId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -171,6 +177,12 @@ CREATE UNIQUE INDEX "SocialAccount_providerId_key" ON "SocialAccount"("providerI
 -- CreateIndex
 CREATE UNIQUE INDEX "SocialAccount_provider_providerId_key" ON "SocialAccount"("provider", "providerId");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "DirectQuoteRequest_lessonRequestId_trainerId_key" ON "DirectQuoteRequest"("lessonRequestId", "trainerId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "FavoriteTrainer_userId_trainerId_key" ON "FavoriteTrainer"("userId", "trainerId");
+
 -- AddForeignKey
 ALTER TABLE "Profile" ADD CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -181,10 +193,10 @@ ALTER TABLE "SocialAccount" ADD CONSTRAINT "SocialAccount_userId_fkey" FOREIGN K
 ALTER TABLE "LessonRequest" ADD CONSTRAINT "LessonRequest_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DirectLessonRequest" ADD CONSTRAINT "DirectLessonRequest_lessonRequestId_fkey" FOREIGN KEY ("lessonRequestId") REFERENCES "LessonRequest"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DirectQuoteRequest" ADD CONSTRAINT "DirectQuoteRequest_lessonRequestId_fkey" FOREIGN KEY ("lessonRequestId") REFERENCES "LessonRequest"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DirectLessonRequest" ADD CONSTRAINT "DirectLessonRequest_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DirectQuoteRequest" ADD CONSTRAINT "DirectQuoteRequest_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "LessonQuote" ADD CONSTRAINT "LessonQuote_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -200,6 +212,9 @@ ALTER TABLE "Review" ADD CONSTRAINT "Review_userId_fkey" FOREIGN KEY ("userId") 
 
 -- AddForeignKey
 ALTER TABLE "FavoriteTrainer" ADD CONSTRAINT "FavoriteTrainer_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FavoriteTrainer" ADD CONSTRAINT "FavoriteTrainer_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

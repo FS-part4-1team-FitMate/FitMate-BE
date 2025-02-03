@@ -246,10 +246,10 @@ enum DirectQuoteRequestStatus {
   PROPOSED // 제안됨
 }
 
+
 enum NotificationType {
   CHAT_MESSAGE
-  LESSON_CONFIRMATION
-  LESSON_DATE_REMINDER
-  NEW_REQUEST
-  NEW_DIRECT_LESSON
+  LESSON_QUOTE
+  ETC
 }
+
