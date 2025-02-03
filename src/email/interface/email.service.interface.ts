@@ -6,7 +6,7 @@ export interface IEmailService {
     code: string,
     ttl?: number,
   ): Promise<{ key: string; value: any; ttl?: number }>;
-  sendVerificationCode(email: string, code: string): Promise<void>;
+  sendEmail(email: string, code: string): Promise<void>;
   verifyCode(email: string, code: string): Promise<boolean>;
   markEmailAsVerified(email: string): Promise<{ key: string; value: any; ttl?: number }>;
   isEmailVerified(email: string): Promise<boolean>;

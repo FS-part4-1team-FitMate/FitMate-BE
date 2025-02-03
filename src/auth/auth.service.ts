@@ -33,6 +33,7 @@ export class AuthService implements IAuthService {
 
     const code = this.emailService.generateVerificationCode();
     await this.emailService.saveVerificationCode(email, code);
+    await this.emailService.sendEmail(email, code);
     return code;
   }
 

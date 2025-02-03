@@ -10,6 +10,7 @@ export const cacheClient: FactoryProvider = {
       host: 'localhost',
       port: 6379,
       password: 'redis-password',
+      db: 1,
     });
 
     // 추후 삭제

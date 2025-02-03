@@ -3,11 +3,15 @@ import crypto from 'crypto';
 import { resolveMx } from 'dns/promises';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import { IEmailService } from '#email/interface/email.service.interface.js';
+import { MailService } from '#mail/mail.service.js';
 import { CacheService } from '#cache/cache.service.js';
 
 @Injectable()
 export class EmailService implements IEmailService {
-  constructor(private readonly cacheService: CacheService) {}
+  constructor(
+    private readonly cacheService: CacheService,
+    private readonly mailService: MailService,
+  ) {}
 
   async validateEmailDomain(email: string): Promise<boolean> {
     const domain = email.split('@')[1];
@@ -35,9 +39,9 @@ export class EmailService implements IEmailService {
     return result;
   }
 
-  async sendVerificationCode(email: string, code: string): Promise<void> {
-    console.log(`Sending verification code ${code} to ${email}`);
-    // 실제 이메일 발송 로직 추가
+  async sendEmail(email: string, code: string): Promise<void> {
+    console.log(`${email}로 인증번호가 발송되었습니다.`);
+    this.mailService.sendVerificationEmail(email, code);
   }
 
   async verifyCode(email: string, code: string): Promise<boolean> {
