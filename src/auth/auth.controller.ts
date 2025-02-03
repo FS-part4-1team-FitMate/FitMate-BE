@@ -1,19 +1,7 @@
-import {
-  UseGuards,
-  Body,
-  Controller,
-  Post,
-  Res,
-  Get,
-  Redirect,
-  Query,
-  Req,
-  BadRequestException,
-} from '@nestjs/common';
+import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
-import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
@@ -51,7 +39,11 @@ export class AuthController {
   @Post('email-verification')
   async sendVerificationCode(@Body('email') email: string) {
     const code = await this.authService.emailVerification(email);
-    return { message: `인증번호가 ${email}로 전송되었습니다.`, code };
+
+    //추후 삭제
+    console.log('code: ', code);
+
+    return { message: `인증번호가 ${email}로 전송되었습니다.` };
   }
 
   @Post('verify-code')

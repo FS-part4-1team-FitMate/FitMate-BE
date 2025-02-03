@@ -45,7 +45,7 @@ export class AuthService implements IAuthService {
 
   async createUser(data: CreateUser): Promise<FilterUser> {
     const isVerified = await this.emailService.isEmailVerified(data.email);
-    if (!isVerified) throw new BadRequestException('이메일 인증이 완료되지 않았습니다.');
+    if (!isVerified) throw new BadRequestException(AuthExceptionMessage.EMAIL_NOT_VERIFIED);
 
     const userEmail = await this.userRepository.findByEmail(data.email);
     if (userEmail) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
