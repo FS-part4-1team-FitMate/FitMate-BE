@@ -5,9 +5,10 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "#auth/*": ["./src/auth/*"],
       "#common/*": ["./src/common/*"],
       "#exception/*": ["./src/exception/*"],
+      "#auth/*": ["./src/auth/*"],
+      "#email/*": ["./src/email/*"],
       "#user/*": ["./src/user/*"],
       "#profile/*": ["./src/profile/*"],
       "#lesson/*": ["./src/lesson/*"],

@@ -1,9 +1,4 @@
-import type {
-  CreateUser,
-  FilterUser,
-  ValidateSocialAccount,
-  SocialAccountInfo,
-} from '#auth/type/auth.type.js';
+import type { CreateUser, FilterUser, ValidateSocialAccount } from '#auth/type/auth.type.js';
 
 export interface IAuthService {
   createUser(data: CreateUser): Promise<FilterUser>;

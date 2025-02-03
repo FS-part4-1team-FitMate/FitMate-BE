@@ -9,6 +9,7 @@
   "type": "module",
   "imports": {
     "#auth/*": "./dist/src/auth/*",
+    "#email/*": "./dist/src/email/*",
     "#common/*": "./dist/src/common/*",
     "#exception/*": "./dist/src/exception/*",
     "#user/*": "./dist/src/user/*",

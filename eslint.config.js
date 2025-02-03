@@ -58,6 +58,7 @@ export default [
             { pattern: '#common/**', group: 'internal', position: 'before' },
             { pattern: '#exception/**', group: 'internal', position: 'before' },
             { pattern: '#auth/**', group: 'internal', position: 'before' },
+            { pattern: '#email/**', group: 'internal', position: 'before' },
             { pattern: '#user/**', group: 'internal', position: 'before' },
             { pattern: '#profile/**', group: 'internal', position: 'before' },
             { pattern: '#lesson/**', group: 'internal', position: 'before' },

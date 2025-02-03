@@ -10,6 +10,7 @@ import { KakaoStrategy } from '#auth/strategy/kakao.strategy.js';
 import { LocalStrategy } from '#auth/strategy/local.strategy.js';
 import { NaverStrategy } from '#auth/strategy/naver.strategy.js';
 import { RefreshTokenStrategy } from '#auth/strategy/refresh-token.strategy.js';
+import { EmailModule } from '#email/email.module.js';
 import { UserRepository } from '#user/user.repository.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 
@@ -22,6 +23,7 @@ import { ProfileRepository } from '#profile/profile.repository.js';
     PassportModule,
     JwtConfigModule,
     HttpModule,
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [
