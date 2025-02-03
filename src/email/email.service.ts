@@ -29,6 +29,7 @@ export class EmailService implements IEmailService {
   async saveVerificationCode(
     email: string,
     code: string,
+    ttl?: number,
   ): Promise<{ key: string; value: any; ttl?: number }> {
     const result = await this.cacheService.set(email, code, 300);
     return result;
@@ -42,5 +43,22 @@ export class EmailService implements IEmailService {
   async verifyCode(email: string, code: string): Promise<boolean> {
     const storedCode = await this.cacheService.get(email);
     return storedCode.value === code;
+  }
+
+  async markEmailAsVerified(email: string): Promise<{ key: string; value: any; ttl?: number }> {
+    const result = await this.cacheService.set(email, true, 600);
+    return result;
+  }
+
+  async isEmailVerified(email: string): Promise<boolean> {
+    const result = await this.cacheService.get(email);
+    return result.value === true;
+  }
+
+  async removeEmailVerification(
+    email: string,
+  ): Promise<{ key: string; previousValue?: any; deleted: boolean }> {
+    const result = await this.cacheService.del(email);
+    return result;
   }
 }

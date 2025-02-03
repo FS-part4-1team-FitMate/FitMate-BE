@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -8,6 +8,7 @@ import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
 import type { CreateUser, FilterUser, ValidateSocialAccount, SocialAccountInfo } from '#auth/type/auth.type';
+import { EmailService } from '#email/email.service.js';
 import { UserRepository } from '#user/user.repository.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
@@ -19,13 +20,33 @@ import mapToRole from '#utils/map-to-role.js';
 export class AuthService implements IAuthService {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly emailService: EmailService,
     private readonly jwtService: JwtService,
     private readonly profileRepository: ProfileRepository,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
   ) {}
 
+  async emailVerification(email: string): Promise<string> {
+    const isValid = await this.emailService.validateEmailDomain(email);
+    if (!isValid) throw new BadRequestException(AuthExceptionMessage.EMAIL_NOT_FOUND);
+
+    const code = this.emailService.generateVerificationCode();
+    await this.emailService.saveVerificationCode(email, code);
+    return code;
+  }
+
+  async verifyEmailCode(email: string, code: string): Promise<boolean> {
+    const isValid = await this.emailService.verifyCode(email, code);
+    if (!isValid) return false;
+    await this.emailService.markEmailAsVerified(email);
+    return true;
+  }
+
   async createUser(data: CreateUser): Promise<FilterUser> {
+    const isVerified = await this.emailService.isEmailVerified(data.email);
+    if (!isVerified) throw new BadRequestException('이메일 인증이 완료되지 않았습니다.');
+
     const userEmail = await this.userRepository.findByEmail(data.email);
     if (userEmail) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
 
@@ -35,6 +56,8 @@ export class AuthService implements IAuthService {
       ...userWithoutPassword,
       password: hashedPassword,
     });
+
+    await this.emailService.removeEmailVerification(data.email);
 
     return filterSensitiveUserData(createUser);
   }

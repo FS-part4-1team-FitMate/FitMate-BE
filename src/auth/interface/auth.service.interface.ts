@@ -1,6 +1,8 @@
 import type { CreateUser, FilterUser, ValidateSocialAccount } from '#auth/type/auth.type.js';
 
 export interface IAuthService {
+  emailVerification(email: string): Promise<string>;
+  verifyEmailCode(email: string, code: string): Promise<boolean>;
   createUser(data: CreateUser): Promise<FilterUser>;
   getUser(email: string, password: string): Promise<FilterUser>;
   updateUser(userId: string, refreshToken: string): Promise<FilterUser>;
