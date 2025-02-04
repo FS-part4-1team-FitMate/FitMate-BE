@@ -154,7 +154,7 @@ CREATE TABLE "FavoriteTrainer" (
 
 -- CreateTable
 CREATE TABLE "Notification" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "userId" TEXT NOT NULL,
     "type" "NotificationType" NOT NULL,
     "message" TEXT NOT NULL,
