@@ -1,4 +1,4 @@
-import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query, Req } from '@nestjs/common';
+import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
@@ -9,12 +9,14 @@ import { KakaoAuthGuard } from '#auth/guard/kakao.guard.js';
 import { NaverAuthGuard } from '#auth/guard/naver.guard.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
 import type { SocialAccountInfo } from '#auth/type/auth.type.js';
+import { EmailService } from '#email/email.service.js';
 import mapToRole from '#utils/map-to-role.js';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly emailService: EmailService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -34,12 +36,29 @@ export class AuthController {
     return redirectUrl;
   }
 
+  @Post('email-verification')
+  async sendVerificationCode(@Body('email') email: string) {
+    const code = await this.authService.emailVerification(email);
+
+    //추후 삭제
+    console.log('code: ', code);
+
+    return { message: `인증번호가 ${email}로 전송되었습니다.` };
+  }
+
+  @Post('verify-code')
+  async verifyCode(@Body('email') email: string, @Body('code') code: string) {
+    await this.authService.verifyEmailCode(email, code);
+    return { message: '이메일 인증 성공' };
+  }
+
   @Post('signup')
   async handleSignup(@Body() body: CreateUserDTO, @Query('role') role: string) {
     const validateRole = mapToRole(role);
 
     const user = await this.authService.createUser({ ...body, role: validateRole });
     const authResponse = await this.generateAuthResponse(user.id, validateRole);
+
     const { redirectUrl, ...rest } = authResponse;
     return rest;
   }
