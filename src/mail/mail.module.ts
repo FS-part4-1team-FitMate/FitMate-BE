@@ -1,13 +1,17 @@
+import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter.js';
 import { join } from 'path';
+import { MailProcessor } from '#mail/mail.processor.js';
 import { MailService } from '#mail/mail.service.js';
+import { CacheConfigModule } from '#cache/cache.config.module.js';
+import { SEND_MAIL } from '#mq/queue.constants.js';
 
 @Module({
   imports: [
-    ConfigModule,
+    ConfigModule.forRoot(),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -32,8 +36,17 @@ import { MailService } from '#mail/mail.service.js';
         },
       }),
     }),
+    CacheConfigModule,
+    BullModule.registerQueueAsync({
+      name: SEND_MAIL,
+      imports: [CacheConfigModule],
+      inject: ['BULL_REDIS'],
+      useFactory: (redisOptions) => ({
+        connection: redisOptions,
+      }),
+    }),
   ],
-  providers: [MailService],
+  providers: [MailService, MailProcessor],
   exports: [MailService],
 })
 export class MailModule {}

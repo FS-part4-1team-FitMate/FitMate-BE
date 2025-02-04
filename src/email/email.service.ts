@@ -41,7 +41,7 @@ export class EmailService implements IEmailService {
 
   async sendEmail(email: string, code: string): Promise<void> {
     console.log(`${email}로 인증번호가 발송되었습니다.`);
-    this.mailService.sendVerificationEmail(email, code);
+    this.mailService.queueEmail(email, code);
   }
 
   async verifyCode(email: string, code: string): Promise<boolean> {

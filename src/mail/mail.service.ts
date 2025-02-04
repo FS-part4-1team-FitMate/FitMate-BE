@@ -1,16 +1,15 @@
+import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
+import { Queue } from 'bullmq';
+import { SEND_MAIL } from '#mq/queue.constants.js';
 
 @Injectable()
 export class MailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(@InjectQueue(SEND_MAIL) private readonly mailQueue: Queue) {}
 
-  async sendVerificationEmail(email: string, code: string) {
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'fitmate 이메일 인증 코드',
-      template: './verificationEmail',
-      context: { code },
-    });
+  async queueEmail(email: string, code: string) {
+    //추후 삭제
+    console.log(`queue에 작업 추가: ${email}`);
+    await this.mailQueue.add('send-email', { email, code });
   }
 }

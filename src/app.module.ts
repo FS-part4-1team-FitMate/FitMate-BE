@@ -13,6 +13,7 @@ import { TrainerModule } from '#trainer/trainer.module.js';
 import { QuoteModule } from '#quote/quote.module.js';
 import { ReviewModule } from '#review/review.module.js';
 import { CacheModule } from '#cache/cache.module.js';
+import { MqModule } from '#mq/mq.module.js';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CacheModule } from '#cache/cache.module.js';
     ReviewModule,
     CacheModule,
     EmailModule,
+    MqModule,
   ],
   controllers: [],
   providers: [AccessTokenGuard],

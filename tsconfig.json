@@ -20,6 +20,7 @@
       "#s3/*": ["./src/s3/*"],
       "#mail/*": ["./src/mail/*"],
       "#cache/*": ["./src/cache/*"],
+      "#mq/*": ["./src/mq/*"],
       "#utils/*": ["./src/utils/*"],
       "#configs/*": ["./src/configs/*"],
       "#logger/*": ["./src/logger/*"],

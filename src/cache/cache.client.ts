@@ -5,13 +5,9 @@ export const CACHE_CLIENT = Symbol('CACHE_CLIENT');
 
 export const cacheClient: FactoryProvider = {
   provide: CACHE_CLIENT,
-  useFactory: async () => {
-    const client = new Redis({
-      host: 'localhost',
-      port: 6379,
-      password: 'redis-password',
-      db: 1,
-    });
+  inject: ['CACHE_REDIS'],
+  useFactory: async (redisOptions) => {
+    const client = new Redis(redisOptions);
 
     // 추후 삭제
     client.on('connect', () => {
