@@ -1,4 +1,4 @@
-import { LessonQuote, QuoteStatus } from '@prisma/client';
+import type { LessonQuote } from '@prisma/client';
 
 export type CreateLessonQuote = {
   lessonRequestId: string;
@@ -10,4 +10,3 @@ export type CreateLessonQuote = {
 export type PatchLessonQuote = Partial<CreateLessonQuote>;
 
 export type LessonQuoteResponse = LessonQuote;
-
