@@ -1,24 +1,17 @@
-import type {
-  DirectQuoteRequest,
-  DirectQuoteRequestStatus,
-  LessonRequest,
-  LessonRequestStatus,
-  Prisma,
-} from '@prisma/client';
-import type { CreateLesson, LessonResponse, PatchLesson } from '../type/lesson.type';
+import type { DirectQuoteRequest, LessonRequest } from '@prisma/client';
+import { DirectQuoteRequestStatus, LessonRequestStatus, Prisma } from '@prisma/client';
+import { QueryLessonDto } from '#lesson/dto/lesson.dto.js';
+import type { CreateLesson, LessonResponse, PatchLesson } from '#lesson/type/lesson.type.js';
 
 export interface ILessonRepository {
   create(data: CreateLesson & { userId: string }): Promise<LessonRequest>;
-  findAll(
-    where?: Record<string, any>,
-    orderBy?: Record<string, string>,
-    skip?: number,
-    take?: number,
-    select?: Prisma.LessonRequestSelect,
-  ): Promise<LessonResponse[]>;
-  count(where?: Record<string, any>): Promise<number>;
   findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]>;
-  findOne(id: string): Promise<LessonResponse | null>;
+  findLessons(
+    query: QueryLessonDto,
+    currentUserId: string,
+    myLessonUserId?: string,
+  ): Promise<{ lessons: LessonResponse[]; totalCount: number; hasMore: boolean }>;
+  findOneById(id: string): Promise<LessonResponse | null>;
   updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest>;
   updateLessonStatustWithTx(
     tx: Prisma.TransactionClient,

@@ -112,7 +112,7 @@ export class QueryLessonDto {
   @IsOptional()
   @Transform(({ value }) => (value ? value.split(',') : []))
   @IsEnum(Gender, { each: true, message: '유효하지 않은 성별입니다.' })
-  gender?: Gender;
+  gender?: Gender[];
 
   @IsOptional()
   @Transform(({ value }) => (value ? value.split(',') : []))

@@ -1,5 +1,6 @@
-import { LessonQuote, Prisma, QuoteStatus } from '@prisma/client';
-import { CreateLessonQuote, PatchLessonQuote } from '#quote/type/quote.type.js';
+import type { LessonQuote } from '@prisma/client';
+import { Prisma, QuoteStatus } from '@prisma/client';
+import type { CreateLessonQuote, PatchLessonQuote } from '#quote/type/quote.type.js';
 
 export interface IQuoteRepository {
   create(data: CreateLessonQuote): Promise<LessonQuote>;

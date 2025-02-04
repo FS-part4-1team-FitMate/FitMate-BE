@@ -6,23 +6,24 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { DirectQuoteRequest, LessonRequestStatus, Prisma, Region } from '@prisma/client';
+import type { DirectQuoteRequest } from '@prisma/client';
+import { LessonRequestStatus, Prisma } from '@prisma/client';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
-import { UserRepository } from '#user/user.repository.js';
+import { UserService } from '#user/user.service.js';
 import type { IQuoteService } from '#quote/interface/quote-service.inteface.js';
 import { CreateDirectQuoteDto, QueryLessonDto, RejectDirectQuoteDto } from './dto/lesson.dto.js';
-import { ILessonService } from './interface/lesson-service.interface.js';
+import type { ILessonService } from './interface/lesson-service.interface.js';
 import { LessonRepository } from './lesson.repository.js';
-import { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
+import type { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
 
 @Injectable()
 export class LessonService implements ILessonService {
   constructor(
     private readonly lessonRepository: LessonRepository,
-    private readonly userRepository: UserRepository,
-    @Inject(forwardRef(() => 'IQuoteService'))
+    private readonly userService: UserService,
+    @Inject('IQuoteService')
     private readonly quoteService: IQuoteService,
     private readonly alsStore: AlsStore,
   ) {}
@@ -45,10 +46,8 @@ export class LessonService implements ILessonService {
     if (userRole !== 'USER') {
       throw new UnauthorizedException(LessonExceptionMessage.ONLY_USER_CAN_REQUEST_LESSON);
     }
-    const userExists = await this.userRepository.findUserById(userId);
-    if (!userExists) {
-      throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
-    }
+    // userService 에서 userId가 존재하는지 검증
+    await this.userService.findUserById(userId);
 
     const pendingLesson = await this.lessonRepository.findLessonsByUserId(
       userId,
@@ -89,173 +88,14 @@ export class LessonService implements ILessonService {
     genderCounts: Record<string, number>;
     directQuoteRequestCount: number;
   }> {
-    const {
-      page = 1,
-      limit = 5,
-      order = 'createdAt',
-      sort = 'desc',
-      keyword,
-      lessonType,
-      lessonSubType,
-      locationType,
-      status,
-      gender,
-      region,
-      hasDirectQuote,
-    } = query.toCamelCase();
-
-    const orderMapping: Record<string, string> = {
-      created_at: 'createdAt',
-      start_date: 'startDate',
-      end_date: 'endDate',
-      quote_end_date: 'quoteEndDate',
-      rating: 'rating',
-      lesson_count: 'lessonCount',
-      lesson_time: 'lessonTime',
-    };
-
-    const orderByField = orderMapping[order] || 'createdAt';
-
-    const regionMapping: Record<Region, string[]> = {
-      SEOUL: ['서울'],
-      GYEONGGI: ['경기'],
-      INCHEON: ['인천'],
-      GANGWON: ['강원', '강원특별자치도'],
-      CHUNGBUK: ['충북'],
-      CHUNGNAM: ['충남'],
-      JEONBUK: ['전북', '전북특별자치도'],
-      JEONNAM: ['전남'],
-      GYEONGBUK: ['경북'],
-      GYEONGNAM: ['경남'],
-      DAEGU: ['대구'],
-      DAEJEON: ['대전'],
-      BUSAN: ['부산'],
-      ULSAN: ['울산'],
-      GWANGJU: ['광주'],
-      JEJU: ['제주', '제주특별자치도'],
-    };
-
     const currentUserId = this.getUserId();
 
-    // 필터 조건 구성
-    const where = {
-      ...(myLessonUserId && { userId: myLessonUserId }),
-      ...(lessonType && { lessonType: { in: lessonType } }),
-      ...(lessonSubType && { lessonSubType: { in: lessonSubType } }),
-      ...(locationType && { locationType: { in: locationType } }),
-      ...(status && { status: { in: status } }),
-      ...(gender && {
-        user: {
-          profile: {
-            gender: { in: gender },
-          },
-        },
-      }),
-      ...(hasDirectQuote !== undefined && {
-        directQuoteRequests: hasDirectQuote
-          ? { some: { trainerId: currentUserId } }
-          : { none: { trainerId: currentUserId } },
-      }),
-      AND: [
-        ...(region
-          ? [
-              {
-                OR: region.flatMap(
-                  (r) =>
-                    regionMapping[r]?.map((koreanRegion) => ({
-                      roadAddress: { contains: koreanRegion },
-                    })) || [],
-                ),
-              },
-            ]
-          : []),
-        ...(keyword
-          ? [
-              {
-                OR: [
-                  { user: { nickname: { contains: keyword, mode: 'insensitive' } } },
-                  { user: { profile: { name: { contains: keyword, mode: 'insensitive' } } } },
-                ],
-              },
-            ]
-          : []),
-      ],
-    };
-
-    const orderBy: Record<string, string> = {};
-    orderBy[orderByField] = sort;
-    const skip = (page - 1) * limit;
-    const take = limit;
-
-    const select: Prisma.LessonRequestSelect = {
-      id: true,
-      userId: true,
-      lessonType: true,
-      lessonSubType: true,
-      startDate: true,
-      endDate: true,
-      lessonCount: true,
-      lessonTime: true,
-      quoteEndDate: true,
-      locationType: true,
-      postcode: true,
-      roadAddress: true,
-      detailAddress: true,
-      status: true,
-      createdAt: true,
-      updatedAt: true,
-      directQuoteRequests: {
-        select: {
-          id: true,
-          lessonRequestId: true,
-          trainerId: true,
-          status: true,
-          rejectionReason: true,
-        },
-      },
-      lessonQuotes: {
-        select: {
-          id: true,
-          lessonRequestId: true,
-          trainerId: true,
-          price: true,
-          status: true,
-          createdAt: true,
-          updatedAt: true,
-          rejectionReason: true,
-          trainer: {
-            select: {
-              id: true,
-              nickname: true,
-              profile: {
-                select: {
-                  name: true,
-                  region: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          nickname: true,
-          profile: {
-            select: {
-              name: true,
-              gender: true,
-              region: true,
-            },
-          },
-        },
-      },
-    };
-
-    const [lessons, totalCount] = await Promise.all([
-      this.lessonRepository.findAll(where, orderBy, skip, take, select),
-      this.lessonRepository.count(where),
-    ]);
+    // Repository에서 처리하도록 변경
+    const { lessons, totalCount, hasMore } = await this.lessonRepository.findLessons(
+      query,
+      currentUserId,
+      myLessonUserId,
+    );
 
     // 전체 레슨 타입 목록 정의 (초기값)
     const allLessonTypes = ['SPORTS', 'FITNESS', 'REHAB'];
@@ -299,7 +139,7 @@ export class LessonService implements ILessonService {
     return {
       list: lessonsWithDirectQuote,
       totalCount,
-      hasMore: totalCount > page * limit,
+      hasMore,
       lessonTypeCounts,
       genderCounts,
       directQuoteRequestCount,
@@ -310,45 +150,8 @@ export class LessonService implements ILessonService {
    * 요청 레슨 상세조회
    * ***********************************************************************************
    */
-  async getLessonById(id: string): Promise<LessonResponse> {
-    const select = {
-      id: true,
-      userId: true,
-      lessonType: true,
-      lessonSubType: true,
-      startDate: true,
-      endDate: true,
-      lessonCount: true,
-      lessonTime: true,
-      quoteEndDate: true,
-      locationType: true,
-      postcode: true,
-      roadAddress: true,
-      detailAddress: true,
-      status: true,
-      createdAt: true,
-      updatedAt: true,
-      directQuoteRequests: {
-        select: {
-          trainerId: true,
-        },
-      },
-      user: {
-        select: {
-          id: true,
-          nickname: true,
-          profile: {
-            select: {
-              name: true,
-              gender: true,
-              region: true,
-            },
-          },
-        },
-      },
-    };
-
-    const lesson = await this.lessonRepository.findOne(id, select);
+  async getLessonById(lessonId: string): Promise<LessonResponse> {
+    const lesson = await this.lessonRepository.findOneById(lessonId);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
@@ -368,7 +171,7 @@ export class LessonService implements ILessonService {
   async cancelLessonById(lessonId: string): Promise<LessonResponse> {
     const userId = this.getUserId();
 
-    const lesson = await this.lessonRepository.findOne(lessonId);
+    const lesson = await this.lessonRepository.findOneById(lessonId);
 
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
@@ -396,7 +199,7 @@ export class LessonService implements ILessonService {
     const userId = this.getUserId();
 
     // 요청 레슨 확인
-    const lesson = await this.lessonRepository.findOne(lessonId);
+    const lesson = await this.lessonRepository.findOneById(lessonId);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
@@ -410,7 +213,7 @@ export class LessonService implements ILessonService {
     }
 
     // 트레이너 확인
-    const trainer = await this.userRepository.findUserById(trainerId);
+    const trainer = await this.userService.findUserById(trainerId);
     if (!trainer || trainer.role !== 'TRAINER') {
       throw new BadRequestException(LessonExceptionMessage.TRAINER_NOT_FOUND_OR_INVALID);
     }
@@ -480,7 +283,7 @@ export class LessonService implements ILessonService {
    * ***********************************************************************************
    */
   async updateLessonById(id: string, data: PatchLesson): Promise<LessonResponse> {
-    const lesson = await this.lessonRepository.findOne(id);
+    const lesson = await this.lessonRepository.findOneById(id);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
@@ -492,7 +295,7 @@ export class LessonService implements ILessonService {
    * ***********************************************************************************
    */
   async updateLessonStatus(id: string, status: LessonRequestStatus): Promise<LessonResponse> {
-    const lesson = await this.lessonRepository.findOne(id);
+    const lesson = await this.lessonRepository.findOneById(id);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
