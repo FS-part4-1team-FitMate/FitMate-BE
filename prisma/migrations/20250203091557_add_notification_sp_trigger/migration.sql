@@ -213,3 +213,65 @@ CREATE TRIGGER direct_quote_request_trigger
 AFTER INSERT ON "DirectQuoteRequest"
 FOR EACH ROW
 EXECUTE FUNCTION direct_quote_request_trigger();
+
+-- -----------------------------------------------
+-- 3. 트레이너 분야와 매칭되는 레슨 등록 알림
+-- -----------------------------------------------
+
+-- 3-1. 분야와 매칭되는 레슨 등록 저장 프로시저 생성
+CREATE OR REPLACE PROCEDURE notify_lesson_create_matching_trainer(
+  lesson_id TEXT
+)
+LANGUAGE plpgsql AS $$
+
+DECLARE
+  trainer_id TEXT;
+  lesson_type TEXT;
+  location_type TEXT;
+  start_date DATE;
+  end_date DATE;
+  requester_name TEXT;
+  notification_message TEXT;
+
+BEGIN
+  -- 새로운 레슨 요청의 정보 가져오기
+  SELECT lr."lessonType", lr."locationType", lr."startDate", lr."endDate", u."nickname"
+  INTO lesson_type, location_type, start_date, end_date, requester_name
+  FROM "LessonRequest" lr
+  JOIN "User" u ON lr."userId" = u."id"
+  WHERE lr.id = lesson_id;
+
+  -- 매칭되는 트레이너 찾기
+  FOR trainer_id IN
+    SELECT u.id
+    FROM "User" u
+    JOIN "Profile" p ON u.id = p.userId
+    WHERE lesson_type = ANY(p."lessonType") 
+  LOOP
+    -- 알림 메시지 생성
+    notification_message := requester_name || '님이 ' || location_type || '에서 ' || start_date || ' ~ ' || end_date || ' 동안 ' || lesson_type || ' 레슨을 요청했습니다.';
+
+    -- 트레이너에게 알림 전송
+    CALL notify_user_change(
+      trainer_id,
+      'LESSON_QUOTE',
+      notification_message
+    );
+  END LOOP;
+END;
+$$;
+
+-- 3-2. 분야와 매칭되는 레슨 등록 트리거 함수
+CREATE OR REPLACE FUNCTION lesson_create_trigger()
+RETURNS TRIGGER AS $$
+BEGIN 
+  CALL notify_lesson_create_matching_trainer(NEW.id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 3-3. 분야와 매칭되는 레슨 등록 트리거 생성
+CREATE TRIGGER lesson_create_trigger
+AFTER INSERT ON "LessonRequest"
+FOR EACH ROW
+EXECUTE FUNCTION lesson_create_trigger();
