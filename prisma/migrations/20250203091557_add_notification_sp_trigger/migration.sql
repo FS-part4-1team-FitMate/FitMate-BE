@@ -25,9 +25,9 @@ BEGIN
 END;
 $$;
 
--- -------------------------------------------------------------
--- 1. 레슨 상태 변경 저장 프로시저: notify_lesson_status_change
--- -------------------------------------------------------------
+-- -----------------------------------------------
+-- 1. 레슨 상태 변경 알림
+-- -----------------------------------------------
 
 -- 1-1. 레슨 상태 변경 저장 프로시저 생성
 CREATE OR REPLACE PROCEDURE notify_lesson_status_change(
@@ -112,3 +112,104 @@ FOR EACH ROW
 EXECUTE FUNCTION lesson_status_change_trigger();
 
 
+-- -----------------------------------------------
+-- 2. 새로운 견적 도착 알림
+-- -----------------------------------------------
+
+-- 2-1. 새로운 견적 도착 저장 프로시저 생성
+CREATE OR REPLACE PROCEDURE notify_quote_create(
+  quote_id TEXT
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+  user_id TEXT;
+  notification_message TEXT;
+BEGIN
+  SELECT lr."userId"
+  INTO user_id
+  FROM "LessonQuote" lq
+  JOIN "LessonRequest" lr ON lq."lessonRequestId" = lr.id
+  WHERE lq.id = quote_id;
+
+  IF user_id IS NULL THEN
+    RETURN; -- 사용자가 없으면 종료
+  END IF;
+
+  -- 알림 메시지 생성
+  notification_message := '새로운 견적이 도착했습니다.';
+
+  -- 레슨 요청자에게 알림 생성
+  CALL notify_user_change(
+    user_id,
+    'LESSON_QUOTE',
+    notification_message
+  );
+END;
+$$;
+
+-- 2-2. 새로운 견적 도착 트리거 함수
+CREATE OR REPLACE FUNCTION quote_create_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+  CALL notify_quote_create(NEW.id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2-3. 새로운 견적 도착 트리거 생성
+DROP TRIGGER IF EXISTS quote_create_trigger ON "LessonQuote";
+
+CREATE TRIGGER quote_create_trigger
+AFTER INSERT ON "LessonQuote"
+FOR EACH ROW
+EXECUTE FUNCTION quote_create_trigger();
+
+-- -----------------------------------------------
+-- 3. 지정 견적 요청 알림
+-- -----------------------------------------------
+
+-- 3-1. 지정 견적 요청 저장 프로시저 생성
+CREATE OR REPLACE PROCEDURE notify_direct_quote_request(
+  direct_quote_id TEXT
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+  trainer_id TEXT;
+  notification_message TEXT;
+BEGIN
+  SELECT trainerId
+  INTO trainer_id
+  FROM "DirectQuoteRequest"
+  WHERE id = direct_quote_id;
+
+  IF trainer_id IS NULL THEN
+    RETURN; -- 트레이너가 없으면 종료
+  END IF;
+
+  -- 알림 메시지 생성
+  notification_message := '새로운 지정 견적 요청이 도착했습니다.';
+
+  -- 트레이너에게 알림 생성
+  CALL notify_user_change(
+    trainer_id,
+    'LESSON_QUOTE',
+    notification_message
+  );
+END;
+
+-- 3-2. 지정 견적 요청 트리거 함수
+CREATE OR REPLACE FUNCTION direct_quote_request_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+  CALL notify_direct_quote_request(NEW.id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 3-3. 지정 견적 요청 트리거 생성
+DROP TRIGGER IF EXISTS  direct_quote_request_trigger ON "DirectQuoteRequest";
+
+CREATE TRIGGER direct_quote_request_trigger
+AFTER INSERT ON "DirectQuoteRequest"
+FOR EACH ROW
+EXECUTE FUNCTION direct_quote_request_trigger();
