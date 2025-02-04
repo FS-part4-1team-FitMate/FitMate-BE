@@ -7,6 +7,7 @@ enum AuthExceptionMessage {
   NO_REFRESH_TOKEN = '리프레시 토큰이 없습니다.',
   INVALID_ROLE = '잘못된 역할 값입니다.',
   EMAIL_NOT_VERIFIED = '이메일 인증이 완료되지 않았습니다.',
+  INVALID_VERIFICATION_CODE = '인증 실패: 잘못된 인증번호 입니다.',
 }
 
 export default AuthExceptionMessage;

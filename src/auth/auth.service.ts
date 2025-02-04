@@ -39,7 +39,7 @@ export class AuthService implements IAuthService {
 
   async verifyEmailCode(email: string, code: string): Promise<boolean> {
     const isValid = await this.emailService.verifyCode(email, code);
-    if (!isValid) return false;
+    if (!isValid) throw new BadRequestException(AuthExceptionMessage.INVALID_VERIFICATION_CODE);
     await this.emailService.markEmailAsVerified(email);
     return true;
   }
