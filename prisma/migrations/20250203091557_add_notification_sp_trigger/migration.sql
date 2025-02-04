@@ -196,6 +196,7 @@ BEGIN
     notification_message
   );
 END;
+$$;
 
 -- 3-2. 지정 견적 요청 트리거 함수
 CREATE OR REPLACE FUNCTION direct_quote_request_trigger()
@@ -215,10 +216,10 @@ FOR EACH ROW
 EXECUTE FUNCTION direct_quote_request_trigger();
 
 -- -----------------------------------------------
--- 3. 트레이너 분야와 매칭되는 레슨 등록 알림
+-- 4. 트레이너 분야와 매칭되는 레슨 등록 알림
 -- -----------------------------------------------
 
--- 3-1. 분야와 매칭되는 레슨 등록 저장 프로시저 생성
+-- 4-1. 분야와 매칭되는 레슨 등록 저장 프로시저 생성
 CREATE OR REPLACE PROCEDURE notify_lesson_create_matching_trainer(
   lesson_id TEXT
 )
@@ -226,8 +227,8 @@ LANGUAGE plpgsql AS $$
 
 DECLARE
   trainer_id TEXT;
-  lesson_type TEXT;
-  location_type TEXT;
+  lesson_type "LessonType";
+  location_type "LocationType";
   start_date DATE;
   end_date DATE;
   requester_name TEXT;
@@ -245,8 +246,9 @@ BEGIN
   FOR trainer_id IN
     SELECT u.id
     FROM "User" u
-    JOIN "Profile" p ON u.id = p.userId
-    WHERE lesson_type = ANY(p."lessonType") 
+    JOIN "Profile" p ON u.id = p."userId"
+    WHERE u."role" = 'TRAINER' AND ARRAY[lesson_type] && p."lessonType"  -- ENUM 배열 비교
+
   LOOP
     -- 알림 메시지 생성
     notification_message := requester_name || '님이 ' || location_type || '에서 ' || start_date || ' ~ ' || end_date || ' 동안 ' || lesson_type || ' 레슨을 요청했습니다.';
@@ -261,7 +263,7 @@ BEGIN
 END;
 $$;
 
--- 3-2. 분야와 매칭되는 레슨 등록 트리거 함수
+-- 4-2. 분야와 매칭되는 레슨 등록 트리거 함수
 CREATE OR REPLACE FUNCTION lesson_create_trigger()
 RETURNS TRIGGER AS $$
 BEGIN 
@@ -270,7 +272,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 3-3. 분야와 매칭되는 레슨 등록 트리거 생성
+-- 4-3. 분야와 매칭되는 레슨 등록 트리거 생성
 CREATE TRIGGER lesson_create_trigger
 AFTER INSERT ON "LessonRequest"
 FOR EACH ROW
