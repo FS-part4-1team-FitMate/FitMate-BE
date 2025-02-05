@@ -121,22 +121,22 @@ export const LESSON_REQUESTS = [
     updatedAt: convertKstToUtc(2025, 1, 17, 10, 0, 0),
   },
   {
-    id: '699fc386-d1a7-4430-a37d-9d1c5bdafd03', // 완료된 레슨  // trainer01 견적 선택
+    id: '699fc386-d1a7-4430-a37d-9d1c5bdafd03', // 진행중인 레슨  // trainer01 견적 선택
     userId: '399fc386-d1a7-4430-a37d-9d1c5bdafd3d', // User03 // 박다솔
     lessonType: LessonType.REHAB,
     lessonSubType: LessonSubType.STRETCHING,
-    startDate: convertKstToUtc(2025, 1, 22, 10, 0, 0),
-    endDate: convertKstToUtc(2025, 1, 22, 19, 0, 0),
+    startDate: convertKstToUtc(2025, 2, 4, 10, 0, 0),
+    endDate: convertKstToUtc(2025, 2, 4, 19, 0, 0),
     lessonCount: 1,
     lessonTime: 8,
-    quoteEndDate: convertKstToUtc(2025, 1, 21, 23, 59, 59),
+    quoteEndDate: convertKstToUtc(2025, 2, 3, 23, 59, 59),
     locationType: LocationType.ONLINE,
     postcode: null,
     roadAddress: null,
     detailAddress: null,
-    status: LessonRequestStatus.COMPLETED,
-    createdAt: convertKstToUtc(2025, 1, 19, 12, 0, 0),
-    updatedAt: convertKstToUtc(2025, 1, 19, 12, 0, 0),
+    status: LessonRequestStatus.QUOTE_CONFIRMED,
+    createdAt: convertKstToUtc(2025, 2, 1, 12, 0, 0),
+    updatedAt: convertKstToUtc(2025, 2, 1, 12, 0, 0),
   },
   {
     id: '699fc386-d1a7-4430-a37d-9d1c5bdafd04', // 완료된 레슨  // trainer02 견적 선택

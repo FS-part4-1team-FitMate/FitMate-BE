@@ -52,7 +52,7 @@ async function main() {
     });
   }
 
-  // 6. DirectQuoteRequest 데이터 삽입  
+  // 6. DirectQuoteRequest 데이터 삽입
   console.log('DirectQuoteRequest 데이터 삽입 중...');
   for (const directQuoteRequest of DIRECT_QUOTE_REQUESTS) {
     await prisma.directQuoteRequest.create({

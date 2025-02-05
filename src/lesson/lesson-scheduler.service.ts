@@ -15,7 +15,13 @@ export class LessonSchedulerService {
   @Cron('0 0 * * *', { timeZone: 'Asia/Seoul' }) // 매일 자정에 한번 실행
   async handleCron() {
     const now = new Date();
-    const result = await this.lessonRepository.updateExpiredLesson(now);
-    logger.info(`Expired lessons: ${result.count}`);
+
+    // 만료된 레슨 처리
+    const expiredLessons = await this.lessonRepository.updateExpiredLesson(now);
+    logger.info(`Expired lessons: ${expiredLessons.count}`);
+
+    // 완료된 레슨 처리
+    const completedLessons = await this.lessonRepository.updateCompletedLesson(now);
+    logger.info(`Completed lessons: ${completedLessons.count}`);
   }
 }
