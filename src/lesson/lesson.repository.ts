@@ -360,4 +360,32 @@ export class LessonRepository implements ILessonRepository {
       where: { lessonRequestId: lessonId },
     });
   }
+
+  /**
+   * lesson-scheduler.service.ts에서 사용
+   * 현재 시간(now) 기준으로 quoteEndDate가 지난 PENDING 상태의 LessonRequest를 EXPIRED로 업데이트합니다.
+   */
+  async updateExpiredLesson(now: Date): Promise<{ count: number }> {
+    return await this.lessonRequest.updateMany({
+      where: {
+        status: 'PENDING',
+        quoteEndDate: { lt: now },
+      },
+      data: { status: 'EXPIRED' },
+    });
+  }
+
+  /**
+   * lesson-scheduler.service.ts에서 사용
+   * 현재 시간(now) 기준으로 endDate가 지난 QUOTE_CONFIRMED 상태의 LessonRequest를 COMPLETED로 업데이트합니다.
+   */
+  async updateCompletedLesson(now: Date): Promise<{ count: number }> {
+    return await this.lessonRequest.updateMany({
+      where: {
+        status: 'QUOTE_CONFIRMED',
+        endDate: { lt: now },
+      },
+      data: { status: 'COMPLETED' },
+    });
+  }
 }

@@ -200,6 +200,7 @@ export class LessonService implements ILessonService {
 
     // 요청 레슨 확인
     const lesson = await this.lessonRepository.findOneById(lessonId);
+    console.log('요청 레슨 확인', lesson);
     if (!lesson) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }

@@ -1,5 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from '#prisma/prisma.module.js';
 import { AlsMiddleware } from '#common/als/als.middleware.js';
 import { AlsModule } from '#common/als/als.module.js';
@@ -30,6 +31,7 @@ import { MqModule } from '#mq/mq.module.js';
     QuoteModule,
     TrainerModule,
     ReviewModule,
+    ScheduleModule.forRoot(),
     CacheModule,
     EmailModule,
     MqModule,
