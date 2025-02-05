@@ -28,4 +28,5 @@ export interface ILessonRepository {
   ): Promise<DirectQuoteRequest>;
   findDirectQuoteRequestByLessonId(lessonId: string): Promise<DirectQuoteRequest[]>;
   updateExpiredLesson(now: Date): Promise<{ count: number }>;
+  updateCompletedLesson(now: Date): Promise<{ count: number }>;
 }
