@@ -36,12 +36,13 @@ CREATE OR REPLACE PROCEDURE notify_lesson_status_change(
 LANGUAGE plpgsql AS $$
 DECLARE
   user_id TEXT;
+  lesson_sub_type TEXT;
   lesson_status TEXT;
   notification_message TEXT;
   trainer_id TEXT;
 BEGIN
-  SELECT "userId", "status" 
-  INTO user_id, lesson_status
+  SELECT "userId", "lessonSubType"::TEXT, "status" 
+  INTO user_id, lesson_sub_type, lesson_status
   FROM "LessonRequest"
   WHERE id = lesson_id;
 
@@ -49,19 +50,41 @@ BEGIN
     RETURN; -- 사용자가 없으면 종료
   END IF;
 
+  -- ENUM 값을 한글로 변환하는 CASE 문 추가
+  CASE lesson_sub_type
+    WHEN 'SOCCER' THEN lesson_sub_type := '축구';
+    WHEN 'BASKETBALL' THEN lesson_sub_type := '농구';
+    WHEN 'BASEBALL' THEN lesson_sub_type := '야구';
+    WHEN 'TENNIS' THEN lesson_sub_type := '테니스';
+    WHEN 'BADMINTON' THEN lesson_sub_type := '배드민턴';
+    WHEN 'TABLE_TENNIS' THEN lesson_sub_type := '탁구';
+    WHEN 'SKI' THEN lesson_sub_type := '스키';
+    WHEN 'SURFING' THEN lesson_sub_type := '서핑';
+    WHEN 'BOXING' THEN lesson_sub_type := '복싱';
+    WHEN 'TAEKWONDO' THEN lesson_sub_type := '태권도';
+    WHEN 'JIUJITSU' THEN lesson_sub_type := '주짓수';
+    WHEN 'PERSONAL_TRAINING' THEN lesson_sub_type := '퍼스널 트레이닝';
+    WHEN 'YOGA' THEN lesson_sub_type := '요가';
+    WHEN 'PILATES' THEN lesson_sub_type := '필라테스';
+    WHEN 'DIET_MANAGEMENT' THEN lesson_sub_type := '다이어트 관리';
+    WHEN 'STRETCHING' THEN lesson_sub_type := '스트레칭';
+    WHEN 'REHAB_TREATMENT' THEN lesson_sub_type := '재활 치료';
+    ELSE lesson_sub_type := '기타';
+  END CASE;
+
   -- 상태에 따른 알림 메시지 생성
   CASE lesson_status
     WHEN 'QUOTE_CONFIRMED' THEN
-      notification_message := '견적이 확정되었습니다.';
+      notification_message := '레슨(' || lesson_sub_type || ')에 대한 견적이 확정되었습니다.';
 
     WHEN 'COMPLETED' THEN
-      notification_message := '레슨이 완료되었습니다.';
+      notification_message := '레슨(' || lesson_sub_type || ')이 완료되었습니다.';
 
     WHEN 'CANCELED' THEN
-      notification_message := '요청 레슨이 취소되었습니다.';
+      notification_message := '레슨(' || lesson_sub_type || ') 요청이 취소되었습니다.';
 
     WHEN 'EXPIRED' THEN
-      notification_message := '요청 레슨이 만료되었습니다.';
+      notification_message := '레슨(' || lesson_sub_type || ') 요청이 만료되었습니다.';
     ELSE
       RETURN; -- 알림을 보낼 필요가 없는 상태이면 종료
   END CASE;
@@ -123,12 +146,14 @@ CREATE OR REPLACE PROCEDURE notify_quote_create(
 LANGUAGE plpgsql AS $$
 DECLARE
   user_id TEXT;
+  trainer_nick TEXT;
   notification_message TEXT;
 BEGIN
-  SELECT lr."userId"
-  INTO user_id
+  SELECT lr."userId", u."nickname"
+  INTO user_id, trainer_nick
   FROM "LessonQuote" lq
   JOIN "LessonRequest" lr ON lq."lessonRequestId" = lr.id
+  JOIN "User" u ON lq."trainerId" = u.id
   WHERE lq.id = quote_id;
 
   IF user_id IS NULL THEN
@@ -136,7 +161,7 @@ BEGIN
   END IF;
 
   -- 알림 메시지 생성
-  notification_message := '새로운 견적이 도착했습니다.';
+  notification_message := trainer_nick || '님으로부터 새로운 견적이 도착했습니다.';
 
   -- 레슨 요청자에게 알림 생성
   CALL notify_user_change(
@@ -231,27 +256,53 @@ DECLARE
   location_type "LocationType";
   start_date DATE;
   end_date DATE;
-  requester_name TEXT;
+  requester_nick TEXT;
   notification_message TEXT;
+  lesson_type_kr TEXT;
+  location_type_kr TEXT;
+  road_address TEXT;
 
 BEGIN
   -- 새로운 레슨 요청의 정보 가져오기
-  SELECT lr."lessonType", lr."locationType", lr."startDate", lr."endDate", u."nickname"
-  INTO lesson_type, location_type, start_date, end_date, requester_name
+  SELECT lr."lessonType", lr."locationType", lr."startDate", lr."endDate", lr."roadAddress", u."nickname"
+  INTO lesson_type, location_type, start_date, end_date, road_address, requester_nick
   FROM "LessonRequest" lr
   JOIN "User" u ON lr."userId" = u."id"
   WHERE lr.id = lesson_id;
+
+  -- ENUM 값을 한글로 변환하는 CASE 문 추가
+  CASE lesson_type
+    WHEN 'SPORTS' THEN lesson_type_kr := '스포츠';
+    WHEN 'FITNESS' THEN lesson_type_kr := '피트니스';
+    WHEN 'REHAB' THEN lesson_type_kr := '재활';
+    ELSE lesson_type_kr := '기타';
+  END CASE;
+
+  -- location_type에 따라 한글로 변환(OFFLINE 일 경우 해당 지역 표시)
+  IF location_type = 'ONLINE' THEN
+    location_type_kr := '온라인';
+  ELSIF location_type = 'OFFLINE' THEN
+    -- road_address에서 첫 번째 공백 이전의 단어 추출
+    IF road_address IS NOT NULL AND road_address <> '' THEN
+      location_type_kr := split_part(road_address, ' ', 1);
+    ELSE
+      location_type_kr := '오프라인';
+    END IF;
+  ELSE
+    location_type_kr := '기타타';
+  END IF;
 
   -- 매칭되는 트레이너 찾기
   FOR trainer_id IN
     SELECT u.id
     FROM "User" u
     JOIN "Profile" p ON u.id = p."userId"
-    WHERE u."role" = 'TRAINER' AND ARRAY[lesson_type] && p."lessonType"  -- ENUM 배열 비교
+    WHERE u."role" = 'TRAINER' 
+      AND ARRAY[lesson_type] && p."lessonType"  -- ENUM 배열 비교
 
   LOOP
     -- 알림 메시지 생성
-    notification_message := requester_name || '님이 ' || location_type || '에서 ' || start_date || ' ~ ' || end_date || ' 동안 ' || lesson_type || ' 레슨을 요청했습니다.';
+    notification_message := requester_nick || '님이 [' || location_type_kr || ']에서 ' || start_date || ' ~ ' || end_date || ' 동안 [' || lesson_type_kr || '] 레슨을 요청했습니다.';
 
     -- 트레이너에게 알림 전송
     CALL notify_user_change(
