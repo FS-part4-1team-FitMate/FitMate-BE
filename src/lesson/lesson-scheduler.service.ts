@@ -7,8 +7,12 @@ import { LessonRepository } from './lesson.repository.js';
 export class LessonSchedulerService {
   constructor(private readonly lessonRepository: LessonRepository) {}
 
-  //@Cron('0 0 * * *', { timeZone: 'Asia/Seoul' }) // 매일 자정에 실행
-  @Cron('* * * * *', { timeZone: 'Asia/Seoul' }) // 매 분마다 실행
+  async onModuleInit() {
+    logger.info('NestJS 시작시 handleCron() 실행');
+    await this.handleCron();
+  }
+
+  @Cron('0 0 * * *', { timeZone: 'Asia/Seoul' }) // 매일 자정에 한번 실행
   async handleCron() {
     const now = new Date();
     const result = await this.lessonRepository.updateExpiredLesson(now);

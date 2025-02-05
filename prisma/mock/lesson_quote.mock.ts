@@ -35,7 +35,7 @@ export const LESSON_QUOTES = [
     updatedAt: convertKstToUtc(2025, 1, 21, 13, 0, 0),
   },
   {
-    id: '8df489c0-a951-44c4-8d52-bec26edf0bbe', // user01의 대기중인 요청레슨에 대한 견적적
+    id: '8df489c0-a951-44c4-8d52-bec26edf0bbe', // user01의 대기중인 요청레슨에 대한 견적
     trainerId: '11752641-132b-4ec3-ab67-bb2116cc3c94',
     lessonRequestId: '699fc386-d1a7-4430-a37d-9d1c5bdafd01',
     price: 110000.0,
@@ -46,7 +46,7 @@ export const LESSON_QUOTES = [
     updatedAt: convertKstToUtc(2025, 2, 1, 11, 0, 0),
   },
   {
-    id: 'd695d827-7486-44a7-b851-5ffae053d8c8', // user01의 대기중인 요청레슨에 대한 견적적
+    id: 'd695d827-7486-44a7-b851-5ffae053d8c8', // user01의 대기중인 요청레슨에 대한 견적
     trainerId: '22752641-132b-4ec3-ab67-bb2116cc3c94',
     lessonRequestId: '699fc386-d1a7-4430-a37d-9d1c5bdafd01',
     price: 120000.0,

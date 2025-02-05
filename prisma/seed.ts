@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PROFILES } from '#prisma/mock/profile.mock.js';
 import { USERS } from '#prisma/mock/user.mock.js';
+import { DIRECT_QUOTE_REQUESTS } from './mock/direct_quote_request.mock.js';
 import { LESSON_QUOTES } from './mock/lesson_quote.mock.js';
 import { LESSON_REQUESTS } from './mock/lesson_request.mock.js';
 import { REVIEWS } from './mock/review.mock.js';
@@ -51,7 +52,15 @@ async function main() {
     });
   }
 
-  // 6. Review 데이터 삽입
+  // 6. DirectQuoteRequest 데이터 삽입  
+  console.log('DirectQuoteRequest 데이터 삽입 중...');
+  for (const directQuoteRequest of DIRECT_QUOTE_REQUESTS) {
+    await prisma.directQuoteRequest.create({
+      data: directQuoteRequest,
+    });
+  }
+
+  // 7. Review 데이터 삽입
   console.log('Review 데이터 삽입 중...');
   await prisma.review.createMany({
     data: REVIEWS,

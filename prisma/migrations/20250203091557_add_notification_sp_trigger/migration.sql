@@ -20,7 +20,7 @@ BEGIN
     user_id, 
     type::"NotificationType",   -- 문자열을 enum으로 변환
     message,
-    now() -- DB 내부에서 UpdatedAt은 수동으로 셋팅해줘야 함
+    now() -- DB 내부에서 updatedAt은 수동으로 셋팅해줘야 함
   );
 END;
 $$;
@@ -36,13 +36,16 @@ CREATE OR REPLACE PROCEDURE notify_lesson_status_change(
 LANGUAGE plpgsql AS $$
 DECLARE
   user_id TEXT;
+  lesson_type TEXT;
   lesson_sub_type TEXT;
   lesson_status TEXT;
-  notification_message TEXT;
   trainer_id TEXT;
+  notification_message TEXT;
+  lesson_type_kr TEXT;
+  lesson_sub_type_kr TEXT;
 BEGIN
-  SELECT "userId", "lessonSubType"::TEXT, "status" 
-  INTO user_id, lesson_sub_type, lesson_status
+  SELECT "userId", "lessonType"::TEXT, "lessonSubType"::TEXT, "status" 
+  INTO user_id, lesson_type, lesson_sub_type, lesson_status
   FROM "LessonRequest"
   WHERE id = lesson_id;
 
@@ -50,41 +53,62 @@ BEGIN
     RETURN; -- 사용자가 없으면 종료
   END IF;
 
-  -- ENUM 값을 한글로 변환하는 CASE 문 추가
-  CASE lesson_sub_type
-    WHEN 'SOCCER' THEN lesson_sub_type := '축구';
-    WHEN 'BASKETBALL' THEN lesson_sub_type := '농구';
-    WHEN 'BASEBALL' THEN lesson_sub_type := '야구';
-    WHEN 'TENNIS' THEN lesson_sub_type := '테니스';
-    WHEN 'BADMINTON' THEN lesson_sub_type := '배드민턴';
-    WHEN 'TABLE_TENNIS' THEN lesson_sub_type := '탁구';
-    WHEN 'SKI' THEN lesson_sub_type := '스키';
-    WHEN 'SURFING' THEN lesson_sub_type := '서핑';
-    WHEN 'BOXING' THEN lesson_sub_type := '복싱';
-    WHEN 'TAEKWONDO' THEN lesson_sub_type := '태권도';
-    WHEN 'JIUJITSU' THEN lesson_sub_type := '주짓수';
-    WHEN 'PERSONAL_TRAINING' THEN lesson_sub_type := '퍼스널 트레이닝';
-    WHEN 'YOGA' THEN lesson_sub_type := '요가';
-    WHEN 'PILATES' THEN lesson_sub_type := '필라테스';
-    WHEN 'DIET_MANAGEMENT' THEN lesson_sub_type := '다이어트 관리';
-    WHEN 'STRETCHING' THEN lesson_sub_type := '스트레칭';
-    WHEN 'REHAB_TREATMENT' THEN lesson_sub_type := '재활 치료';
-    ELSE lesson_sub_type := '기타';
-  END CASE;
+    -- lesson_type을 한글로 변환
+  lesson_type_kr := 
+    CASE lesson_type
+      WHEN 'FITNESS' THEN '피트니스'
+      WHEN 'SPORTS' THEN '스포츠'
+      WHEN 'REHAB' THEN '재활'
+      ELSE '알 수 없는 레슨'
+    END;
+
+  -- lesson_sub_type을 한글로 변환
+  lesson_sub_type_kr := 
+    CASE lesson_sub_type
+      -- SPORTS
+      WHEN 'SOCCER' THEN '축구'
+      WHEN 'BASKETBALL' THEN '농구'
+      WHEN 'BASEBALL' THEN '야구'
+      WHEN 'TENNIS' THEN '테니스'
+      WHEN 'BADMINTON' THEN '배드민턴'
+      WHEN 'TABLE_TENNIS' THEN '탁구'
+      WHEN 'SKI' THEN '스키'
+      WHEN 'SURFING' THEN '서핑'
+      WHEN 'BOXING' THEN '복싱'
+      WHEN 'TAEKWONDO' THEN '태권도'
+      WHEN 'JIUJITSU' THEN '주짓수'
+
+      -- FITNESS
+      WHEN 'PERSONAL_TRAINING' THEN '퍼스널 트레이닝'
+      WHEN 'YOGA' THEN '요가'
+      WHEN 'PILATES' THEN '필라테스'
+      WHEN 'DIET_MANAGEMENT' THEN '다이어트 관리'
+
+      -- REHAB
+      WHEN 'STRETCHING' THEN '스트레칭'
+      WHEN 'REHAB_TREATMENT' THEN '재활 치료'
+
+      ELSE NULL
+    END;
+
+  -- lesson_sub_type이 NULL이면 lesson_type을 사용
+  IF lesson_sub_type_kr IS NULL THEN
+    lesson_sub_type_kr := lesson_type_kr;
+  END IF;
 
   -- 상태에 따른 알림 메시지 생성
   CASE lesson_status
     WHEN 'QUOTE_CONFIRMED' THEN
-      notification_message := '레슨(' || lesson_sub_type || ')에 대한 견적이 확정되었습니다.';
+      notification_message := '레슨(' || lesson_sub_type_kr || ')에 대한 견적이 확정되었습니다.';
 
     WHEN 'COMPLETED' THEN
-      notification_message := '레슨(' || lesson_sub_type || ')이 완료되었습니다.';
+      notification_message := '레슨(' || lesson_sub_type_kr || ')이 완료되었습니다.';
 
     WHEN 'CANCELED' THEN
       notification_message := '레슨(' || lesson_sub_type || ') 요청이 취소되었습니다.';
 
     WHEN 'EXPIRED' THEN
-      notification_message := '레슨(' || lesson_sub_type || ') 요청이 만료되었습니다.';
+      notification_message := '레슨(' || lesson_sub_type_kr || ') 요청이 만료되었습니다.';
     ELSE
       RETURN; -- 알림을 보낼 필요가 없는 상태이면 종료
   END CASE;
@@ -146,11 +170,15 @@ CREATE OR REPLACE PROCEDURE notify_quote_create(
 LANGUAGE plpgsql AS $$
 DECLARE
   user_id TEXT;
+  lesson_type TEXT;
+  lesson_sub_type TEXT;
   trainer_nick TEXT;
   notification_message TEXT;
+  lesson_type_kr TEXT;
+  lesson_sub_type_kr TEXT;
 BEGIN
-  SELECT lr."userId", u."nickname"
-  INTO user_id, trainer_nick
+  SELECT lr."userId", lr."lessonType"::TEXT, lr."lessonSubType"::TEXT, u."nickname"
+  INTO user_id, lesson_type, lesson_sub_type, trainer_nick
   FROM "LessonQuote" lq
   JOIN "LessonRequest" lr ON lq."lessonRequestId" = lr.id
   JOIN "User" u ON lq."trainerId" = u.id
@@ -160,8 +188,51 @@ BEGIN
     RETURN; -- 사용자가 없으면 종료
   END IF;
 
+  -- lesson_type을 한글로 변환
+  lesson_type_kr := 
+    CASE lesson_type
+      WHEN 'FITNESS' THEN '피트니스'
+      WHEN 'SPORTS' THEN '스포츠'
+      WHEN 'REHAB' THEN '재활'
+      ELSE '알 수 없는 레슨'
+    END;
+
+  -- lesson_sub_type을 한글로 변환
+  lesson_sub_type_kr := 
+    CASE lesson_sub_type
+      -- SPORTS
+      WHEN 'SOCCER' THEN '축구'
+      WHEN 'BASKETBALL' THEN '농구'
+      WHEN 'BASEBALL' THEN '야구'
+      WHEN 'TENNIS' THEN '테니스'
+      WHEN 'BADMINTON' THEN '배드민턴'
+      WHEN 'TABLE_TENNIS' THEN '탁구'
+      WHEN 'SKI' THEN '스키'
+      WHEN 'SURFING' THEN '서핑'
+      WHEN 'BOXING' THEN '복싱'
+      WHEN 'TAEKWONDO' THEN '태권도'
+      WHEN 'JIUJITSU' THEN '주짓수'
+
+      -- FITNESS
+      WHEN 'PERSONAL_TRAINING' THEN '퍼스널 트레이닝'
+      WHEN 'YOGA' THEN '요가'
+      WHEN 'PILATES' THEN '필라테스'
+      WHEN 'DIET_MANAGEMENT' THEN '다이어트 관리'
+
+      -- REHAB
+      WHEN 'STRETCHING' THEN '스트레칭'
+      WHEN 'REHAB_TREATMENT' THEN '재활 치료'
+
+      ELSE NULL
+    END;
+
+  -- lesson_sub_type이 NULL이면 lesson_type을 사용
+  IF lesson_sub_type_kr IS NULL THEN
+    lesson_sub_type_kr := lesson_type_kr;
+  END IF;
+
   -- 알림 메시지 생성
-  notification_message := trainer_nick || '님으로부터 새로운 견적이 도착했습니다.';
+  notification_message := trainer_nick || '님으로부터 요청하신 레슨(' || lesson_sub_type_kr || ') 에 대한 새로운 견적이 도착했습니다.';
 
   -- 레슨 요청자에게 알림 생성
   CALL notify_user_change(
@@ -200,19 +271,35 @@ CREATE OR REPLACE PROCEDURE notify_direct_quote_request(
 LANGUAGE plpgsql AS $$
 DECLARE
   trainer_id TEXT;
+  user_id TEXT;
+  lesson_type TEXT;
+  user_nick TEXT;
   notification_message TEXT;
+  lesson_type_kr TEXT;
 BEGIN
-  SELECT trainerId
-  INTO trainer_id
-  FROM "DirectQuoteRequest"
-  WHERE id = direct_quote_id;
+  SELECT dqr."trainerId", lr."userId", lr."lessonType"::TEXT, u."nickname"
+  INTO trainer_id, user_id, lesson_type, user_nick
+  FROM "DirectQuoteRequest" dqr
+  JOIN "LessonRequest" lr ON dqr."lessonRequestId" = lr.id
+  JOIN "User" u ON lr."userId" = u.id
+  WHERE dqr.id = direct_quote_id;
 
-  IF trainer_id IS NULL THEN
-    RETURN; -- 트레이너가 없으면 종료
+   -- 트레이너가 없으면 종료
+  IF trainer_id IS NULL OR user_id IS NULL THEN
+    RETURN;
   END IF;
 
+    -- lesson_type을 한글로 변환
+  lesson_type_kr := 
+    CASE lesson_type
+      WHEN 'FITNESS' THEN '피트니스'
+      WHEN 'SPORTS' THEN '스포츠'
+      WHEN 'REHAB' THEN '재활'
+      ELSE '알 수 없는 레슨'
+    END;
+
   -- 알림 메시지 생성
-  notification_message := '새로운 지정 견적 요청이 도착했습니다.';
+  notification_message := user_nick || '님으로부터 레슨(' || lesson_type_kr || ')에 대한 지정 견적 요청이 도착했습니다.';
 
   -- 트레이너에게 알림 생성
   CALL notify_user_change(
