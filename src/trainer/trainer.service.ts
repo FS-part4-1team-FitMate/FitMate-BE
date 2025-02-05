@@ -55,52 +55,48 @@ export class TrainerService implements ITrainerService {
     const store = this.alsStore.getStore();
     const userId = store?.userId || null;
 
-    const {
-      page = 1,
-      limit = 5,
-      order = 'review_count',
-      sort = 'desc',
-      keyword,
-      lessonType,
-      gender,
-    } = query.toCamelCase();
-
+    // 정렬 기준 매핑
     const orderMapping: Record<string, 'reviewCount' | 'rating' | 'experience' | 'lessonCount'> = {
-      review_count: 'reviewCount',
+      reviewCount: 'reviewCount',
       rating: 'rating',
       experience: 'experience',
-      lesson_count: 'lessonCount',
+      lessonCount: 'lessonCount',
     };
 
-    const orderByField = orderMapping[order] || 'reviewCount';
+    // query.order 기본값 설정
+    const orderByField = orderMapping[query.order ?? 'reviewCount'];
 
-    const validSortValues: ('asc' | 'desc')[] = ['asc', 'desc'];
-    const sortValue: 'asc' | 'desc' = validSortValues.includes(sort as 'asc' | 'desc')
-      ? (sort as 'asc' | 'desc')
-      : 'desc';
-
-    const orderBy: Record<string, 'asc' | 'desc'> = {
-      [orderByField]: sortValue,
-    };
-
-    const where = {
-      ...(keyword && { nickname: { contains: keyword, mode: 'insensitive' } }),
-      profile: {
-        ...(lessonType && { lessonType: { hasSome: lessonType } }),
-        ...(gender && { gender }),
-      },
-    };
-
+    // query.page, query.limit 기본값 설정
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
     const take = limit;
 
+    // query.sort 값이 'asc' | 'desc'인지 확인 후 강제 변환
+    const sortValue: 'asc' | 'desc' = query.sort === 'asc' || query.sort === 'desc' ? query.sort : 'desc';
+
+    // profile 내부 정렬인지 확인 후 orderBy 설정
+    const profileOrderByFields = ['reviewCount', 'rating', 'lessonCount', 'experience'];
+    const orderBy = profileOrderByFields.includes(orderByField)
+      ? { profile: { [orderByField]: sortValue } } // profile 내부 필드 정렬
+      : { [orderByField]: sortValue }; // 일반 필드 정렬
+
+    const where = {
+      role: 'TRAINER',
+      ...(query.keyword && { nickname: { contains: query.keyword, mode: 'insensitive' } }),
+      profile: {
+        ...(query.lessonType && { lessonType: { hasSome: query.lessonType } }),
+        ...(query.gender && { gender: query.gender }),
+      },
+    };
+
+    // DB 조회 실행 (리포지토리에서 처리)
     const [trainers, totalCount] = await Promise.all([
       this.trainerRepository.findAll(userId, where, orderBy, skip, take),
       this.trainerRepository.count(where),
     ]);
 
     let favoriteTrainerIds: string[] = [];
-
     if (userId) {
       favoriteTrainerIds = await this.trainerRepository.findFavoriteTrainerIds(userId);
     }

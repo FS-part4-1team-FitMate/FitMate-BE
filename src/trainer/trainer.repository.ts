@@ -59,17 +59,12 @@ export class TrainerRepository implements ITrainerRepository {
 
   async findAll(
     userId: string | null,
-    where: Record<string, unknown> = {},
-    orderBy: Record<string, 'asc' | 'desc'> = { createdAt: 'desc' },
-    skip = 0,
-    take = 10,
+    where: Record<string, unknown>,
+    orderBy: Record<string, 'asc' | 'desc'> | { profile: Record<string, 'asc' | 'desc'> },
+    skip: number,
+    take: number,
   ): Promise<TrainerWithFavorites[]> {
-    const profileOrderByFields = ['reviewCount', 'rating', 'lessonCount', 'experience'];
-    const orderByClause = profileOrderByFields.includes(Object.keys(orderBy)[0])
-      ? { profile: orderBy }
-      : orderBy;
-
-    const trainers = await this.user.findMany({
+    return (await this.user.findMany({
       where: { role: 'TRAINER', ...where },
       select: {
         id: true,
@@ -94,11 +89,10 @@ export class TrainerRepository implements ITrainerRepository {
           },
         },
       },
-      orderBy: orderByClause,
+      orderBy, // 서비스에서 보낸 `orderBy` 그대로 적용
       skip,
       take,
-    });
-    return trainers as TrainerWithFavorites[];
+    })) as TrainerWithFavorites[];
   }
 
   // 트레이너 수 조회
