@@ -12,7 +12,6 @@ export class CreateReviewDto {
   @Max(5, { message: '평점은 최대 5점 이하이어야 합니다.' })
   rating: number;
 
-  @IsNotEmpty()
   @IsString()
   @Length(5, 500, { message: '리뷰 내용은 최소 5자에서 최대 500자까지 입력 가능합니다.' })
   content: string;
