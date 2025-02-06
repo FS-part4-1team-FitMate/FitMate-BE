@@ -17,7 +17,22 @@ export class TrainerController {
   async getTrainers(
     @Query() query: QueryTrainerDto,
   ): Promise<{ trainers: TrainerWithFavorites[]; totalCount: number; hasMore: boolean }> {
-    return this.trainerService.getTrainers(query);
+    const snakeToCamel = {
+      review_count: 'reviewCount',
+      lesson_count: 'lessonCount',
+    };
+
+    const transformedQuery = {
+      page: query.page || 1,
+      limit: query.limit || 10,
+      keyword: query.keyword,
+      lessonType: query.lessonType,
+      gender: query.gender,
+      order: query.order || 'reviewCount',
+      sort: query.sort || 'desc',
+    };
+
+    return this.trainerService.getTrainers(transformedQuery);
   }
 
   @Get('favorite')

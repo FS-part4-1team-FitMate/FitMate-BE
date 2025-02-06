@@ -55,42 +55,26 @@ export class TrainerService implements ITrainerService {
     const store = this.alsStore.getStore();
     const userId = store?.userId || null;
 
-    const {
-      page = 1,
-      limit = 5,
-      order = 'review_count',
-      sort = 'desc',
-      keyword,
-      lessonType,
-      gender,
-    } = query.toCamelCase();
+    const orderByField = query.order ?? 'reviewCount';
 
-    const orderMapping: Record<string, 'reviewCount' | 'rating' | 'experience' | 'lessonCount'> = {
-      review_count: 'reviewCount',
-      rating: 'rating',
-      experience: 'experience',
-      lesson_count: 'lessonCount',
-    };
+    const sortValue: 'asc' | 'desc' = query.sort === 'asc' || query.sort === 'desc' ? query.sort : 'desc';
 
-    const orderByField = orderMapping[order] || 'reviewCount';
-
-    const validSortValues: ('asc' | 'desc')[] = ['asc', 'desc'];
-    const sortValue: 'asc' | 'desc' = validSortValues.includes(sort as 'asc' | 'desc')
-      ? (sort as 'asc' | 'desc')
-      : 'desc';
-
-    const orderBy: Record<string, 'asc' | 'desc'> = {
-      [orderByField]: sortValue,
-    };
+    const profileOrderByFields = ['reviewCount', 'rating', 'lessonCount', 'experience'];
+    const orderBy = profileOrderByFields.includes(orderByField)
+      ? { profile: { [orderByField]: sortValue } }
+      : { [orderByField]: sortValue };
 
     const where = {
-      ...(keyword && { nickname: { contains: keyword, mode: 'insensitive' } }),
+      role: 'TRAINER',
+      ...(query.keyword && { nickname: { contains: query.keyword, mode: 'insensitive' } }),
       profile: {
-        ...(lessonType && { lessonType: { hasSome: lessonType } }),
-        ...(gender && { gender }),
+        ...(query.lessonType && { lessonType: { hasSome: query.lessonType } }),
+        ...(query.gender && { gender: query.gender }),
       },
     };
 
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
     const take = limit;
 
@@ -100,7 +84,6 @@ export class TrainerService implements ITrainerService {
     ]);
 
     let favoriteTrainerIds: string[] = [];
-
     if (userId) {
       favoriteTrainerIds = await this.trainerRepository.findFavoriteTrainerIds(userId);
     }
