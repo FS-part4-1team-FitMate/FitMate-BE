@@ -32,5 +32,4 @@ export interface IReviewRepository {
   }>;
 
   getReviewRatingStats(trainerId: string): Promise<{ rating: number; count: number }[]>;
-  isTrainerExists(trainerId: string): Promise<boolean>;
 }

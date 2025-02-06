@@ -12,6 +12,7 @@ import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
 import QuoteExceptionMessage from '#exception/quote-exception-message.js';
 import ReviewExceptionMessage from '#exception/review-exception-message.js';
+import { UserService } from '#user/user.service.js';
 import { LessonService } from '#lesson/lesson.service.js';
 import type { IQuoteService } from '#quote/interface/quote-service.interface.js';
 import { CreateReviewDto, GetReviewsQueryDto } from './dto/review.dto.js';
@@ -26,6 +27,7 @@ export class ReviewService implements IReviewService {
     @Inject('IQuoteService')
     private readonly quoteService: IQuoteService,
     private readonly alsStore: AlsStore,
+    private readonly userService: UserService,
   ) {}
   async createReview(data: CreateReviewDto): Promise<Review> {
     const { userId } = this.alsStore.getStore();
@@ -56,7 +58,11 @@ export class ReviewService implements IReviewService {
       throw new BadRequestException(ReviewExceptionMessage.ALREADY_REVIEWED);
     }
 
-    return await this.reviewRepository.create(data, userId);
+    const review = await this.reviewRepository.create(data, userId);
+
+    await this.reviewRepository.updateTrainerRating(quote.trainerId);
+
+    return review;
   }
 
   async getReviews(trainerId?: string, page = 1, limit = 10) {
@@ -73,10 +79,7 @@ export class ReviewService implements IReviewService {
   }
 
   async getReviewRatingStats(trainerId: string) {
-    const isTrainerExists = await this.reviewRepository.isTrainerExists(trainerId);
-    if (!isTrainerExists) {
-      throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
-    }
+    await this.userService.findUserById(trainerId);
 
     return this.reviewRepository.getReviewRatingStats(trainerId);
   }

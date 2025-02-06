@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Review } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
+import { UserRepository } from '#user/user.repository.js';
 import { CreateReviewDto } from './dto/review.dto.js';
 import { IReviewRepository } from './interface/review.repository.interface.js';
 import { MyReviewResponse } from './type/review.type.js';
@@ -140,10 +141,28 @@ export class ReviewRepository implements IReviewRepository {
     return defaultRatings;
   }
 
-  async isTrainerExists(trainerId: string): Promise<boolean> {
-    const trainer = await this.prisma.user.findUnique({
-      where: { id: trainerId, role: 'TRAINER' }, // 역할이 'TRAINER'인지 확인
+  async updateTrainerRating(trainerId: string): Promise<void> {
+    const ratingStats = await this.prisma.review.groupBy({
+      by: ['rating'],
+      where: {
+        lessonQuote: {
+          trainerId,
+        },
+      },
+      _count: {
+        rating: true,
+      },
     });
-    return !!trainer;
+
+    // 평점 계산
+    const totalRating = ratingStats.reduce((sum, r) => sum + r.rating * r._count.rating, 0);
+    const totalCount = ratingStats.reduce((sum, r) => sum + r._count.rating, 0);
+    const newRating = totalCount > 0 ? totalRating / totalCount : 0;
+
+    // 트레이너 프로필에 업데이트
+    await this.prisma.profile.update({
+      where: { userId: trainerId },
+      data: { rating: newRating, reviewCount: totalCount },
+    });
   }
 }
