@@ -15,7 +15,7 @@ import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import QuoteExceptionMessage from '#exception/quote-exception-message.js';
 import { LessonService } from '#lesson/lesson.service.js';
 import type { QueryQuoteDto } from './dto/quote.dto.js';
-import type { IQuoteService } from './interface/quote-service.inteface.js';
+import type { IQuoteService } from './interface/quote-service.interface.js';
 import { QuoteRepository } from './quote.repository.js';
 import type { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
 

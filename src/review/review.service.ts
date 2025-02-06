@@ -13,7 +13,7 @@ import ExceptionMessages from '#exception/exception-message.js';
 import QuoteExceptionMessage from '#exception/quote-exception-message.js';
 import ReviewExceptionMessage from '#exception/review-exception-message.js';
 import { LessonService } from '#lesson/lesson.service.js';
-import type { IQuoteService } from '#quote/interface/quote-service.inteface.js';
+import type { IQuoteService } from '#quote/interface/quote-service.interface.js';
 import { CreateReviewDto, GetReviewsQueryDto } from './dto/review.dto.js';
 import { IReviewService } from './interface/review.service.interface.js';
 import { ReviewRepository } from './review.repository.js';
