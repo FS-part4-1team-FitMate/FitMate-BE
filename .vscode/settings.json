@@ -1,0 +1,29 @@
+{
+  "cSpell.words": [
+    "BUSAN",
+    "CHUNGBUK",
+    "CHUNGNAM",
+    "DAEGU",
+    "DAEJEON",
+    "datasource",
+    "dotenv",
+    "fitmate",
+    "GANGWON",
+    "GYEONGBUK",
+    "GYEONGGI",
+    "GYEONGNAM",
+    "INCHEON",
+    "JEJU",
+    "JEONBUK",
+    "JEONNAM",
+    "nestjs",
+    "pids",
+    "TAEKWONDO",
+    "trivago"
+  ],
+  "editor.formatOnSave": true,
+  "eslint.validate": ["javascript", "typescript"],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "typescript.preferences.importModuleSpecifierEnding": "js",
+  "javascript.preferences.importModuleSpecifierEnding": "js"
+}

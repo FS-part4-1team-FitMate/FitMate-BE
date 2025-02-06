@@ -1,0 +1,255 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String                @id @default(uuid())
+  email                String                @unique
+  nickname             String
+  password             String
+  refreshToken         String?
+  role                 Role                  @default(USER)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  profile              Profile?
+  socialAccounts       SocialAccount[]
+  lessonRequests       LessonRequest[]
+  directQuoteRequests  DirectQuoteRequest[]
+  lessonQuotes         LessonQuote[]
+  reviews              Review[]
+  favoriteTrainers     FavoriteTrainer[]     @relation("UserToFavoriteTrainers")
+  favoritedByUsers     FavoriteTrainer[]     @relation("TrainerToFavoriteTrainers")
+  notifications        Notification[]
+}
+
+model Profile {
+  id                     String       @id @default(uuid())
+  userId                 String       @unique
+  name                   String?
+  profileImage           String?
+  phone                  String?
+  gender                 Gender
+  lessonType             LessonType[]
+  region                 Region[]
+  intro                  String?
+  description            String?
+  experience             Int?
+  certification          String?
+  certificationValidated Boolean      @default(false)
+  rating                 Float?       @default(0)
+  lessonCount            Int?         @default(0)
+  reviewCount            Int?         @default(0)
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SocialAccount {
+  id         String   @id @default(uuid())
+  userId     String
+  provider   String   @default("local")
+  providerId String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+}
+
+model LessonRequest {
+  id                  String                @id @default(uuid())
+  userId              String
+  lessonType          LessonType
+  lessonSubType       LessonSubType?
+  startDate           DateTime
+  endDate             DateTime
+  lessonCount         Int
+  lessonTime          Int
+  quoteEndDate        DateTime
+  locationType        LocationType
+  postcode            String?
+  roadAddress         String?
+  detailAddress       String?
+  status              LessonRequestStatus   @default(PENDING)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  lessonQuotes        LessonQuote[]
+  directQuoteRequests DirectQuoteRequest[]
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model DirectQuoteRequest {
+  id              String   @id @default(uuid())
+  lessonRequestId String
+  trainerId       String
+  status          DirectQuoteRequestStatus @default(PENDING)
+  rejectionReason String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lessonRequest LessonRequest @relation(fields: [lessonRequestId], references: [id], onDelete: Cascade)
+  trainer         User          @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonRequestId, trainerId])
+}
+
+model LessonQuote {
+  id              String      @id @default(uuid())
+  trainerId       String
+  lessonRequestId String
+  price           Float
+  message         String
+  status          QuoteStatus @default(PENDING)
+  rejectionReason String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  Review          Review[]
+
+  trainer       User          @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  lessonRequest LessonRequest @relation(fields: [lessonRequestId], references: [id])
+}
+
+model Review {
+  id            String      @id @default(uuid())
+  userId        String
+  lessonQuoteId String
+  rating        Int
+  content       String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  lessonQuote   LessonQuote @relation(fields: [lessonQuoteId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id])
+}
+
+model FavoriteTrainer {
+  id        String   @id @default(uuid())
+  userId    String
+  trainerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], name: "UserToFavoriteTrainers")
+  trainer   User     @relation(fields: [trainerId], references: [id], name: "TrainerToFavoriteTrainers")
+
+  @@unique([userId, trainerId])
+}
+
+model Notification {
+  id        Int             @id @default(autoincrement())
+  userId    String
+  type      NotificationType
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+// ENUM 정의
+enum Role {
+  USER
+  TRAINER
+  ADMIN //관리자 고도화
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum LessonType {
+  SPORTS
+  FITNESS
+  REHAB
+}
+
+enum LessonSubType {
+  // SPORTS
+  SOCCER
+  BASKETBALL
+  BASEBALL
+  TENNIS
+  BADMINTON
+  TABLE_TENNIS
+  SKI
+  SURFING
+  BOXING
+  TAEKWONDO
+  JIUJITSU
+
+  // FITNESS
+  PERSONAL_TRAINING
+  YOGA
+  PILATES
+  DIET_MANAGEMENT
+
+  // REHAB
+  STRETCHING
+  REHAB_TREATMENT
+}
+
+enum Region {
+  SEOUL
+  GYEONGGI
+  INCHEON
+  GANGWON
+  CHUNGBUK
+  CHUNGNAM
+  JEONBUK
+  JEONNAM
+  GYEONGBUK
+  GYEONGNAM
+  DAEGU
+  DAEJEON
+  BUSAN
+  ULSAN
+  GWANGJU
+  JEJU
+}
+
+enum LocationType {
+  ONLINE
+  OFFLINE
+}
+
+enum LessonRequestStatus {
+  PENDING         // 레슨 요청이 생성됨 (견적 대기 상태)
+  QUOTE_CONFIRMED // 견적이 확정되고 레슨 진행 중
+  COMPLETED       // 레슨 완료
+  CANCELED        // 요청 취소
+  EXPIRED         // 요청 기간 만료
+}
+
+enum QuoteStatus {
+  PENDING       // 견적 요청됨
+  ACCEPTED      // 견적 수락됨  
+  REJECTED      // 견적 거절됨
+  CANCELED      // 견적 취소됨
+}
+
+enum DirectQuoteRequestStatus {
+  PENDING  // 요청됨
+  REJECTED // 반려됨
+  PROPOSED // 제안됨
+}
+
+
+enum NotificationType {
+  CHAT_MESSAGE
+  LESSON_QUOTE
+  ETC
+}
+
