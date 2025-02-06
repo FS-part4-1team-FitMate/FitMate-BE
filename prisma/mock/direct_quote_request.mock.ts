@@ -1,6 +1,6 @@
 import { DirectQuoteRequestStatus } from '@prisma/client';
 
-const convertKstToUtc = (
+const formatToTime = (
   year: number,
   month: number,
   day: number,
@@ -18,7 +18,7 @@ export const DIRECT_QUOTE_REQUESTS = [
     trainerId: '66752641-132b-4ec3-ab67-bb2116cc3c94', // trainer06
     status: DirectQuoteRequestStatus.PENDING,
     rejectionReason: null,
-    createdAt: convertKstToUtc(2025, 2, 5, 15, 34, 13),
-    updatedAt: convertKstToUtc(2025, 2, 5, 15, 34, 13),
+    createdAt: formatToTime(2025, 2, 5, 15, 34, 13),
+    updatedAt: formatToTime(2025, 2, 5, 15, 34, 13),
   },
 ];
