@@ -55,31 +55,14 @@ export class TrainerService implements ITrainerService {
     const store = this.alsStore.getStore();
     const userId = store?.userId || null;
 
-    // 정렬 기준 매핑
-    const orderMapping: Record<string, 'reviewCount' | 'rating' | 'experience' | 'lessonCount'> = {
-      reviewCount: 'reviewCount',
-      rating: 'rating',
-      experience: 'experience',
-      lessonCount: 'lessonCount',
-    };
+    const orderByField = query.order ?? 'reviewCount';
 
-    // query.order 기본값 설정
-    const orderByField = orderMapping[query.order ?? 'reviewCount'];
-
-    // query.page, query.limit 기본값 설정
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 10;
-    const skip = (page - 1) * limit;
-    const take = limit;
-
-    // query.sort 값이 'asc' | 'desc'인지 확인 후 강제 변환
     const sortValue: 'asc' | 'desc' = query.sort === 'asc' || query.sort === 'desc' ? query.sort : 'desc';
 
-    // profile 내부 정렬인지 확인 후 orderBy 설정
     const profileOrderByFields = ['reviewCount', 'rating', 'lessonCount', 'experience'];
     const orderBy = profileOrderByFields.includes(orderByField)
-      ? { profile: { [orderByField]: sortValue } } // profile 내부 필드 정렬
-      : { [orderByField]: sortValue }; // 일반 필드 정렬
+      ? { profile: { [orderByField]: sortValue } }
+      : { [orderByField]: sortValue };
 
     const where = {
       role: 'TRAINER',
@@ -90,7 +73,11 @@ export class TrainerService implements ITrainerService {
       },
     };
 
-    // DB 조회 실행 (리포지토리에서 처리)
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const skip = (page - 1) * limit;
+    const take = limit;
+
     const [trainers, totalCount] = await Promise.all([
       this.trainerRepository.findAll(userId, where, orderBy, skip, take),
       this.trainerRepository.count(where),

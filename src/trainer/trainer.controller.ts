@@ -17,6 +17,11 @@ export class TrainerController {
   async getTrainers(
     @Query() query: QueryTrainerDto,
   ): Promise<{ trainers: TrainerWithFavorites[]; totalCount: number; hasMore: boolean }> {
+    const snakeToCamel = {
+      review_count: 'reviewCount',
+      lesson_count: 'lessonCount',
+    };
+
     const transformedQuery = {
       page: query.page || 1,
       limit: query.limit || 10,
