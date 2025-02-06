@@ -56,7 +56,11 @@ export class ReviewService implements IReviewService {
       throw new BadRequestException(ReviewExceptionMessage.ALREADY_REVIEWED);
     }
 
-    return await this.reviewRepository.create(data, userId);
+    const review = await this.reviewRepository.create(data, userId);
+
+    await this.reviewRepository.updateTrainerRating(quote.trainerId);
+
+    return review;
   }
 
   async getReviews(trainerId?: string, page = 1, limit = 10) {

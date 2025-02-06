@@ -147,4 +147,29 @@ export class ReviewRepository implements IReviewRepository {
   async isTrainerExists(trainerId: string): Promise<boolean> {
     return !!(await this.userRepository.findUserById(trainerId));
   }
+
+  async updateTrainerRating(trainerId: string): Promise<void> {
+    const ratingStats = await this.prisma.review.groupBy({
+      by: ['rating'],
+      where: {
+        lessonQuote: {
+          trainerId,
+        },
+      },
+      _count: {
+        rating: true,
+      },
+    });
+
+    // 평점 계산
+    const totalRating = ratingStats.reduce((sum, r) => sum + r.rating * r._count.rating, 0);
+    const totalCount = ratingStats.reduce((sum, r) => sum + r._count.rating, 0);
+    const newRating = totalCount > 0 ? totalRating / totalCount : 0;
+
+    // 트레이너 프로필에 업데이트
+    await this.prisma.profile.update({
+      where: { userId: trainerId },
+      data: { rating: newRating, reviewCount: totalCount },
+    });
+  }
 }
