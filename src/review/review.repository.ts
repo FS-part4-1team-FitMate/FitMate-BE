@@ -8,10 +8,7 @@ import { MyReviewResponse } from './type/review.type.js';
 
 @Injectable()
 export class ReviewRepository implements IReviewRepository {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly userRepository: UserRepository,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateReviewDto, userId: string): Promise<Review> {
     return await this.prisma.review.create({
@@ -142,10 +139,6 @@ export class ReviewRepository implements IReviewRepository {
     });
 
     return defaultRatings;
-  }
-
-  async isTrainerExists(trainerId: string): Promise<boolean> {
-    return !!(await this.userRepository.findUserById(trainerId));
   }
 
   async updateTrainerRating(trainerId: string): Promise<void> {
