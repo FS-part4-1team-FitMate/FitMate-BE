@@ -21,7 +21,7 @@ export const REVIEWS: Review[] = [
   },
   {
     id: 'c3d4e5f6-g7h8-i9j10-k11lm12no13pqr14', // User03의 완료된 요청레슨
-    userId: '449fc386-d1a7-4430-a37d-9d1c5bdafd4d', // User03
+    userId: '399fc386-d1a7-4430-a37d-9d1c5bdafd3d', // User03
     lessonQuoteId: '673805e8-2c0a-4ec0-9edd-034db8563474', // trainer01 완료된 레슨
     rating: 5,
     content: '수업이 체계적이고 효과적이었어요!',
