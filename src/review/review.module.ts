@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from '#prisma/prisma.service.js';
+import { UserRepository } from '#user/user.repository.js';
 import { LessonModule } from '#lesson/lesson.module.js';
 import { QuoteModule } from '#quote/quote.module.js';
 import { ReviewController } from '#review/review.controller.js';
@@ -9,7 +10,7 @@ import { ReviewService } from '#review/review.service.js';
 @Module({
   imports: [LessonModule, QuoteModule],
   controllers: [ReviewController],
-  providers: [ReviewService, ReviewRepository, PrismaService],
+  providers: [ReviewService, ReviewRepository, PrismaService, UserRepository],
   exports: [ReviewService],
 })
 export class ReviewModule {}

@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { Review } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
+import { UserRepository } from '#user/user.repository.js';
 import { CreateReviewDto } from './dto/review.dto.js';
 import { IReviewRepository } from './interface/review.repository.interface.js';
 import { MyReviewResponse } from './type/review.type.js';
 
 @Injectable()
 export class ReviewRepository implements IReviewRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userRepository: UserRepository,
+  ) {}
 
   async create(data: CreateReviewDto, userId: string): Promise<Review> {
     return await this.prisma.review.create({
@@ -141,9 +145,6 @@ export class ReviewRepository implements IReviewRepository {
   }
 
   async isTrainerExists(trainerId: string): Promise<boolean> {
-    const trainer = await this.prisma.user.findUnique({
-      where: { id: trainerId, role: 'TRAINER' }, // 역할이 'TRAINER'인지 확인
-    });
-    return !!trainer;
+    return !!(await this.userRepository.findUserById(trainerId));
   }
 }
