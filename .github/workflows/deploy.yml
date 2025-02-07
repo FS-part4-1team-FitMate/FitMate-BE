@@ -18,20 +18,20 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2  # AWS 리전 (서울 기준)
+          aws-region: ap-northeast-2
 
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode > ~/.ssh/id_rsa.pem
-          chmod 600 ~/.ssh/id_rsa.pem
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/fitmate.pem
+          chmod 600 ~/.ssh/fitmate.pem
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2
         run: |
-         ssh -i ~/.ssh/id_rsa.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -i ~/.ssh/fitmate.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd ~/FitMate-BE  
-            git pull origin ${{ secrets.GIT_BRANCH }}
+            git pull origin main
             npm install
             npm run build
             pm2 restart all || pm2 start npm --name "fitmate-be" -- run start
