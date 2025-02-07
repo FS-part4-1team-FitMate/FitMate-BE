@@ -415,3 +415,37 @@ CREATE TRIGGER lesson_create_trigger
 AFTER INSERT ON "LessonRequest"
 FOR EACH ROW
 EXECUTE FUNCTION lesson_create_trigger();
+
+-- -----------------------------------------------
+-- 5. 알림 생성시 자동 이벤트 발생
+-- -----------------------------------------------
+
+-- 5-1. 알림 생성시 자동 이벤트 발생 트리거 함수
+CREATE OR REPLACE FUNCTION notify_new_notification() 
+RETURNS TRIGGER AS $$
+DECLARE
+  payload JSON;
+BEGIN
+  -- 새로 삽입된 알림 데이터를 JSON 형태로 변환
+  payload := json_build_object(
+    'id', New."id",
+    'userId', NEW."userId",
+    'type', NEW."type",
+    'message', NEW."message",
+    'createdAt', New."createdAt"
+  );
+
+  -- PostgreSQL NOTIFY를 통해 `notification_channel`에 이벤트 발생
+  PERFORM pg_notify('notification_channel', payload::TEXT);
+
+  RETURN NEW;
+END;  
+$$ LANGUAGE plpgsql;
+
+-- 5-2. 알림 생성시 자동 이벤트 발생 트리거 생성
+DROP TRIGGER IF EXISTS notify_new_notification_trigger ON "Notification";
+
+CREATE TRIGGER notify_new_notification_trigger
+AFTER INSERT ON "Notification"
+FOR EACH ROW
+EXECUTE FUNCTION notify_new_notification();
