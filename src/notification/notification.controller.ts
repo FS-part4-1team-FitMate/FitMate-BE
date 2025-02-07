@@ -1,20 +1,19 @@
-import { Controller, Sse } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Controller, Query, Sse } from '@nestjs/common';
+import { map, Observable, tap } from 'rxjs';
+import { logger } from '#logger/winston-logger.js';
 import { NotificationService } from './notification.service.js';
-
-export interface MessageEvent {
-  data: string | object;
-  id?: string;
-  type?: string;
-  retry?: number;
-}
 
 @Controller('notifications')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   @Sse('sse')
-  sse(): Observable<MessageEvent> {
-    return this.notificationService.getNotificationStream();
+  sse(@Query('user_id') userId: string): Observable<string> {
+    return this.notificationService.getUserNotificationStream(userId).pipe(
+      tap((data) => {
+        logger.debug(`SSE 응답 데이터:\n ${JSON.stringify(data, null, 2)}`);
+      }),
+      map((data) => `${JSON.stringify(data)}\n\n`), //SSE 표준 형식으로 변환
+    );
   }
 }
