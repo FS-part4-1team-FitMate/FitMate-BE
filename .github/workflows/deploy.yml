@@ -1,38 +1,32 @@
-name: Deploy to EC2
+name: Deploy to EC2  
+run-name: Deploy FitMate-BE to EC2
 
 on:
   push:
     branches:
-      - main
+      - main  
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2
-
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/fitmate.pem
-          chmod 600 ~/.ssh/fitmate.pem
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+        uses: actions/checkout@v4  
 
       - name: Deploy to EC2
-        run: |
-          ssh -i ~/.ssh/fitmate.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+        uses: appleboy/ssh-action@v1.0.3  
+        with:
+          host: ${{ secrets.EC2_HOST }} 
+          username: ${{ secrets.EC2_USER }}  
+          key: ${{ secrets.EC2_SSH_KEY }} 
+          port: 22  
+          script: |
+
             cd ~/FitMate-BE  
+
+            git reset --hard HEAD
+            git switch main
             git pull origin main
-            npm install
-            npm run build
-            pm2 restart all || pm2 start npm --name "fitmate-be" -- run start
-          EOF
+
+            pm2 restart fitmate-be || pm2 start npm --name "fitmate-be" -- run start
