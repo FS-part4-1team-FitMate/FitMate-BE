@@ -11,14 +11,7 @@ import { NotificationRepository } from './notification.repository.js';
 import type { NotificationPayload, NotificationResponse } from './type/notification.type.js';
 
 const { Client } = pkg;
-// interface NotificationPayload {
-//   id: number;
-//   userId: string;
-//   type: string;
-//   message: string;
-//   createdAt: string;
-//   updatedAt: string;
-// }
+
 @Injectable()
 export class NotificationService implements OnModuleInit, OnModuleDestroy, INotificationService {
   private pgClient: InstanceType<typeof Client>;
@@ -124,5 +117,26 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy, INoti
       totalCount,
       hasMore,
     };
+  }
+
+  /*************************************************************************************
+   * 알림 읽음 처리
+   * ***********************************************************************************
+   */
+  async toggleNotificaitonRead(notificationId: number): Promise<NotificationResponse> {
+    const { userId } = this.alsStore.getStore();
+
+    const notification = await this.notificationRepository.findNotificationById(notificationId);
+    if (!notification) {
+      throw new BadRequestException(NotificationExpeptionMessage.NOTIFICATION_NOT_FOUND);
+    }
+
+    if (notification.userId != userId) {
+      throw new BadRequestException(NotificationExpeptionMessage.NOTIFICATION_NOT_MATCHED_USER);
+    }
+
+    return await this.notificationRepository.updateNotification(notificationId, {
+      isRead: !notification.isRead,
+    });
   }
 }

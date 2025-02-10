@@ -25,7 +25,7 @@ export type CreateNotification = {
 /**
  * 알림 수정 시 사용할 타입 (Partial 적용)
  */
-export type PatchNotification = Partial<CreateNotification>;
+export type PatchNotification = Partial<Omit<Notification, 'userId'>>;
 
 /**
  * Notification API 응답 타입

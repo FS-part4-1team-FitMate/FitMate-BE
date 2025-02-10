@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { QueryNotificationDto } from './dto/notification.dto.js';
-import type { NotificationResponse } from './type/notification.type.js';
+import type { NotificationResponse, PatchNotification } from './type/notification.type.js';
 
 @Injectable()
 export class NotificationRepository {
@@ -35,5 +35,18 @@ export class NotificationRepository {
     const hasMore = totalCount > page * limit;
 
     return { notifications, totalCount, hasMore };
+  }
+
+  async findNotificationById(notificationId: number): Promise<NotificationResponse | null> {
+    return await this.notification.findUnique({
+      where: { id: notificationId },
+    });
+  }
+
+  async updateNotification(notificationId: number, data: PatchNotification): Promise<NotificationResponse> {
+    return await this.notification.update({
+      where: { id: notificationId },
+      data,
+    });
   }
 }
