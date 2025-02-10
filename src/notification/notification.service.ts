@@ -1,38 +1,43 @@
 import { BadRequestException, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Notification } from '@prisma/client';
 import pkg from 'pg';
 import { Observable, Subject } from 'rxjs';
+import { AlsStore } from '#common/als/store-validator.js';
 import NotificationExpeptionMessage from '#exception/notification-exception-message.js';
 import { logger } from '#logger/winston-logger.js';
+import { QueryNotificationDto } from './dto/notification.dto.js';
+import { INotificationService } from './interface/notification-service.interface.js';
+import { NotificationRepository } from './notification.repository.js';
+import type { NotificationPayload, NotificationResponse } from './type/notification.type.js';
 
 const { Client } = pkg;
-interface NotificationPayload {
-  id: number;
-  userId: string;
-  type: string;
-  message: string;
-  createdAt: string;
-  updatedAt?: string;
-}
-@Injectable()
-export class NotificationService implements OnModuleInit, OnModuleDestroy {
-  private pgClient: InstanceType<typeof Client>;
 
+@Injectable()
+export class NotificationService implements OnModuleInit, OnModuleDestroy, INotificationService {
+  private pgClient: InstanceType<typeof Client>;
   // 유저별로 알림을 보내기 위해, userId -> Subject 맵핑
   private userNotificationStreams: Map<string, Subject<NotificationPayload>> = new Map();
 
-  constructor() {
+  constructor(
+    private readonly notificationRepository: NotificationRepository,
+    private readonly alsStore: AlsStore,
+  ) {
     this.pgClient = new Client({
       connectionString: process.env.DATABASE_URL,
     });
   }
 
+  /*************************************************************************************
+   * SSE(Server-Sent Events)를 사용하여 클라이언트에 알림을 전달하는 서비스
+   * ***********************************************************************************
+   */
   async onModuleInit() {
     await this.pgClient.connect();
     await this.listenForNotifications();
   }
 
   // PostgreSQL NOTIFY 이벤트를 수신하여 알림 처리
-  private async listenForNotifications() {
+  public async listenForNotifications() {
     this.pgClient.on('notification', (msg) => {
       if (!msg.payload) {
         logger.debug('새 알림 수신: payload가 비어 있습니다.');
@@ -91,5 +96,47 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy {
     }
 
     await this.pgClient.end();
+  }
+
+  /*************************************************************************************
+   * 알림 목록 조회
+   * ***********************************************************************************
+   */
+  async getNotifications(query: QueryNotificationDto): Promise<{
+    list: NotificationResponse[];
+    totalCount: number;
+    hasMore: boolean;
+  }> {
+    const { userId } = this.alsStore.getStore();
+    const { notifications, totalCount, hasMore } = await this.notificationRepository.findNotifications(
+      query,
+      userId,
+    );
+    return {
+      list: notifications,
+      totalCount,
+      hasMore,
+    };
+  }
+
+  /*************************************************************************************
+   * 알림 읽음 처리
+   * ***********************************************************************************
+   */
+  async toggleNotificaitonRead(notificationId: number): Promise<NotificationResponse> {
+    const { userId } = this.alsStore.getStore();
+
+    const notification = await this.notificationRepository.findNotificationById(notificationId);
+    if (!notification) {
+      throw new BadRequestException(NotificationExpeptionMessage.NOTIFICATION_NOT_FOUND);
+    }
+
+    if (notification.userId != userId) {
+      throw new BadRequestException(NotificationExpeptionMessage.NOTIFICATION_NOT_MATCHED_USER);
+    }
+
+    return await this.notificationRepository.updateNotification(notificationId, {
+      isRead: !notification.isRead,
+    });
   }
 }

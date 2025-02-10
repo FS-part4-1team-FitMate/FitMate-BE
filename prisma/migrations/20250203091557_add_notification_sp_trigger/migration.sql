@@ -434,6 +434,7 @@ BEGIN
     'userId', NEW."userId",
     'type', NEW."type",
     'message', NEW."message",
+    'isRead', New."isRead",
     'createdAt', New."createdAt",
     'updatedAt', New."updatedAt"
   );

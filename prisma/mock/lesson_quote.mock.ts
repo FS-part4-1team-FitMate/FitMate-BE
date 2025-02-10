@@ -8,7 +8,7 @@ const formatToTime = (
   minute: number,
   second: number,
 ) => {
-  return new Date(Date.UTC(year, month - 1, day, hour - 9, minute, second)); // 9시간 빼서 UTC 변환
+  return new Date(Date.UTC(year, month - 1, day, minute, second));
 };
 
 export const LESSON_QUOTES = [
@@ -119,7 +119,29 @@ export const LESSON_QUOTES = [
     message: 'trainer02 완료된 레슨.',
     status: QuoteStatus.ACCEPTED,
     rejectionReason: null,
-    createdAt: new Date('2025-01-17T06:30:12.460Z'),
-    updatedAt: new Date('2025-01-17T06:30:12.460Z'),
+    createdAt: new Date('2025-01-17T09:30:12.460Z'),
+    updatedAt: new Date('2025-01-17T09:30:12.460Z'),
+  },
+  {
+    id: '9ef489c0-a951-44c4-8d52-bec26edf0ffg', //  User05 완료된 요청레슨
+    trainerId: '22752641-132b-4ec3-ab67-bb2116cc3c94',
+    lessonRequestId: '699fc386-d1a7-4430-a37d-9d1c5bdafd05',
+    price: 110000.0,
+    message: 'trainer03 완료된 레슨.',
+    status: QuoteStatus.ACCEPTED,
+    rejectionReason: null,
+    createdAt: new Date('2025-02-02T08:30:12.460Z'),
+    updatedAt: new Date('2025-02-02T16:30:12.460Z'),
+  },
+  {
+    id: '33e489c0-a951-44c4-8d52-bec26edf0ffg', //  User02 견적확정 요청레슨
+    trainerId: '22752641-132b-4ec3-ab67-bb2116cc3c94',
+    lessonRequestId: '259fc386-d1a7-4430-a37d-9d1c5bdafd02',
+    price: 150000.0,
+    message: 'trainer03 견적확정 레슨.',
+    status: QuoteStatus.ACCEPTED,
+    rejectionReason: null,
+    createdAt: new Date('2025-02-08T08:30:12.460Z'),
+    updatedAt: new Date('2025-02-08T16:30:12.460Z'),
   },
 ];
