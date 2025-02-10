@@ -8,6 +8,7 @@ export type NotificationPayload = {
   userId: string;
   type: string;
   message: string;
+  isRead: boolean;
   createdAt: string;
   updatedAt: string;
 };
