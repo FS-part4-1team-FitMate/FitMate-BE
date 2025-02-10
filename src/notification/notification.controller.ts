@@ -1,11 +1,19 @@
-import { Controller, Query, Sse } from '@nestjs/common';
+import { Controller, Get, Query, Sse, UseGuards } from '@nestjs/common';
 import { map, Observable, tap } from 'rxjs';
+import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { logger } from '#logger/winston-logger.js';
+import { QueryNotificationDto } from './dto/notification.dto.js';
 import { NotificationService } from './notification.service.js';
 
 @Controller('notifications')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
+
+  @Get()
+  @UseGuards(AccessTokenGuard)
+  async getNotifications(@Query() query: QueryNotificationDto) {
+    return this.notificationService.getNotifications(query);
+  }
 
   @Sse('sse')
   sse(@Query('user_id') userId: string): Observable<string> {
