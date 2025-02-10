@@ -53,8 +53,8 @@ export const LESSON_REQUESTS = [
     userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f', // User01 // 여하늘
     lessonType: LessonType.FITNESS,
     lessonSubType: LessonSubType.PILATES,
-    startDate: formatToTime(2025, 2, 7, 10, 0, 0),
-    endDate: formatToTime(2025, 2, 7, 18, 0, 0),
+    startDate: formatToTime(2025, 2, 11, 10, 0, 0),
+    endDate: formatToTime(2025, 2, 15, 18, 0, 0),
     lessonCount: 5,
     lessonTime: 40,
     quoteEndDate: formatToTime(2025, 2, 6, 23, 59, 59),

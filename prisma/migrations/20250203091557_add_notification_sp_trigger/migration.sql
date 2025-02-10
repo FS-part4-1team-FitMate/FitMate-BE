@@ -43,11 +43,13 @@ DECLARE
   notification_message TEXT;
   lesson_type_kr TEXT;
   lesson_sub_type_kr TEXT;
+  user_nick TEXT;
 BEGIN
-  SELECT "userId", "lessonType"::TEXT, "lessonSubType"::TEXT, "status" 
-  INTO user_id, lesson_type, lesson_sub_type, lesson_status
-  FROM "LessonRequest"
-  WHERE id = lesson_id;
+  SELECT lr."userId", lr."lessonType"::TEXT, lr."lessonSubType"::TEXT, lr."status" , u."nickname"
+  INTO user_id, lesson_type, lesson_sub_type, lesson_status, user_nick
+  FROM "LessonRequest" lr
+  JOIN "User" u On lr."userId" = u.id
+  WHERE lr.id = lesson_id;
 
   IF user_id IS NULL THEN
     RETURN; -- 사용자가 없으면 종료
@@ -99,16 +101,16 @@ BEGIN
   -- 상태에 따른 알림 메시지 생성
   CASE lesson_status
     WHEN 'QUOTE_CONFIRMED' THEN
-      notification_message := '레슨(' || lesson_sub_type_kr || ')에 대한 견적이 확정되었습니다.';
+      notification_message := user_nick || '님의 레슨(' || lesson_sub_type_kr || ')에 대한 견적이 확정되었습니다.';
 
     WHEN 'COMPLETED' THEN
-      notification_message := '레슨(' || lesson_sub_type_kr || ')이 완료되었습니다.';
+      notification_message := user_nick || '님의 레슨(' || lesson_sub_type_kr || ')이 완료되었습니다.';
 
     WHEN 'CANCELED' THEN
-      notification_message := '레슨(' || lesson_sub_type || ') 요청이 취소되었습니다.';
+      notification_message := user_nick || '님의 레슨(' || lesson_sub_type || ') 요청이 취소되었습니다.';
 
     WHEN 'EXPIRED' THEN
-      notification_message := '레슨(' || lesson_sub_type_kr || ') 요청이 만료되었습니다.';
+      notification_message := user_nick || '님의 레슨(' || lesson_sub_type_kr || ') 요청이 만료되었습니다.';
     ELSE
       RETURN; -- 알림을 보낼 필요가 없는 상태이면 종료
   END CASE;
@@ -415,3 +417,38 @@ CREATE TRIGGER lesson_create_trigger
 AFTER INSERT ON "LessonRequest"
 FOR EACH ROW
 EXECUTE FUNCTION lesson_create_trigger();
+
+-- -----------------------------------------------
+-- 5. 알림 생성시 자동 이벤트 발생
+-- -----------------------------------------------
+
+-- 5-1. 알림 생성시 자동 이벤트 발생 트리거 함수
+CREATE OR REPLACE FUNCTION notify_new_notification() 
+RETURNS TRIGGER AS $$
+DECLARE
+  payload JSON;
+BEGIN
+  -- 새로 삽입된 알림 데이터를 JSON 형태로 변환
+  payload := json_build_object(
+    'id', New."id",
+    'userId', NEW."userId",
+    'type', NEW."type",
+    'message', NEW."message",
+    'createdAt', New."createdAt",
+    'updatedAt', New."updatedAt"
+  );
+
+  -- PostgreSQL NOTIFY를 통해 `notification_channel`에 이벤트 발생
+  PERFORM pg_notify('notification_channel', payload::TEXT);
+
+  RETURN NEW;
+END;  
+$$ LANGUAGE plpgsql;
+
+-- 5-2. 알림 생성시 자동 이벤트 발생 트리거 생성
+DROP TRIGGER IF EXISTS notify_new_notification_trigger ON "Notification";
+
+CREATE TRIGGER notify_new_notification_trigger
+AFTER INSERT ON "Notification"
+FOR EACH ROW
+EXECUTE FUNCTION notify_new_notification();
