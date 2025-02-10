@@ -8,7 +8,7 @@ const formatToTime = (
   minute: number,
   second: number,
 ) => {
-  return new Date(Date.UTC(year, month - 1, day, hour - 9, minute, second)); // 9시간 빼서 UTC 변환
+  return new Date(Date.UTC(year, month - 1, day, hour, minute, second));
 };
 
 export const LESSON_REQUESTS = [
@@ -53,11 +53,11 @@ export const LESSON_REQUESTS = [
     userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f', // User01 // 여하늘
     lessonType: LessonType.FITNESS,
     lessonSubType: LessonSubType.PILATES,
-    startDate: formatToTime(2025, 2, 11, 10, 0, 0),
-    endDate: formatToTime(2025, 2, 15, 18, 0, 0),
+    startDate: formatToTime(2025, 2, 12, 10, 0, 0),
+    endDate: formatToTime(2025, 2, 16, 18, 0, 0),
     lessonCount: 5,
     lessonTime: 40,
-    quoteEndDate: formatToTime(2025, 2, 6, 23, 59, 59),
+    quoteEndDate: formatToTime(2025, 2, 11, 23, 59, 59),
     locationType: LocationType.OFFLINE,
     postcode: '13529',
     roadAddress: '경기 성남시 분당구 판교역로 166',
@@ -83,6 +83,24 @@ export const LESSON_REQUESTS = [
     status: LessonRequestStatus.EXPIRED,
     createdAt: formatToTime(2025, 1, 18, 11, 0, 0),
     updatedAt: formatToTime(2025, 1, 18, 11, 0, 0),
+  },
+  {
+    id: '259fc386-d1a7-4430-a37d-9d1c5bdafd02', // 견적이 확정된 레슨
+    userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd4d', // User02 // 남하늘
+    lessonType: LessonType.SPORTS,
+    lessonSubType: LessonSubType.TENNIS,
+    startDate: formatToTime(2025, 2, 10, 11, 0, 0),
+    endDate: formatToTime(2025, 2, 12, 19, 0, 0),
+    lessonCount: 3,
+    lessonTime: 60,
+    quoteEndDate: formatToTime(2025, 2, 9, 23, 59, 59),
+    locationType: LocationType.OFFLINE,
+    postcode: '12345',
+    roadAddress: '서울 강남구 테헤란로 123',
+    detailAddress: '202호',
+    status: LessonRequestStatus.QUOTE_CONFIRMED,
+    createdAt: formatToTime(2025, 2, 7, 11, 0, 0),
+    updatedAt: formatToTime(2025, 2, 7, 11, 0, 0),
   },
   {
     id: '399fc386-d1a7-4430-a37d-9d1c5bdafd04', // 완료된 레슨  // trainer01 견적 선택
@@ -121,8 +139,8 @@ export const LESSON_REQUESTS = [
     updatedAt: formatToTime(2025, 1, 17, 10, 0, 0),
   },
   {
-    id: '699fc386-d1a7-4430-a37d-9d1c5bdafd03', // 진행중인 레슨 > 완료됨  // trainer01 견적 선택
-    userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f', // User01 // 여하늘늘
+    id: '699fc386-d1a7-4430-a37d-9d1c5bdafd03', // 완료된 레슨  // trainer01 견적 선택
+    userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f', // User01 // 여하늘
     lessonType: LessonType.REHAB,
     lessonSubType: LessonSubType.STRETCHING,
     startDate: formatToTime(2025, 2, 4, 10, 0, 0),
@@ -157,7 +175,7 @@ export const LESSON_REQUESTS = [
     updatedAt: new Date('2025-01-12T13:00:00.000Z'),
   },
   {
-    id: '699fc386-d1a7-4430-a37d-9d1c5bdafd05', // 요청중인 레슨
+    id: '699fc386-d1a7-4430-a37d-9d1c5bdafd05', // 완료된 레슨 // trainer03 견적 선택
     userId: '559fc386-d1a7-4430-a37d-9d1c5bdafd4d', // User05 // 강다은
     lessonType: LessonType.SPORTS,
     lessonSubType: LessonSubType.BOXING,
@@ -170,7 +188,7 @@ export const LESSON_REQUESTS = [
     postcode: '10101',
     roadAddress: '제주 서귀포시 칠십리로 1',
     detailAddress: '404호',
-    status: LessonRequestStatus.PENDING,
+    status: LessonRequestStatus.QUOTE_CONFIRMED,
     createdAt: new Date('2025-01-14T12:00:00.000Z'),
     updatedAt: new Date('2025-01-14T12:00:00.000Z'),
   },
