@@ -1,4 +1,4 @@
-import type { Notification } from '@prisma/client';
+import type { Notification, NotificationType } from '@prisma/client';
 
 /**
  * PostgreSQL NOTIFY 이벤트로 전달되는 알림 페이로드
@@ -18,7 +18,7 @@ export type NotificationPayload = {
  */
 export type CreateNotification = {
   userId: string;
-  type: string;
+  type: NotificationType;
   message: string;
 };
 

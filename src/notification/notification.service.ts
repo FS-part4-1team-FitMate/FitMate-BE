@@ -139,4 +139,28 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy, INoti
       isRead: !notification.isRead,
     });
   }
+
+  /*************************************************************************************
+   * 레슨 시작 알림 생성
+   * ***********************************************************************************
+   */
+  async createLessonStartNotification(
+    userId: string,
+    nickname: string,
+    lessonSubType: string,
+    now: Date,
+  ): Promise<NotificationResponse | null> {
+    const alreadyNotified = await this.notificationRepository.hasLessonStartNotification(userId, now);
+    if (alreadyNotified) {
+      logger.debug(`이미 레슨 시작 알림을 받은 유저: ${nickname}`);
+      return null;
+    }
+    // 레슨 시작 알림 생성
+    const notification = await this.notificationRepository.createNotification({
+      userId,
+      type: 'LESSON_QUOTE',
+      message: `오늘 ${nickname}님의 레슨(${lessonSubType})이 시작됩니다!`,
+    });
+    return notification;
+  }
 }
