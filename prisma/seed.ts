@@ -8,11 +8,26 @@ import { REVIEWS } from './mock/review.mock.js';
 
 const prisma = new PrismaClient();
 
+async function resetNotificationSequence() {
+  console.log('Notification 테이블 ID 시퀀스 초기화 중...');
+
+  await prisma.$executeRawUnsafe(`
+    SELECT setval(
+      pg_get_serial_sequence('"Notification"', 'id'), 
+      COALESCE((SELECT MAX(id) FROM "Notification"), 1)
+    );
+  `);
+
+  console.log('Notification ID 시퀀스 초기화 완료.');
+}
+
 async function main() {
   // 1. 기존 데이터 삭제
   console.log('기존 데이터 삭제 중...');
-  await prisma.favoriteTrainer.deleteMany();
+
   await prisma.notification.deleteMany();
+  await resetNotificationSequence();
+  await prisma.favoriteTrainer.deleteMany();
   await prisma.review.deleteMany();
   await prisma.lessonQuote.deleteMany();
   await prisma.directQuoteRequest.deleteMany();
