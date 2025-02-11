@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { NotificationService } from '#notification/notification.service.js';
-import { logger } from '#logger/winston-logger.js';
-import { LessonRepository } from './lesson.repository.js';
 import { getLessonSubTypeKr } from '#utils/lesson.util.js';
+import { logger } from '#logger/winston-logger.js';
+import type { ILessonSchedulerService } from './interface/lesson-scheduler-service.interface.js';
+import { LessonRepository } from './lesson.repository.js';
 
 @Injectable()
-export class LessonSchedulerService {
+export class LessonSchedulerService implements ILessonSchedulerService {
   constructor(
     private readonly lessonRepository: LessonRepository,
     private readonly notificationService: NotificationService,

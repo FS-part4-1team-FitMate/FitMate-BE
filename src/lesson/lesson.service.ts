@@ -308,6 +308,6 @@ export class LessonService implements ILessonService {
     lessonRequestId: string,
     status: LessonRequestStatus,
   ): Promise<void> {
-    await this.lessonRepository.updateLessonStatustWithTx(tx, lessonRequestId, status);
+    await this.lessonRepository.updateLessonStatusWithTx(tx, lessonRequestId, status);
   }
 }
