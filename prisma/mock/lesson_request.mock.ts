@@ -89,8 +89,8 @@ export const LESSON_REQUESTS = [
     userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd4d', // User02 // 남하늘
     lessonType: LessonType.SPORTS,
     lessonSubType: LessonSubType.TENNIS,
-    startDate: formatToTime(2025, 2, 10, 11, 0, 0),
-    endDate: formatToTime(2025, 2, 12, 19, 0, 0),
+    startDate: formatToTime(2025, 2, 11, 11, 0, 0),
+    endDate: formatToTime(2025, 2, 13, 19, 0, 0),
     lessonCount: 3,
     lessonTime: 60,
     quoteEndDate: formatToTime(2025, 2, 9, 23, 59, 59),
