@@ -217,26 +217,30 @@ export class LessonRepository implements ILessonRepository {
   async findOneById(id: string): Promise<LessonResponse | null> {
     return this.lessonRequest.findUnique({
       where: { id },
-      select: {
-        id: true,
-        userId: true,
-        lessonType: true,
-        lessonSubType: true,
-        startDate: true,
-        endDate: true,
-        lessonCount: true,
-        lessonTime: true,
-        quoteEndDate: true,
-        locationType: true,
-        postcode: true,
-        roadAddress: true,
-        detailAddress: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
         directQuoteRequests: {
           select: {
+            id: true,
+            lessonRequestId: true,
             trainerId: true,
+            status: true,
+            rejectionReason: true,
+          },
+        },
+        lessonQuotes: {
+          include: {
+            trainer: {
+              select: {
+                id: true,
+                nickname: true,
+                profile: {
+                  select: {
+                    name: true,
+                    region: true,
+                  },
+                },
+              },
+            },
           },
         },
         user: {
