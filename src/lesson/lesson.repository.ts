@@ -207,11 +207,12 @@ export class LessonRepository implements ILessonRepository {
   }
 
   async findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]> {
-    const whereClause: Prisma.LessonRequestWhereInput = { userId };
-    if (status) {
-      whereClause.status = status;
-    }
-    return await this.lessonRequest.findMany({ where: whereClause });
+    return await this.lessonRequest.findMany({
+      where: {
+        userId,
+        ...(status && { status }),
+      },
+    });
   }
 
   async findOneById(id: string): Promise<LessonResponse | null> {
