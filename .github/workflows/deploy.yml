@@ -29,5 +29,9 @@ jobs:
             git switch main
             git pull origin main
 
-            pm2 restart fitmate-be || pm2 start npm --name "fitmate-be" -- run start
+            npm install
+            npx prisma migrate deploy
+            npm run seed
+
+            pm2 restart fitmate-be || pm2 start dist/src/main.js --name "fitmate-be" 
             pm2 save
