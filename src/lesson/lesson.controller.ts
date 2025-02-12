@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, Query } from '@nestjs/common';
+import { setHours, setMinutes, setSeconds, subDays } from 'date-fns';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import {
@@ -20,7 +21,12 @@ export class LessonController {
   @Post()
   @UseGuards(AccessTokenGuard)
   async create(@Body() body: CreateLessonDto) {
-    return this.lessonService.createLesson(body);
+    const startDate = new Date(body.startDate);
+
+    // quoteEndDate를 startDate 하루 전날 23:59:59 설정
+    const quoteEndDate = setSeconds(setMinutes(setHours(subDays(startDate, 1), 23), 59), 59);
+
+    return this.lessonService.createLesson({ ...body, quoteEndDate: quoteEndDate });
   }
 
   /*************************************************************************************
