@@ -8,7 +8,7 @@ const formatToTime = (
   minute: number,
   second: number,
 ) => {
-  return new Date(Date.UTC(year, month - 1, day, minute, second));
+  return new Date(Date.UTC(year, month - 1, day, hour - 9, minute, second));
 };
 
 export const DIRECT_QUOTE_REQUESTS = [
