@@ -35,6 +35,6 @@ import { ProfileRepository } from '#profile/profile.repository.js';
     NaverStrategy,
     KakaoStrategy,
   ],
-  exports: [],
+  exports: [AuthService],
 })
 export class AuthModule {}

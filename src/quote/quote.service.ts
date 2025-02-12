@@ -13,6 +13,7 @@ import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import QuoteExceptionMessage from '#exception/quote-exception-message.js';
+import { AuthService } from '#auth/auth.service.js';
 import { LessonService } from '#lesson/lesson.service.js';
 import type { QueryQuoteDto } from './dto/quote.dto.js';
 import type { IQuoteService } from './interface/quote-service.interface.js';
@@ -27,6 +28,7 @@ export class QuoteService implements IQuoteService {
     private readonly lessonService: LessonService,
     private readonly alsStore: AlsStore,
     private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
   ) {}
 
   private getUserId(): string {
@@ -44,6 +46,11 @@ export class QuoteService implements IQuoteService {
     const { userId, userRole } = this.alsStore.getStore();
     if (userRole !== 'TRAINER') {
       throw new BadRequestException(QuoteExceptionMessage.ONLY_TRAINER_CAN_CREATE_QUOTE);
+    }
+
+    // 프로필을 등록한 트레이너만 견적을 생성할 수 있도록 제한
+    if (!(await this.authService.hasProfile(userId))) {
+      throw new BadRequestException(QuoteExceptionMessage.TRAINER_PROFILE_REQUIRED);
     }
 
     const lessonRequest = await this.lessonService.getLessonById(data.lessonRequestId);
