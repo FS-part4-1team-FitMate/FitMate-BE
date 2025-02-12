@@ -13,6 +13,7 @@ import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import QuoteExceptionMessage from '#exception/quote-exception-message.js';
+import { AuthService } from '#auth/auth.service.js';
 import { LessonService } from '#lesson/lesson.service.js';
 import type { QueryQuoteDto } from './dto/quote.dto.js';
 import type { IQuoteService } from './interface/quote-service.interface.js';
@@ -27,6 +28,7 @@ export class QuoteService implements IQuoteService {
     private readonly lessonService: LessonService,
     private readonly alsStore: AlsStore,
     private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
   ) {}
 
   private getUserId(): string {
@@ -46,24 +48,60 @@ export class QuoteService implements IQuoteService {
       throw new BadRequestException(QuoteExceptionMessage.ONLY_TRAINER_CAN_CREATE_QUOTE);
     }
 
+    // 프로필을 등록한 트레이너만 견적을 생성할 수 있도록 제한
+    if (!(await this.authService.hasProfile(userId))) {
+      throw new BadRequestException(QuoteExceptionMessage.TRAINER_PROFILE_REQUIRED);
+    }
+
     const lessonRequest = await this.lessonService.getLessonById(data.lessonRequestId);
     if (!lessonRequest) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
 
-    // 지정 견적 요청에 포함되지 않은 일반 견적 개수 확인
-    const nonDirectQuotesCount = await this.quoteRepository.count({
-      lessonRequestId: data.lessonRequestId,
-      trainerId: {
-        notIn: await this.quoteRepository.findDirectQuoteRequestTrainers(data.lessonRequestId),
-      },
-    });
-
-    // 최대 견적 제한 확인
-    if (nonDirectQuotesCount >= 5) {
-      throw new BadRequestException(QuoteExceptionMessage.QUOTE_LIMIT_REACHED);
+    // 1. 견적 마감일이 지났는지 확인
+    const now = new Date();
+    if (lessonRequest.quoteEndDate < now) {
+      throw new BadRequestException(QuoteExceptionMessage.QUOTE_DEADLINE_PASSED);
     }
-    return await this.quoteRepository.create({ ...data, trainerId: userId });
+
+    // 2. 이미 해당 레슨에 견적을 제출했는지 확인
+    const hasSubmittedQuote = lessonRequest.lessonQuotes?.some((quote) => quote.trainer.id === userId);
+    if (hasSubmittedQuote) {
+      throw new BadRequestException(QuoteExceptionMessage.TRAINER_ALREADY_SENT_QUOTE);
+    }
+
+    // 3. 지정 견적 여부 확인
+    const isDirectQuote = lessonRequest.isDirectQuote;
+
+    // 4. 지정 견적이 아닌 경우, 일반 견적 개수 확인
+    if (!isDirectQuote) {
+      const nonDirectQuotesCount = await this.quoteRepository.count({
+        lessonRequestId: data.lessonRequestId,
+        trainerId: {
+          notIn: await this.quoteRepository.findDirectQuoteRequestTrainers(data.lessonRequestId),
+        },
+      });
+      console.log('nonDirectQuotesCount', nonDirectQuotesCount);
+
+      // 최대 견적 제한 확인
+      if (nonDirectQuotesCount >= 5) {
+        throw new BadRequestException(QuoteExceptionMessage.QUOTE_LIMIT_REACHED);
+      }
+    }
+
+    // 5. 견적 생성
+    const createdQuote = await this.quoteRepository.create({ ...data, trainerId: userId });
+
+    // 6. 지정 견적 요청이었다면 지정견적요청 상태를 PROPOSED로 변경
+    if (isDirectQuote) {
+      await this.quoteRepository.updateDirectQuoteStatus({
+        lessonRequestId: data.lessonRequestId,
+        trainerId: userId,
+        status: 'PROPOSED',
+      });
+    }
+
+    return createdQuote;
   }
 
   /*************************************************************************************

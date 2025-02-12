@@ -41,11 +41,6 @@ export class CreateLessonDto {
   lessonTime: number;
 
   @IsNotEmpty()
-  @Transform(({ value }) => new Date(value))
-  @IsDate()
-  quoteEndDate: Date;
-
-  @IsNotEmpty()
   @IsEnum(LocationType, { message: '유효하지 않은 위치 타입입니다.' })
   locationType: LocationType;
 

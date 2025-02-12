@@ -28,4 +28,5 @@ export interface IQuoteService {
     totalCount: number;
     hasMore: boolean;
   }>;
+  hasTrainerSubmittedQuote(lessonRequestId: string, trainerId: string): Promise<boolean>;
 }
