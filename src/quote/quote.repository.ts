@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LessonQuote, Prisma, QuoteStatus } from '@prisma/client';
+import { DirectQuoteRequestStatus, LessonQuote, Prisma, QuoteStatus } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import type { IQuoteRepository } from './interface/quote-repository.interface.js';
 import type { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
@@ -116,6 +116,26 @@ export class QuoteRepository implements IQuoteRepository {
         Review: {
           none: {},
         },
+      },
+    });
+  }
+
+  async updateDirectQuoteStatus({
+    lessonRequestId,
+    trainerId,
+    status,
+  }: {
+    lessonRequestId: string;
+    trainerId: string;
+    status: DirectQuoteRequestStatus;
+  }): Promise<void> {
+    await this.directQuoteRequest.updateMany({
+      where: {
+        lessonRequestId,
+        trainerId,
+      },
+      data: {
+        status,
       },
     });
   }

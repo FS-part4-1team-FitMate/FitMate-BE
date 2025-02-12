@@ -46,13 +46,12 @@ export class LessonService implements ILessonService {
     if (userRole !== 'USER') {
       throw new UnauthorizedException(LessonExceptionMessage.ONLY_USER_CAN_REQUEST_LESSON);
     }
-    // userService 에서 userId가 존재하는지 검증
-    await this.userService.findUserById(userId);
 
-    const pendingLesson = await this.lessonRepository.findLessonsByUserId(
-      userId,
-      LessonRequestStatus.PENDING,
-    );
+    const [_user, pendingLesson] = await Promise.all([
+      this.userService.findUserById(userId),
+      this.lessonRepository.findLessonsByUserId(userId, LessonRequestStatus.PENDING),
+    ]);
+
     if (pendingLesson.length > 0) {
       throw new BadRequestException(LessonExceptionMessage.PENDING_LESSON_EXISTS);
     }
