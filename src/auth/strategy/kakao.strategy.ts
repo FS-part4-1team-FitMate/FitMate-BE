@@ -9,9 +9,9 @@ import type { ExtendKakaoProfile } from '#auth/type/auth.type.js';
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor(private readonly configService: ConfigService) {
     super({
-      clientID: configService.get<string>('KAKAO_REST_API_KEY'),
-      clientSecret: configService.get<string>('KAKAO_CLIENT_SECRET'),
-      callbackURL: configService.get<string>('KAKAO_REDIRECT_URI'),
+      clientID: configService.get<string>('KAKAO_REST_API_KEY') || '',
+      clientSecret: configService.get<string>('KAKAO_CLIENT_SECRET') || '',
+      callbackURL: configService.get<string>('KAKAO_REDIRECT_URI') || '',
     });
   }
 
