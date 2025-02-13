@@ -13,6 +13,7 @@ import { RefreshTokenStrategy } from '#auth/strategy/refresh-token.strategy.js';
 import { EmailModule } from '#email/email.module.js';
 import { UserRepository } from '#user/user.repository.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
+import { CacheModule } from '#cache/cache.module.js';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ProfileRepository } from '#profile/profile.repository.js';
     JwtConfigModule,
     HttpModule,
     EmailModule,
+    CacheModule,
   ],
   controllers: [AuthController],
   providers: [

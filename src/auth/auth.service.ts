@@ -11,6 +11,7 @@ import type { CreateUser, FilterUser, ValidateSocialAccount, SocialAccountInfo }
 import { EmailService } from '#email/email.service.js';
 import { UserRepository } from '#user/user.repository.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
+import { CacheService } from '#cache/cache.service.js';
 import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 import { getEnvOrThrow } from '#utils/get-env.js';
@@ -27,6 +28,7 @@ export class AuthService implements IAuthService {
     private readonly profileRepository: ProfileRepository,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly cacheService: CacheService,
   ) {
     this.frontBaseUrl = this.configService.get<string>('FRONTEND_BASE_URL') || 'http://localhost:3000';
   }
@@ -77,24 +79,32 @@ export class AuthService implements IAuthService {
   }
 
   async updateUser(userId: string, refreshToken: string): Promise<FilterUser> {
-    const user = await this.userRepository.updateUser(userId, refreshToken);
+    await this.cacheService.set(userId, refreshToken, 604800);
+
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) {
+      throw new BadRequestException(AuthExceptionMessage.USER_NOT_FOUND);
+    }
 
     return filterSensitiveUserData(user);
   }
 
   createToken(userId: string, role: string, type: string = 'access'): string {
     const payload = { userId, role };
-    const options = { expiresIn: type === 'refresh' ? TOKEN_EXPIRATION.ACCESS : TOKEN_EXPIRATION.REFRESH };
+    const options = { expiresIn: type === 'refresh' ? TOKEN_EXPIRATION.REFRESH : TOKEN_EXPIRATION.ACCESS };
     const jwt = this.jwtService.sign(payload, options);
 
     return jwt;
   }
 
   async refreshToken(userId: string, role: string, refreshToken: string): Promise<string> {
-    const user = await this.userRepository.findUserById(userId);
-    if (!user || user.refreshToken !== refreshToken)
+    const { value: storedToken } = await this.cacheService.get(userId);
+    if (!storedToken || storedToken !== refreshToken) {
       throw new UnauthorizedException(ExceptionMessages.INVALID_REFRESH_TOKEN);
+    }
 
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) throw new BadRequestException(AuthExceptionMessage.USER_NOT_FOUND);
     return this.createToken(user.id, role);
   }
 

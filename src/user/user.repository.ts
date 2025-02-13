@@ -26,13 +26,6 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async updateUser(id: string, refreshToken: string): Promise<User> {
-    return await this.user.update({
-      where: { id },
-      data: { refreshToken },
-    });
-  }
-
   async findUserById(id: string): Promise<User | null> {
     return await this.user.findUnique({
       where: { id },
