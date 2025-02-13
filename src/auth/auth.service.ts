@@ -4,6 +4,7 @@ import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
+import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
@@ -29,6 +30,7 @@ export class AuthService implements IAuthService {
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly cacheService: CacheService,
+    private readonly alsStore: AlsStore,
   ) {
     this.frontBaseUrl = this.configService.get<string>('FRONTEND_BASE_URL') || 'http://localhost:3000';
   }
@@ -229,5 +231,10 @@ export class AuthService implements IAuthService {
       return `${this.frontBaseUrl}/sns-login?message=${encodeURIComponent(AuthExceptionMessage.USER_NOT_FOUND)}`;
 
     return filterSensitiveUserData(user);
+  }
+
+  async logout(): Promise<void> {
+    const { userId } = await this.alsStore.getStore();
+    await this.cacheService.del(userId);
   }
 }

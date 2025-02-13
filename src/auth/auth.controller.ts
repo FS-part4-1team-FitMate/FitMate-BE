@@ -1,10 +1,11 @@
-import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query } from '@nestjs/common';
+import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query, Delete } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
+import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { KakaoAuthGuard } from '#auth/guard/kakao.guard.js';
 import { NaverAuthGuard } from '#auth/guard/naver.guard.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
@@ -179,5 +180,12 @@ export class AuthController {
 
     const redirectUrl = await this.handleRedirectUrl(kakaoUser.id, kakaoUser.role);
     return res.redirect(redirectUrl);
+  }
+
+  @Delete('logout')
+  @UseGuards(AccessTokenGuard)
+  async logout() {
+    await this.authService.logout();
+    return { message: '로그아웃 되었습니다.' };
   }
 }
