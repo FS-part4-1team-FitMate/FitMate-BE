@@ -37,7 +37,7 @@ export class AuthService implements IAuthService {
 
   async emailVerification(email: string): Promise<string> {
     const isValid = await this.emailService.validateEmailDomain(email);
-    if (!isValid) throw new BadRequestException(AuthExceptionMessage.EMAIL_NOT_FOUND);
+    if (!isValid) throw new NotFoundException(AuthExceptionMessage.EMAIL_NOT_FOUND);
 
     const code = this.emailService.generateVerificationCode();
     await this.emailService.saveVerificationCode(email, code);
@@ -85,7 +85,7 @@ export class AuthService implements IAuthService {
 
     const user = await this.userRepository.findUserById(userId);
     if (!user) {
-      throw new BadRequestException(AuthExceptionMessage.USER_NOT_FOUND);
+      throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
     }
 
     return filterSensitiveUserData(user);
@@ -106,7 +106,7 @@ export class AuthService implements IAuthService {
     }
 
     const user = await this.userRepository.findUserById(userId);
-    if (!user) throw new BadRequestException(AuthExceptionMessage.USER_NOT_FOUND);
+    if (!user) throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
     return this.createToken(user.id, role);
   }
 
@@ -236,5 +236,23 @@ export class AuthService implements IAuthService {
   async logout(): Promise<void> {
     const { userId } = await this.alsStore.getStore();
     await this.cacheService.del(userId);
+  }
+
+  async changePassword(currentPassword: string, newPassword: string, confirmNewPassword: string) {
+    const { userId } = await this.alsStore.getStore();
+
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) throw new NotFoundException(AuthExceptionMessage.EMAIL_NOT_FOUND);
+
+    await verifyPassword(currentPassword, user.password);
+
+    if (newPassword !== confirmNewPassword) {
+      throw new BadRequestException(AuthExceptionMessage.PASSWORD_MISMATCH);
+    }
+
+    const hashedPassword = await hashingPassword(newPassword);
+    await this.userRepository.updatePassword(userId, hashedPassword);
+
+    return { message: '비밀번호가 변경되었습니다.' };
   }
 }

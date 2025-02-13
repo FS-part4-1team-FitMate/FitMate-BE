@@ -1,4 +1,4 @@
-import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query, Delete } from '@nestjs/common';
+import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query, Delete, Patch } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
@@ -187,5 +187,17 @@ export class AuthController {
   async logout() {
     await this.authService.logout();
     return { message: '로그아웃 되었습니다.' };
+  }
+
+  @Patch('password')
+  @UseGuards(AccessTokenGuard)
+  async changePassword(
+    @Body('currentPassword') currentPassword: string,
+    @Body('newPassword') newPassword: string,
+    @Body('confirmNewPassword') confirmNewPassword: string,
+  ) {
+    await this.authService.changePassword(currentPassword, newPassword, confirmNewPassword);
+
+    return { message: '비밀번호가 변경되었습니다.' };
   }
 }
