@@ -13,11 +13,13 @@ import { UserRepository } from '#user/user.repository.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
 import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
+import { getEnvOrThrow } from '#utils/get-env.js';
 import { hashingPassword, verifyPassword } from '#utils/hashing-password.js';
 import mapToRole from '#utils/map-to-role.js';
 
 @Injectable()
 export class AuthService implements IAuthService {
+  private readonly frontBaseUrl: string;
   constructor(
     private readonly userRepository: UserRepository,
     private readonly emailService: EmailService,
@@ -25,7 +27,9 @@ export class AuthService implements IAuthService {
     private readonly profileRepository: ProfileRepository,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-  ) {}
+  ) {
+    this.frontBaseUrl = this.configService.get<string>('FRONTEND_BASE_URL') || 'http://localhost:3000';
+  }
 
   async emailVerification(email: string): Promise<string> {
     const isValid = await this.emailService.validateEmailDomain(email);
@@ -119,9 +123,9 @@ export class AuthService implements IAuthService {
     const tokenResponse = await firstValueFrom(
       this.httpService.post(tokenUrl, {
         code,
-        client_id: this.configService.get<string>('GOOGLE_CLIENT_ID'),
-        client_secret: this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
-        redirect_uri: this.configService.get<string>('GOOGLE_REDIRECT_URI'),
+        client_id: getEnvOrThrow(this.configService, 'GOOGLE_CLIENT_ID'),
+        client_secret: getEnvOrThrow(this.configService, 'GOOGLE_CLIENT_SECRET'),
+        redirect_uri: getEnvOrThrow(this.configService, 'GOOGLE_REDIRECT_URI'),
         grant_type: 'authorization_code',
       }),
     );
@@ -138,11 +142,12 @@ export class AuthService implements IAuthService {
     return { provider, providerId, email, nickname };
   }
 
-  async handleGoogleSignUp(code: string, role: string): Promise<FilterUser> {
+  async handleGoogleSignUp(code: string, role: string): Promise<string | FilterUser> {
     const { provider, providerId, email, nickname } = await this.fetchGoogleUserInfo(code);
 
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
-    if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
+    if (existingAccount)
+      return `${this.frontBaseUrl}/sns-login?message=${encodeURIComponent(AuthExceptionMessage.USER_EXISTS)}`;
 
     let user = await this.userRepository.findByEmail(email);
 
@@ -160,14 +165,16 @@ export class AuthService implements IAuthService {
     return filterSensitiveUserData(user);
   }
 
-  async handleGoogleLogin(code: string): Promise<FilterUser> {
+  async handleGoogleLogin(code: string): Promise<string | FilterUser> {
     const { provider, providerId } = await this.fetchGoogleUserInfo(code);
 
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
-    if (!existingAccount) throw new ConflictException(AuthExceptionMessage.USER_NOT_FOUND);
+    if (!existingAccount)
+      return `${this.frontBaseUrl}/sns-login?message=${encodeURIComponent(AuthExceptionMessage.USER_NOT_FOUND)}`;
 
     const user = await this.userRepository.findUserById(existingAccount.userId);
-    if (!user) throw new ConflictException(AuthExceptionMessage.USER_NOT_FOUND);
+    if (!user)
+      return `${this.frontBaseUrl}/sns-login?message=${encodeURIComponent(AuthExceptionMessage.USER_NOT_FOUND)}`;
 
     return filterSensitiveUserData(user);
   }
@@ -178,9 +185,10 @@ export class AuthService implements IAuthService {
     email,
     nickname,
     role,
-  }: ValidateSocialAccount): Promise<FilterUser> {
+  }: ValidateSocialAccount): Promise<string | FilterUser> {
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
-    if (existingAccount) throw new ConflictException(AuthExceptionMessage.USER_EXISTS);
+    if (existingAccount)
+      return `${this.frontBaseUrl}/sns-login?message=${encodeURIComponent(AuthExceptionMessage.USER_EXISTS)}`;
 
     let user = await this.userRepository.findByEmail(email);
 
@@ -201,12 +209,14 @@ export class AuthService implements IAuthService {
   async loginSocialAccount({
     provider,
     providerId,
-  }: Omit<ValidateSocialAccount, 'email' | 'nickname' | 'role'>): Promise<FilterUser> {
+  }: Omit<ValidateSocialAccount, 'email' | 'nickname' | 'role'>): Promise<string | FilterUser> {
     const existingAccount = await this.userRepository.findSocialAccount(provider, providerId);
-    if (!existingAccount) throw new ConflictException(AuthExceptionMessage.USER_NOT_FOUND);
+    if (!existingAccount)
+      return `${this.frontBaseUrl}/sns-login?message=${encodeURIComponent(AuthExceptionMessage.USER_NOT_FOUND)}`;
 
     const user = await this.userRepository.findUserById(existingAccount.userId);
-    if (!user) throw new ConflictException(AuthExceptionMessage.USER_NOT_FOUND);
+    if (!user)
+      return `${this.frontBaseUrl}/sns-login?message=${encodeURIComponent(AuthExceptionMessage.USER_NOT_FOUND)}`;
 
     return filterSensitiveUserData(user);
   }

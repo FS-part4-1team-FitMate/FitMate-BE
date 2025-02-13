@@ -4,14 +4,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { Strategy } from 'passport-kakao';
 import type { ExtendKakaoProfile } from '#auth/type/auth.type.js';
+import { getEnvOrThrow } from '#utils/get-env.js';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor(private readonly configService: ConfigService) {
     super({
-      clientID: configService.get<string>('KAKAO_REST_API_KEY') || '',
-      clientSecret: configService.get<string>('KAKAO_CLIENT_SECRET') || '',
-      callbackURL: configService.get<string>('KAKAO_REDIRECT_URI') || '',
+      clientID: getEnvOrThrow(configService, 'KAKAO_REST_API_KEY'),
+      clientSecret: getEnvOrThrow(configService, 'KAKAO_CLIENT_SECRET'),
+      callbackURL: getEnvOrThrow(configService, 'KAKAO_REDIRECT_URI'),
     });
   }
 

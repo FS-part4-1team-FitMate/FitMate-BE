@@ -102,8 +102,13 @@ export class AuthController {
     const user = isSignUp
       ? await this.authService.handleGoogleSignUp(code, role!)
       : await this.authService.handleGoogleLogin(code);
+
+    if (typeof user === 'string') {
+      return res.redirect(user);
+    }
+
     const redirectUrl = await this.handleRedirectUrl(user.id, user.role);
-    res.redirect(redirectUrl);
+    return res.redirect(redirectUrl);
   }
 
   @Get('naver')
@@ -133,8 +138,12 @@ export class AuthController {
           providerId,
         });
 
+    if (typeof naverUser === 'string') {
+      return res.redirect(naverUser);
+    }
+
     const redirectUrl = await this.handleRedirectUrl(naverUser.id, naverUser.role);
-    res.redirect(redirectUrl);
+    return res.redirect(redirectUrl);
   }
 
   @Get('kakao')
@@ -164,7 +173,11 @@ export class AuthController {
           providerId,
         });
 
+    if (typeof kakaoUser === 'string') {
+      return res.redirect(kakaoUser);
+    }
+
     const redirectUrl = await this.handleRedirectUrl(kakaoUser.id, kakaoUser.role);
-    res.redirect(redirectUrl);
+    return res.redirect(redirectUrl);
   }
 }
