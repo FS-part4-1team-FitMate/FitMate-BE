@@ -1,26 +1,26 @@
-name: Deploy to EC2  
+name: Deploy to EC2
 run-name: Deploy FitMate-BE to EC2
 
 on:
   push:
     branches:
-      - main  
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4  
+        uses: actions/checkout@v4
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3  
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }} 
-          username: ${{ secrets.EC2_USER }}  
-          key: ${{ secrets.EC2_SSH_KEY }} 
-          port: 22  
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
           script: |
 
             cd ~/FitMate-BE  
@@ -29,4 +29,9 @@ jobs:
             git switch main
             git pull origin main
 
-            pm2 restart fitmate-be || pm2 start npm --name "fitmate-be" -- run start
+            npm install
+            npx prisma migrate deploy
+            npm run seed
+
+            pm2 restart fitmate-be || pm2 start dist/src/main.js --name "fitmate-be" 
+            pm2 save
