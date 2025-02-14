@@ -1,5 +1,6 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from '#prisma/prisma.module.js';
 import { AlsMiddleware } from '#common/als/als.middleware.js';
@@ -16,6 +17,7 @@ import { ReviewModule } from '#review/review.module.js';
 import { CacheModule } from '#cache/cache.module.js';
 import { MqModule } from '#mq/mq.module.js';
 import { NotificationModule } from './notification/notification.module.js';
+
 
 @Module({
   imports: [
@@ -37,6 +39,13 @@ import { NotificationModule } from './notification/notification.module.js';
     EmailModule,
     MqModule,
     NotificationModule,
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+    }),
   ],
   controllers: [],
   providers: [AccessTokenGuard],
