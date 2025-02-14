@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { PROFILES } from '#prisma/mock/profile.mock.js';
 import { USERS } from '#prisma/mock/user.mock.js';
 import { DIRECT_QUOTE_REQUESTS } from './mock/direct_quote_request.mock.js';
+import { FAVORITE_TRAINERS } from './mock/favorite_trainers.mock.js';
 import { LESSON_QUOTES } from './mock/lesson_quote.mock.js';
 import { LESSON_REQUESTS } from './mock/lesson_request.mock.js';
 import { REVIEWS } from './mock/review.mock.js';
@@ -34,6 +35,7 @@ async function main() {
   await prisma.lessonRequest.deleteMany();
   await prisma.profile.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.favoriteTrainer.deleteMany();
 
   // 2. User 데이터 삽입
   console.log('User 데이터 삽입 중...');
@@ -81,6 +83,14 @@ async function main() {
     data: REVIEWS,
     skipDuplicates: true,
   });
+
+  // 8. FavoriteTrainer 데이터 삽입
+  console.log('FavoriteTrainer 데이터 삽입 중...');
+  for (const favoriteTrainer of FAVORITE_TRAINERS) {
+    await prisma.favoriteTrainer.create({
+      data: favoriteTrainer,
+    });
+  }
 
   console.log('모든 데이터 삽입 완료!');
 }

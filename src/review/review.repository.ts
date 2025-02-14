@@ -74,6 +74,7 @@ export class ReviewRepository implements IReviewRepository {
       take: limit,
       orderBy: { createdAt: 'desc' },
       select: {
+        rating: true,
         content: true,
         createdAt: true,
         lessonQuote: {
