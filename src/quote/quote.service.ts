@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { LessonRequestStatus, QuoteStatus } from '@prisma/client';
-import type { LessonQuote } from '@prisma/client';
+import type { LessonQuote, Prisma } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
@@ -18,7 +18,7 @@ import { LessonService } from '#lesson/lesson.service.js';
 import type { QueryQuoteDto } from './dto/quote.dto.js';
 import type { IQuoteService } from './interface/quote-service.interface.js';
 import { QuoteRepository } from './quote.repository.js';
-import type { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
+import type { CreateLessonQuote, LessonQuoteResponse, PatchLessonQuote } from './type/quote.type.js';
 
 @Injectable()
 export class QuoteService implements IQuoteService {
@@ -177,57 +177,15 @@ export class QuoteService implements IQuoteService {
    * 레슨 견적 목록 조회
    * ***********************************************************************************
    */
-  async getLessonQuotes(query: QueryQuoteDto): Promise<{
-    list: LessonQuote[];
-    totalCount: number;
-    hasMore: boolean;
-  }> {
-    const {
-      page = 1,
-      limit = 5,
-      order = 'createdAt',
-      sort = 'desc',
-      status,
-      trainerId,
-      minPrice,
-      maxPrice,
-      lessonRequestId,
-    } = query.toCamelCase();
-
-    const orderMapping: Record<string, string> = {
-      created_at: 'createdAt', // 매핑된 필드 이름
-      updated_at: 'updatedAt',
-      price: 'price',
-    };
-
-    const orderByField = orderMapping[order] || order; // 매핑된 필드를 사용하거나 기본값 유지
-
-    const orderBy: Record<string, string> = {
-      [orderByField]: sort,
-    };
-
-    const skip = (page - 1) * limit;
-    const take = limit;
-
-    // 필터 조건 생성
-    const where = {
-      ...(status && { status: { in: status } }),
-      ...(trainerId && { trainerId }),
-      ...(lessonRequestId && { lessonRequestId }),
-      ...(minPrice || maxPrice ? { price: { gte: minPrice || undefined, lte: maxPrice || undefined } } : {}),
-    };
-
-    const [quotes, totalCount] = await Promise.all([
-      this.quoteRepository.findAll(where, orderBy, skip, take, {
-        lessonRequest: true,
-      }),
-      this.quoteRepository.count(where),
-    ]);
+  async getLessonQuotes(
+    query: QueryQuoteDto,
+  ): Promise<{ list: LessonQuoteResponse[]; totalCount: number; hasMore: boolean }> {
+    const { quotes, totalCount, hasMore } = await this.quoteRepository.findQuotes(query);
 
     return {
       list: quotes,
       totalCount,
-      hasMore: totalCount > page * limit,
+      hasMore,
     };
   }
 
@@ -235,7 +193,7 @@ export class QuoteService implements IQuoteService {
    * 레슨 견적 상세 조회
    * ***********************************************************************************
    */
-  async getLessonQuoteById(id: string): Promise<LessonQuote | null> {
+  async getLessonQuoteById(id: string): Promise<LessonQuoteResponse | null> {
     const lessonQuote = await this.quoteRepository.findOne(id);
     if (!lessonQuote) {
       throw new NotFoundException(QuoteExceptionMessage.QUOTE_NOT_FOUND);
