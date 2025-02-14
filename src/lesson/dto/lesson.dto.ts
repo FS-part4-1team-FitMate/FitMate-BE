@@ -216,13 +216,15 @@ export class QueryLessonDto {
 }
 
 export class CreateDirectQuoteDto {
+  @ApiProperty({ description: '견적을 요청할 트레이너의 UUID' })
   @IsNotEmpty()
   @IsUUID('4', { message: '유효하지 않은 강사 ID입니다.' })
   trainerId: string;
 }
 
 export class RejectDirectQuoteDto {
-  @IsNotEmpty()
+  @ApiPropertyOptional({ description: '반려 사유' })
+  @IsOptional()
   @IsString()
-  rejectionReason: string;
+  rejectionReason?: string;
 }
