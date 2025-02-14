@@ -8,7 +8,7 @@ export interface CreateUser {
   role: Role;
 }
 
-export type FilterUser = Omit<User, 'password' | 'refreshToken'>;
+export type FilterUser = Omit<User, 'password'>;
 
 export interface Payload {
   userId: string;
