@@ -7,16 +7,6 @@ import { ICacheService } from '#cache/interface/cache.service.interface.js';
 export class CacheService implements ICacheService {
   constructor(@Inject(CACHE_CLIENT) private readonly redisClient: Redis) {}
 
-  // async testRedisConnection(): Promise<void> {
-  //   try {
-  //     await this.redisClient.set('test-key', 'Hello, Redis!');
-  //     const value = await this.redisClient.get('test-key');
-  //     console.log(`Redis Test Passed: test-key = ${value}`);
-  //   } catch (err) {
-  //     console.error('Redis Test Failed:', err);
-  //   }
-  // }
-
   async get(key: string): Promise<{ key: string; value: any | null }> {
     const value = await this.redisClient.get(key);
     if (value) {

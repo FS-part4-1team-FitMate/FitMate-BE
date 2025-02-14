@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DirectQuoteRequestStatus, LessonQuote, Prisma, QuoteStatus } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
+import { QueryQuoteDto } from './dto/quote.dto.js';
 import type { IQuoteRepository } from './interface/quote-repository.interface.js';
-import type { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
+import type { CreateLessonQuote, LessonQuoteResponse, PatchLessonQuote } from './type/quote.type.js';
 
 @Injectable()
 export class QuoteRepository implements IQuoteRepository {
@@ -18,6 +19,66 @@ export class QuoteRepository implements IQuoteRepository {
     return await this.lessonQuote.create({ data });
   }
 
+  async findQuotes(
+    query: QueryQuoteDto,
+  ): Promise<{ quotes: LessonQuoteResponse[]; totalCount: number; hasMore: boolean }> {
+    const {
+      page = 1,
+      limit = 5,
+      order = 'createdAt',
+      sort = 'desc',
+      status,
+      trainerId,
+      minPrice,
+      maxPrice,
+      lessonRequestId,
+    } = query.toCamelCase();
+
+    const orderMapping: Record<string, string> = {
+      created_at: 'createdAt',
+      updated_at: 'updatedAt',
+      price: 'price',
+    };
+
+    const orderByField = orderMapping[order] || order;
+    const orderBy: Record<string, string> = { [orderByField]: sort };
+
+    const skip = (page - 1) * limit;
+    const take = limit;
+
+    const where: Prisma.LessonQuoteWhereInput = {
+      ...(status && { status: { in: status } }),
+      ...(trainerId && { trainerId }),
+      ...(lessonRequestId && { lessonRequestId }),
+      ...(minPrice || maxPrice ? { price: { gte: minPrice || undefined, lte: maxPrice || undefined } } : {}),
+    };
+
+    const [quotes, totalCount] = await Promise.all([
+      this.lessonQuote.findMany({
+        where,
+        orderBy,
+        skip,
+        take,
+        include: {
+          lessonRequest: true,
+          trainer: {
+            select: {
+              id: true,
+              email: true,
+              nickname: true,
+            },
+          },
+        },
+      }),
+      this.lessonQuote.count({ where }),
+    ]);
+
+    const hasMore = totalCount > page * limit;
+
+    return { quotes, totalCount, hasMore };
+  }
+
+  // 삭제 예정
   async findAll(
     where?: Record<string, any>,
     orderBy?: Record<string, string>,
@@ -25,7 +86,7 @@ export class QuoteRepository implements IQuoteRepository {
     take?: number,
     include?: Prisma.LessonQuoteInclude,
   ): Promise<LessonQuote[]> {
-    return await this.prisma.lessonQuote.findMany({
+    return await this.lessonQuote.findMany({
       where,
       orderBy,
       skip,
@@ -35,12 +96,22 @@ export class QuoteRepository implements IQuoteRepository {
   }
 
   async count(where?: Record<string, any>): Promise<number> {
-    return await this.prisma.lessonQuote.count({ where });
+    return await this.lessonQuote.count({ where });
   }
 
-  async findOne(id: string): Promise<LessonQuote | null> {
+  async findOne(id: string): Promise<LessonQuoteResponse | null> {
     return await this.lessonQuote.findUnique({
       where: { id },
+      include: {
+        lessonRequest: true,
+        trainer: {
+          select: {
+            id: true,
+            email: true,
+            nickname: true,
+          },
+        },
+      },
     });
   }
 

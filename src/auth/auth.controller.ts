@@ -1,10 +1,11 @@
-import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query } from '@nestjs/common';
+import { UseGuards, Body, Controller, Post, Res, Get, Redirect, Query, Delete, Patch } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
 import { AuthService } from '#auth/auth.service.js';
 import { ReqUser } from '#auth/decorator/user.decorator.js';
 import { CreateUserDTO } from '#auth/dto/auth.dto.js';
+import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { KakaoAuthGuard } from '#auth/guard/kakao.guard.js';
 import { NaverAuthGuard } from '#auth/guard/naver.guard.js';
 import { RefreshTokenGuard } from '#auth/guard/refresh-token.guard.js';
@@ -102,8 +103,13 @@ export class AuthController {
     const user = isSignUp
       ? await this.authService.handleGoogleSignUp(code, role!)
       : await this.authService.handleGoogleLogin(code);
+
+    if (typeof user === 'string') {
+      return res.redirect(user);
+    }
+
     const redirectUrl = await this.handleRedirectUrl(user.id, user.role);
-    res.redirect(redirectUrl);
+    return res.redirect(redirectUrl);
   }
 
   @Get('naver')
@@ -133,8 +139,12 @@ export class AuthController {
           providerId,
         });
 
+    if (typeof naverUser === 'string') {
+      return res.redirect(naverUser);
+    }
+
     const redirectUrl = await this.handleRedirectUrl(naverUser.id, naverUser.role);
-    res.redirect(redirectUrl);
+    return res.redirect(redirectUrl);
   }
 
   @Get('kakao')
@@ -164,7 +174,30 @@ export class AuthController {
           providerId,
         });
 
+    if (typeof kakaoUser === 'string') {
+      return res.redirect(kakaoUser);
+    }
+
     const redirectUrl = await this.handleRedirectUrl(kakaoUser.id, kakaoUser.role);
-    res.redirect(redirectUrl);
+    return res.redirect(redirectUrl);
+  }
+
+  @Delete('logout')
+  @UseGuards(AccessTokenGuard)
+  async logout() {
+    await this.authService.logout();
+    return { message: '로그아웃 되었습니다.' };
+  }
+
+  @Patch('password')
+  @UseGuards(AccessTokenGuard)
+  async changePassword(
+    @Body('currentPassword') currentPassword: string,
+    @Body('newPassword') newPassword: string,
+    @Body('confirmNewPassword') confirmNewPassword: string,
+  ) {
+    await this.authService.changePassword(currentPassword, newPassword, confirmNewPassword);
+
+    return { message: '비밀번호가 변경되었습니다.' };
   }
 }

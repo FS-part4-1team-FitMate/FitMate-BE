@@ -26,13 +26,6 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  async updateUser(id: string, refreshToken: string): Promise<User> {
-    return await this.user.update({
-      where: { id },
-      data: { refreshToken },
-    });
-  }
-
   async findUserById(id: string): Promise<User | null> {
     return await this.user.findUnique({
       where: { id },
@@ -53,6 +46,13 @@ export class UserRepository implements IUserRepository {
         providerId,
         userId,
       },
+    });
+  }
+
+  async updatePassword(userId: string, hashedPassword: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
     });
   }
 }
