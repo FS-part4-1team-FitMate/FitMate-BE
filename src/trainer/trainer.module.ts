@@ -6,7 +6,7 @@ import { TrainerRepository } from '#trainer/trainer.repository.js';
 import { TrainerService } from '#trainer/trainer.service.js';
 
 @Module({
-  imports: [AlsModule], // AuthModule 추가
+  imports: [AlsModule],
   controllers: [TrainerController],
   providers: [TrainerService, TrainerRepository, PrismaService],
 })

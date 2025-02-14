@@ -38,7 +38,7 @@ export class TrainerController {
   @Get('favorite')
   @UseGuards(AccessTokenGuard)
   async getFavoriteTrainers(
-    @Query() query: QueryTrainerDto, // 🔹 page와 limit 받기 위해 DTO 추가
+    @Query() query: QueryTrainerDto,
   ): Promise<{ trainers: TrainerWithFavorites[]; totalCount: number; hasMore: boolean }> {
     return this.trainerService.getFavoriteTrainers(query);
   }
