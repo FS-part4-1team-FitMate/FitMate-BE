@@ -14,7 +14,7 @@ export interface IQuoteRepository {
     select?: Prisma.LessonQuoteSelect,
   ): Promise<LessonQuote[]>;
   findOne(id: string): Promise<LessonQuote | null>;
-  update(id: string, data: PatchLessonQuote): Promise<LessonQuote | null>;
+  //update(id: string, data: PatchLessonQuote): Promise<LessonQuote | null>;
   updateStatus(id: string, status: QuoteStatus, rejectionReason?: string): Promise<LessonQuote | null>;
   updateStatusWithTx(
     tx: Prisma.TransactionClient,

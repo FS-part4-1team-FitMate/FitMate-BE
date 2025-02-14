@@ -202,18 +202,6 @@ export class QuoteService implements IQuoteService {
   }
 
   /*************************************************************************************
-   * 레슨 견적 내용 수정 (진행중...)
-   * ***********************************************************************************
-   */
-  async updateLessonQuote(id: string, data: PatchLessonQuote): Promise<LessonQuote | null> {
-    const lessonQuote = await this.quoteRepository.findOne(id);
-    if (!lessonQuote) {
-      throw new NotFoundException(QuoteExceptionMessage.QUOTE_NOT_FOUND);
-    }
-    return await this.quoteRepository.update(id, data);
-  }
-
-  /*************************************************************************************
    * 리뷰 가능 견적 목록 조회
    * ***********************************************************************************
    */
@@ -239,6 +227,7 @@ export class QuoteService implements IQuoteService {
       hasMore: totalCount > page * limit,
     };
   }
+
   /**
    * 특정 트레이너가 지정 견적 요청에 대해 이미 견적서를 제출했는지 확인 (lesson service 에서 사용)
    */
