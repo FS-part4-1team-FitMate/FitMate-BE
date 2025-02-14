@@ -1,9 +1,11 @@
 import type { LessonQuote } from '@prisma/client';
 import { Prisma, QuoteStatus, DirectQuoteRequestStatus } from '@prisma/client';
+import { QueryQuoteDto } from '#quote/dto/quote.dto.js';
 import type { CreateLessonQuote, PatchLessonQuote } from '#quote/type/quote.type.js';
 
 export interface IQuoteRepository {
   create(data: CreateLessonQuote): Promise<LessonQuote>;
+  findQuotes(query: QueryQuoteDto): Promise<{ quotes: LessonQuote[]; totalCount: number; hasMore: boolean }>;
   findAll(
     where?: Record<string, any>,
     orderBy?: Record<string, string>,
