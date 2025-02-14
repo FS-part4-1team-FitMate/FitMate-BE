@@ -3,7 +3,7 @@ import { DirectQuoteRequestStatus, LessonQuote, Prisma, QuoteStatus } from '@pri
 import { PrismaService } from '#prisma/prisma.service.js';
 import { QueryQuoteDto } from './dto/quote.dto.js';
 import type { IQuoteRepository } from './interface/quote-repository.interface.js';
-import type { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
+import type { CreateLessonQuote, LessonQuoteResponse, PatchLessonQuote } from './type/quote.type.js';
 
 @Injectable()
 export class QuoteRepository implements IQuoteRepository {
@@ -21,7 +21,7 @@ export class QuoteRepository implements IQuoteRepository {
 
   async findQuotes(
     query: QueryQuoteDto,
-  ): Promise<{ quotes: LessonQuote[]; totalCount: number; hasMore: boolean }> {
+  ): Promise<{ quotes: LessonQuoteResponse[]; totalCount: number; hasMore: boolean }> {
     const {
       page = 1,
       limit = 5,
@@ -99,9 +99,19 @@ export class QuoteRepository implements IQuoteRepository {
     return await this.lessonQuote.count({ where });
   }
 
-  async findOne(id: string): Promise<LessonQuote | null> {
+  async findOne(id: string): Promise<LessonQuoteResponse | null> {
     return await this.lessonQuote.findUnique({
       where: { id },
+      include: {
+        lessonRequest: true,
+        trainer: {
+          select: {
+            id: true,
+            email: true,
+            nickname: true,
+          },
+        },
+      },
     });
   }
 

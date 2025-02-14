@@ -18,7 +18,7 @@ import { LessonService } from '#lesson/lesson.service.js';
 import type { QueryQuoteDto } from './dto/quote.dto.js';
 import type { IQuoteService } from './interface/quote-service.interface.js';
 import { QuoteRepository } from './quote.repository.js';
-import type { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
+import type { CreateLessonQuote, LessonQuoteResponse, PatchLessonQuote } from './type/quote.type.js';
 
 @Injectable()
 export class QuoteService implements IQuoteService {
@@ -179,7 +179,7 @@ export class QuoteService implements IQuoteService {
    */
   async getLessonQuotes(
     query: QueryQuoteDto,
-  ): Promise<{ list: LessonQuote[]; totalCount: number; hasMore: boolean }> {
+  ): Promise<{ list: LessonQuoteResponse[]; totalCount: number; hasMore: boolean }> {
     const { quotes, totalCount, hasMore } = await this.quoteRepository.findQuotes(query);
 
     return {
@@ -193,7 +193,7 @@ export class QuoteService implements IQuoteService {
    * 레슨 견적 상세 조회
    * ***********************************************************************************
    */
-  async getLessonQuoteById(id: string): Promise<LessonQuote | null> {
+  async getLessonQuoteById(id: string): Promise<LessonQuoteResponse | null> {
     const lessonQuote = await this.quoteRepository.findOne(id);
     if (!lessonQuote) {
       throw new NotFoundException(QuoteExceptionMessage.QUOTE_NOT_FOUND);

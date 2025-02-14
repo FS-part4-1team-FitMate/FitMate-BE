@@ -9,4 +9,10 @@ export type CreateLessonQuote = {
 
 export type PatchLessonQuote = Partial<CreateLessonQuote>;
 
-export type LessonQuoteResponse = LessonQuote;
+export type LessonQuoteResponse = LessonQuote & {
+  trainer: {
+    id: string;
+    email: string;
+    nickname: string;
+  };
+};
