@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { setHours, setMinutes, setSeconds, subDays } from 'date-fns';
 import { UUIDPipe } from '#common/uuid.pipe.js';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
@@ -10,6 +11,8 @@ import {
 } from './dto/lesson.dto.js';
 import { LessonService } from './lesson.service.js';
 
+@ApiTags('lessons')
+@ApiBearerAuth()
 @Controller('lessons')
 export class LessonController {
   constructor(private readonly lessonService: LessonService) {}
@@ -20,6 +23,32 @@ export class LessonController {
    */
   @Post()
   @UseGuards(AccessTokenGuard)
+  @ApiOperation({ summary: '요청 레슨 등록', description: '새로운 요청 레슨을 등록합니다.' })
+  @ApiResponse({ status: 400, description: '유효성 검사 실패 또는 잘못된 요청 데이터' })
+  @ApiResponse({ status: 401, description: '인증 실패' })
+  @ApiCreatedResponse({
+    description: '레슨이 정상적으로 생성됨',
+    schema: {
+      example: {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        lessonType: 'SPORTS',
+        lessonSubType: 'YOGA',
+        startDate: '2025-01-01T09:00:00.000Z',
+        endDate: '2025-02-01T09:00:00.000Z',
+        lessonCount: 3,
+        lessonTime: 24,
+        quoteEndDate: '2024-01-24T23:59:59.000Z',
+        locationType: 'OFFLINE',
+        postcode: '12345',
+        roadAddress: '서울특별시 강남구 역삼동 ...',
+        detailAddress: '101동 101호',
+        userId: 'user-uuid-123',
+        status: 'PENDING',
+        createdAt: '2025-01-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z',
+      },
+    },
+  })
   async create(@Body() body: CreateLessonDto) {
     const startDate = new Date(body.startDate);
 
@@ -35,6 +64,54 @@ export class LessonController {
    */
   @Get()
   @UseGuards(AccessTokenGuard) // 지정 견적 요청을 구분하기 위해
+  @ApiOperation({
+    summary: '요청 레슨 목록 조회',
+    description: '검색/필터링을 바탕으로 레슨 목록을 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '레슨 목록 조회 성공',
+    content: {
+      'application/json': {
+        example: {
+          list: [
+            {
+              id: '123e4567-e89b-12d3-a456-426614174000',
+              lessonType: 'SPORTS',
+              lessonSubType: 'YOGA',
+              startDate: '2025-01-01T09:00:00.000Z',
+              endDate: '2025-02-01T09:00:00.000Z',
+              lessonCount: 3,
+              lessonTime: 24,
+              locationType: 'OFFLINE',
+              postcode: '12345',
+              roadAddress: '서울특별시 강남구 역삼동 ...',
+              detailAddress: '101동 101호',
+              user: {
+                id: 'user-uuid-123',
+                nickname: '남하늘',
+                profile: {
+                  name: '김철수',
+                  gender: 'MALE',
+                  region: ['SEOUL'],
+                },
+              },
+              status: 'PENDING',
+              createdAt: '2025-01-01T00:00:00.000Z',
+              updatedAt: '2025-01-01T00:00:00.000Z',
+              isDirectQuote: false,
+            },
+          ],
+          totalCount: 1,
+          hasMore: false,
+          lessonTypeCounts: { SPORTS: 1, FITNESS: 0, REHAB: 0 },
+          genderCounts: { male: 1, female: 0 },
+          directQuoteRequestCount: 0,
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: '인증 실패' })
   async getLessons(@Query() query: QueryLessonDto) {
     return this.lessonService.getLessons(query);
   }
@@ -45,6 +122,12 @@ export class LessonController {
    */
   @Get('me')
   @UseGuards(AccessTokenGuard) // 요청 레슨 등록한 유저 구분하기 위해
+  @ApiOperation({
+    summary: '나의 요청 레슨 목록 조회',
+    description: '나의 요청 레슨 목록을 조회합니다.',
+  })
+  @ApiResponse({ status: 200, description: '나의 레슨 목록 조회 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패' })
   async getMyLessons(@Query() query: QueryLessonDto) {
     return this.lessonService.getMyLessons(query);
   }
@@ -55,6 +138,10 @@ export class LessonController {
    */
   @Get(':id')
   @UseGuards(AccessTokenGuard) // 지정 견적 요청을 구분하기 위해
+  @ApiOperation({ summary: '요청 레슨 상세 조회', description: '요청 레슨 상세 정보를 조회합니다.' })
+  @ApiResponse({ status: 200, description: '레슨 상세 조회 성공' })
+  @ApiResponse({ status: 401, description: '인증 실패' })
+  @ApiResponse({ status: 404, description: '레슨을 찾을 수 없음' })
   async findOne(@Param('id', UUIDPipe) id: string) {
     return this.lessonService.getLessonById(id);
   }
@@ -65,6 +152,11 @@ export class LessonController {
    */
   @Patch(':id/cancel')
   @UseGuards(AccessTokenGuard)
+  @ApiOperation({ summary: '요청 레슨 취소', description: '요청 레슨을 취소합니다.' })
+  @ApiResponse({ status: 200, description: '레슨 취소 성공' })
+  @ApiResponse({ status: 400, description: '취소 불가능한 상태이거나 잘못된 요청' })
+  @ApiResponse({ status: 401, description: '인증 실패' })
+  @ApiResponse({ status: 404, description: '레슨을 찾을 수 없음' })
   async cancelLesson(@Param('id', UUIDPipe) id: string) {
     return this.lessonService.cancelLessonById(id);
   }
