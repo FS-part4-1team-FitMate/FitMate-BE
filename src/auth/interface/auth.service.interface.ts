@@ -9,17 +9,18 @@ export interface IAuthService {
   createToken(userId: string, role: string, type: string): string;
   refreshToken(userId: string, role: string, refreshToken: string): Promise<string>;
   getGoogleRedirectUrl(role: string): string;
-  handleGoogleSignUp(code: string, role: string): Promise<FilterUser>;
-  handleGoogleLogin(code: string): Promise<FilterUser>;
+  handleGoogleSignUp(code: string, role: string): Promise<string | FilterUser>;
+  handleGoogleLogin(code: string): Promise<string | FilterUser>;
   registerSocialAccount({
     provider,
     providerId,
     email,
     nickname,
     role,
-  }: ValidateSocialAccount): Promise<FilterUser>;
+  }: ValidateSocialAccount): Promise<string | FilterUser>;
   loginSocialAccount({
     provider,
     providerId,
-  }: Omit<ValidateSocialAccount, 'email' | 'nickname' | 'role'>): Promise<FilterUser>;
+  }: Omit<ValidateSocialAccount, 'email' | 'nickname' | 'role'>): Promise<string | FilterUser>;
+  logout(): Promise<void>;
 }

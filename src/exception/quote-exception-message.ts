@@ -8,5 +8,8 @@ enum QuoteExceptionMessage {
   REJECTION_REASON_REQUIRED = '거절 사유를 입력해주세요.',
   QUOTE_LIMIT_REACHED = '이 요청 레슨에 대해 제출할 수 있는 일반 견적이 이미 모두 제출되었습니다.',
   INVALID_LESSON_STATUS_FOR_ACCEPT = '이 레슨은 현재 새로운 견적을 확정할 수 없는 상태입니다.',
+  TRAINER_ALREADY_SENT_QUOTE = '이미 해당 레슨에 견적을 제출했습니다.',
+  QUOTE_DEADLINE_PASSED = '견적 마감일이 지났습니다.',
+  TRAINER_PROFILE_REQUIRED = '프로필을 등록하셔야 견적 생성이 가능합니다.',
 }
 export default QuoteExceptionMessage;

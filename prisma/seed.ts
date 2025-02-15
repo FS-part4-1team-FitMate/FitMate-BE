@@ -2,23 +2,40 @@ import { PrismaClient } from '@prisma/client';
 import { PROFILES } from '#prisma/mock/profile.mock.js';
 import { USERS } from '#prisma/mock/user.mock.js';
 import { DIRECT_QUOTE_REQUESTS } from './mock/direct_quote_request.mock.js';
+import { FAVORITE_TRAINERS } from './mock/favorite_trainers.mock.js';
 import { LESSON_QUOTES } from './mock/lesson_quote.mock.js';
 import { LESSON_REQUESTS } from './mock/lesson_request.mock.js';
 import { REVIEWS } from './mock/review.mock.js';
 
 const prisma = new PrismaClient();
 
+async function resetNotificationSequence() {
+  console.log('Notification 테이블 ID 시퀀스 초기화 중...');
+
+  await prisma.$executeRawUnsafe(`
+    SELECT setval(
+      pg_get_serial_sequence('"Notification"', 'id'), 
+      COALESCE((SELECT MAX(id) FROM "Notification"), 1)
+    );
+  `);
+
+  console.log('Notification ID 시퀀스 초기화 완료.');
+}
+
 async function main() {
   // 1. 기존 데이터 삭제
   console.log('기존 데이터 삭제 중...');
-  await prisma.favoriteTrainer.deleteMany();
+
   await prisma.notification.deleteMany();
+  await resetNotificationSequence();
+  await prisma.favoriteTrainer.deleteMany();
   await prisma.review.deleteMany();
   await prisma.lessonQuote.deleteMany();
   await prisma.directQuoteRequest.deleteMany();
   await prisma.lessonRequest.deleteMany();
   await prisma.profile.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.favoriteTrainer.deleteMany();
 
   // 2. User 데이터 삽입
   console.log('User 데이터 삽입 중...');
@@ -66,6 +83,14 @@ async function main() {
     data: REVIEWS,
     skipDuplicates: true,
   });
+
+  // 8. FavoriteTrainer 데이터 삽입
+  console.log('FavoriteTrainer 데이터 삽입 중...');
+  for (const favoriteTrainer of FAVORITE_TRAINERS) {
+    await prisma.favoriteTrainer.create({
+      data: favoriteTrainer,
+    });
+  }
 
   console.log('모든 데이터 삽입 완료!');
 }

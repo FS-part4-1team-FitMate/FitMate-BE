@@ -1,4 +1,4 @@
-import type { DirectQuoteRequest, LessonRequest } from '@prisma/client';
+import type { DirectQuoteRequest, Gender, LessonRequest } from '@prisma/client';
 import { DirectQuoteRequestStatus, LessonRequestStatus, Prisma } from '@prisma/client';
 import { QueryLessonDto } from '#lesson/dto/lesson.dto.js';
 import type { CreateLesson, LessonResponse, PatchLesson } from '#lesson/type/lesson.type.js';
@@ -13,7 +13,7 @@ export interface ILessonRepository {
   ): Promise<{ lessons: LessonResponse[]; totalCount: number; hasMore: boolean }>;
   findOneById(id: string): Promise<LessonResponse | null>;
   updateStatus(id: string, status: LessonRequestStatus): Promise<LessonRequest>;
-  updateLessonStatustWithTx(
+  updateLessonStatusWithTx(
     tx: Prisma.TransactionClient,
     lessonRequestId: string,
     status: LessonRequestStatus,
@@ -29,4 +29,29 @@ export interface ILessonRepository {
   findDirectQuoteRequestByLessonId(lessonId: string): Promise<DirectQuoteRequest[]>;
   updateExpiredLesson(now: Date): Promise<{ count: number }>;
   updateCompletedLesson(now: Date): Promise<{ count: number }>;
+  groupByLessonTypeAll(): Promise<
+    Array<{
+      lessonType: string; // 또는 LessonType
+      count: number;
+    }>
+  >;
+  groupByLessonTypeAll(): Promise<
+    Array<{
+      lessonType: string; // 또는 LessonType
+      count: number;
+    }>
+  >;
+  findAllForGenderCount(): Promise<
+    Array<{
+      id: string;
+      user: {
+        profile: {
+          gender: Gender | null;
+        } | null;
+      };
+      directQuoteRequests: {
+        trainerId: string;
+      }[];
+    }>
+  >;
 }

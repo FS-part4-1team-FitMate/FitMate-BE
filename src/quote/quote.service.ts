@@ -7,17 +7,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { LessonRequestStatus, QuoteStatus } from '@prisma/client';
-import type { LessonQuote } from '@prisma/client';
+import type { LessonQuote, Prisma } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
 import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import LessonExceptionMessage from '#exception/lesson-exception-message.js';
 import QuoteExceptionMessage from '#exception/quote-exception-message.js';
+import { AuthService } from '#auth/auth.service.js';
 import { LessonService } from '#lesson/lesson.service.js';
 import type { QueryQuoteDto } from './dto/quote.dto.js';
 import type { IQuoteService } from './interface/quote-service.interface.js';
 import { QuoteRepository } from './quote.repository.js';
-import type { CreateLessonQuote, PatchLessonQuote } from './type/quote.type.js';
+import type { CreateLessonQuote, LessonQuoteResponse, PatchLessonQuote } from './type/quote.type.js';
 
 @Injectable()
 export class QuoteService implements IQuoteService {
@@ -27,6 +28,7 @@ export class QuoteService implements IQuoteService {
     private readonly lessonService: LessonService,
     private readonly alsStore: AlsStore,
     private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
   ) {}
 
   private getUserId(): string {
@@ -46,24 +48,60 @@ export class QuoteService implements IQuoteService {
       throw new BadRequestException(QuoteExceptionMessage.ONLY_TRAINER_CAN_CREATE_QUOTE);
     }
 
+    // 프로필을 등록한 트레이너만 견적을 생성할 수 있도록 제한
+    if (!(await this.authService.hasProfile(userId))) {
+      throw new BadRequestException(QuoteExceptionMessage.TRAINER_PROFILE_REQUIRED);
+    }
+
     const lessonRequest = await this.lessonService.getLessonById(data.lessonRequestId);
     if (!lessonRequest) {
       throw new NotFoundException(LessonExceptionMessage.LESSON_NOT_FOUND);
     }
 
-    // 지정 견적 요청에 포함되지 않은 일반 견적 개수 확인
-    const nonDirectQuotesCount = await this.quoteRepository.count({
-      lessonRequestId: data.lessonRequestId,
-      trainerId: {
-        notIn: await this.quoteRepository.findDirectQuoteRequestTrainers(data.lessonRequestId),
-      },
-    });
-
-    // 최대 견적 제한 확인
-    if (nonDirectQuotesCount >= 5) {
-      throw new BadRequestException(QuoteExceptionMessage.QUOTE_LIMIT_REACHED);
+    // 1. 견적 마감일이 지났는지 확인
+    const now = new Date();
+    if (lessonRequest.quoteEndDate < now) {
+      throw new BadRequestException(QuoteExceptionMessage.QUOTE_DEADLINE_PASSED);
     }
-    return await this.quoteRepository.create({ ...data, trainerId: userId });
+
+    // 2. 이미 해당 레슨에 견적을 제출했는지 확인
+    const hasSubmittedQuote = lessonRequest.lessonQuotes?.some((quote) => quote.trainer.id === userId);
+    if (hasSubmittedQuote) {
+      throw new BadRequestException(QuoteExceptionMessage.TRAINER_ALREADY_SENT_QUOTE);
+    }
+
+    // 3. 지정 견적 여부 확인
+    const isDirectQuote = lessonRequest.isDirectQuote;
+
+    // 4. 지정 견적이 아닌 경우, 일반 견적 개수 확인
+    if (!isDirectQuote) {
+      const nonDirectQuotesCount = await this.quoteRepository.count({
+        lessonRequestId: data.lessonRequestId,
+        trainerId: {
+          notIn: await this.quoteRepository.findDirectQuoteRequestTrainers(data.lessonRequestId),
+        },
+      });
+      console.log('nonDirectQuotesCount', nonDirectQuotesCount);
+
+      // 최대 견적 제한 확인
+      if (nonDirectQuotesCount >= 5) {
+        throw new BadRequestException(QuoteExceptionMessage.QUOTE_LIMIT_REACHED);
+      }
+    }
+
+    // 5. 견적 생성
+    const createdQuote = await this.quoteRepository.create({ ...data, trainerId: userId });
+
+    // 6. 지정 견적 요청이었다면 지정견적요청 상태를 PROPOSED로 변경
+    if (isDirectQuote) {
+      await this.quoteRepository.updateDirectQuoteStatus({
+        lessonRequestId: data.lessonRequestId,
+        trainerId: userId,
+        status: 'PROPOSED',
+      });
+    }
+
+    return createdQuote;
   }
 
   /*************************************************************************************
@@ -139,57 +177,15 @@ export class QuoteService implements IQuoteService {
    * 레슨 견적 목록 조회
    * ***********************************************************************************
    */
-  async getLessonQuotes(query: QueryQuoteDto): Promise<{
-    list: LessonQuote[];
-    totalCount: number;
-    hasMore: boolean;
-  }> {
-    const {
-      page = 1,
-      limit = 5,
-      order = 'createdAt',
-      sort = 'desc',
-      status,
-      trainerId,
-      minPrice,
-      maxPrice,
-      lessonRequestId,
-    } = query.toCamelCase();
-
-    const orderMapping: Record<string, string> = {
-      created_at: 'createdAt', // 매핑된 필드 이름
-      updated_at: 'updatedAt',
-      price: 'price',
-    };
-
-    const orderByField = orderMapping[order] || order; // 매핑된 필드를 사용하거나 기본값 유지
-
-    const orderBy: Record<string, string> = {
-      [orderByField]: sort,
-    };
-
-    const skip = (page - 1) * limit;
-    const take = limit;
-
-    // 필터 조건 생성
-    const where = {
-      ...(status && { status: { in: status } }),
-      ...(trainerId && { trainerId }),
-      ...(lessonRequestId && { lessonRequestId }),
-      ...(minPrice || maxPrice ? { price: { gte: minPrice || undefined, lte: maxPrice || undefined } } : {}),
-    };
-
-    const [quotes, totalCount] = await Promise.all([
-      this.quoteRepository.findAll(where, orderBy, skip, take, {
-        lessonRequest: true,
-      }),
-      this.quoteRepository.count(where),
-    ]);
+  async getLessonQuotes(
+    query: QueryQuoteDto,
+  ): Promise<{ list: LessonQuoteResponse[]; totalCount: number; hasMore: boolean }> {
+    const { quotes, totalCount, hasMore } = await this.quoteRepository.findQuotes(query);
 
     return {
       list: quotes,
       totalCount,
-      hasMore: totalCount > page * limit,
+      hasMore,
     };
   }
 
@@ -197,7 +193,7 @@ export class QuoteService implements IQuoteService {
    * 레슨 견적 상세 조회
    * ***********************************************************************************
    */
-  async getLessonQuoteById(id: string): Promise<LessonQuote | null> {
+  async getLessonQuoteById(id: string): Promise<LessonQuoteResponse | null> {
     const lessonQuote = await this.quoteRepository.findOne(id);
     if (!lessonQuote) {
       throw new NotFoundException(QuoteExceptionMessage.QUOTE_NOT_FOUND);

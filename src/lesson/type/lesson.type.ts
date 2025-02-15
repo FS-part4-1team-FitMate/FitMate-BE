@@ -1,4 +1,5 @@
 import {
+  DirectQuoteRequestStatus,
   Gender,
   LessonRequest,
   LessonRequestStatus,
@@ -35,7 +36,22 @@ export type LessonResponse = LessonRequest & {
     } | null;
   };
   directQuoteRequests?: {
+    id: string;
+    lessonRequestId: string;
     trainerId: string;
+    status: DirectQuoteRequestStatus;
+    rejectionReason?: string | null;
+  }[];
+  lessonQuotes?: {
+    id: string;
+    trainer: {
+      id: string;
+      nickname: string;
+      profile?: {
+        name: string | null;
+        region: Region[];
+      } | null;
+    };
   }[];
   isDirectQuote?: boolean;
 };

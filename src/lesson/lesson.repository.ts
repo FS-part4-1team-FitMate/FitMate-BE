@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import type { DirectQuoteRequest, LessonRequest } from '@prisma/client';
+import type { DirectQuoteRequest, LessonRequest, LessonSubType } from '@prisma/client';
 import { DirectQuoteRequestStatus, LessonRequestStatus, Prisma, Region } from '@prisma/client';
 import { PrismaService } from '#prisma/prisma.service.js';
+import { getTodayRange } from '#utils/date.util.js';
 import { QueryLessonDto } from './dto/lesson.dto.js';
 import type { ILessonRepository } from './interface/lesson-repository.interface.js';
 import type { CreateLesson, LessonResponse, PatchLesson } from './type/lesson.type.js';
@@ -206,36 +207,41 @@ export class LessonRepository implements ILessonRepository {
   }
 
   async findLessonsByUserId(userId: string, status?: LessonRequestStatus): Promise<LessonRequest[]> {
-    const whereClause: Prisma.LessonRequestWhereInput = { userId };
-    if (status) {
-      whereClause.status = status;
-    }
-    return await this.lessonRequest.findMany({ where: whereClause });
+    return await this.lessonRequest.findMany({
+      where: {
+        userId,
+        ...(status && { status }),
+      },
+    });
   }
 
   async findOneById(id: string): Promise<LessonResponse | null> {
     return this.lessonRequest.findUnique({
       where: { id },
-      select: {
-        id: true,
-        userId: true,
-        lessonType: true,
-        lessonSubType: true,
-        startDate: true,
-        endDate: true,
-        lessonCount: true,
-        lessonTime: true,
-        quoteEndDate: true,
-        locationType: true,
-        postcode: true,
-        roadAddress: true,
-        detailAddress: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
         directQuoteRequests: {
           select: {
+            id: true,
+            lessonRequestId: true,
             trainerId: true,
+            status: true,
+            rejectionReason: true,
+          },
+        },
+        lessonQuotes: {
+          include: {
+            trainer: {
+              select: {
+                id: true,
+                nickname: true,
+                profile: {
+                  select: {
+                    name: true,
+                    region: true,
+                  },
+                },
+              },
+            },
           },
         },
         user: {
@@ -259,7 +265,7 @@ export class LessonRepository implements ILessonRepository {
     return await this.lessonRequest.update({ where: { id }, data: { status } });
   }
 
-  async updateLessonStatustWithTx(
+  async updateLessonStatusWithTx(
     tx: Prisma.TransactionClient,
     lessonRequestId: string,
     status: LessonRequestStatus,
@@ -387,5 +393,52 @@ export class LessonRepository implements ILessonRepository {
       },
       data: { status: 'COMPLETED' },
     });
+  }
+  /**
+   * lesson-scheduler.service.ts에서 사용
+   * 오늘 시작하는 레슨을 조회하고, 해당하는 트레이너 ID를 포함
+   */
+  async findLessonsStartingToday(now: Date): Promise<
+    Array<{
+      id: string;
+      userId: string;
+      nickname: string;
+      lessonSubType: LessonSubType | null;
+      trainerId: string | null;
+    }>
+  > {
+    const { startOfDay, endOfDay } = getTodayRange(now);
+
+    const lessons = await this.lessonRequest.findMany({
+      where: {
+        status: 'QUOTE_CONFIRMED',
+        startDate: {
+          gte: startOfDay,
+          lt: endOfDay,
+        },
+      },
+      select: {
+        id: true,
+        userId: true,
+        lessonSubType: true,
+        user: {
+          select: {
+            nickname: true,
+          },
+        },
+        lessonQuotes: {
+          where: { status: 'ACCEPTED' },
+          select: { trainerId: true },
+        },
+      },
+    });
+
+    return lessons.map((lesson) => ({
+      id: lesson.id,
+      userId: lesson.userId,
+      nickname: lesson.user.nickname,
+      lessonSubType: lesson.lessonSubType,
+      trainerId: lesson.lessonQuotes.length > 0 ? lesson.lessonQuotes[0].trainerId : null,
+    }));
   }
 }

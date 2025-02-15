@@ -8,7 +8,7 @@ const formatToTime = (
   minute: number,
   second: number,
 ) => {
-  return new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+  return new Date(Date.UTC(year, month - 1, day, hour - 9, minute, second));
 };
 
 export const LESSON_REQUESTS = [
@@ -53,11 +53,11 @@ export const LESSON_REQUESTS = [
     userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f', // User01 // 여하늘
     lessonType: LessonType.FITNESS,
     lessonSubType: LessonSubType.PILATES,
-    startDate: formatToTime(2025, 2, 12, 10, 0, 0),
-    endDate: formatToTime(2025, 2, 16, 18, 0, 0),
-    lessonCount: 5,
-    lessonTime: 40,
-    quoteEndDate: formatToTime(2025, 2, 11, 23, 59, 59),
+    startDate: formatToTime(2025, 2, 18, 10, 0, 0),
+    endDate: formatToTime(2025, 2, 20, 18, 0, 0),
+    lessonCount: 3,
+    lessonTime: 24,
+    quoteEndDate: formatToTime(2025, 2, 17, 23, 59, 59),
     locationType: LocationType.OFFLINE,
     postcode: '13529',
     roadAddress: '경기 성남시 분당구 판교역로 166',
@@ -89,11 +89,11 @@ export const LESSON_REQUESTS = [
     userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd4d', // User02 // 남하늘
     lessonType: LessonType.SPORTS,
     lessonSubType: LessonSubType.TENNIS,
-    startDate: formatToTime(2025, 2, 10, 11, 0, 0),
-    endDate: formatToTime(2025, 2, 12, 19, 0, 0),
-    lessonCount: 3,
-    lessonTime: 60,
-    quoteEndDate: formatToTime(2025, 2, 9, 23, 59, 59),
+    startDate: formatToTime(2025, 2, 12, 11, 0, 0),
+    endDate: formatToTime(2025, 2, 17, 19, 0, 0),
+    lessonCount: 5,
+    lessonTime: 40,
+    quoteEndDate: formatToTime(2025, 2, 11, 23, 59, 59),
     locationType: LocationType.OFFLINE,
     postcode: '12345',
     roadAddress: '서울 강남구 테헤란로 123',

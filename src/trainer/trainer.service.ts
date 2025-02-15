@@ -19,18 +19,38 @@ export class TrainerService implements ITrainerService {
     private readonly alsStore: AlsStore,
   ) {}
 
-  async getFavoriteTrainers(): Promise<TrainerWithFavorites[]> {
+  async getFavoriteTrainers(
+    query: QueryTrainerDto,
+  ): Promise<{ trainers: TrainerWithFavorites[]; totalCount: number; hasMore: boolean }> {
     const { userId } = this.alsStore.getStore();
     if (!userId) {
       throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
     }
 
-    const favorites = await this.trainerRepository.findFavoriteByUserId(userId);
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const skip = (page - 1) * limit;
 
-    return favorites.map((trainer) => ({
-      ...trainer,
-      isFavorite: true,
-    }));
+    // 찜한 트레이너 ID 가져오기
+    const favoriteTrainerIds = await this.trainerRepository.findFavoriteTrainerIds(userId);
+
+    if (favoriteTrainerIds.length === 0) {
+      return { trainers: [], totalCount: 0, hasMore: false };
+    }
+
+    // 찜한 트레이너 목록 가져오기
+    const trainers = await this.trainerRepository.findAll(
+      userId,
+      { id: { in: favoriteTrainerIds } },
+      { createdAt: 'desc' },
+      skip,
+      limit,
+    );
+
+    // 찜한 트레이너 총 개수 가져오기
+    const totalCount = await this.trainerRepository.countFavoriteByUserId(userId);
+
+    return { trainers, totalCount, hasMore: totalCount > page * limit };
   }
 
   async getFavoriteStatus(trainerId: string): Promise<{ isFavorite: boolean; favoriteTotalCount: number }> {
