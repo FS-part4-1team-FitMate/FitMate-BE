@@ -75,6 +75,12 @@ export class QuoteRepository implements IQuoteRepository {
               id: true,
               email: true,
               nickname: true,
+              profile: {
+                select: {
+                  name: true,
+                  profileImage: true,
+                },
+              },
             },
           },
         },
@@ -110,6 +116,12 @@ export class QuoteRepository implements IQuoteRepository {
             id: true,
             email: true,
             nickname: true,
+            profile: {
+              select: {
+                name: true,
+                profileImage: true,
+              },
+            },
           },
         },
       },
@@ -152,7 +164,7 @@ export class QuoteRepository implements IQuoteRepository {
     return trainers.map((t) => t.trainerId);
   }
 
-  async findReviewableQuotes(userId: string, skip: number, take: number): Promise<LessonQuote[]> {
+  async findReviewableQuotes(userId: string, skip: number, take: number): Promise<LessonQuoteResponse[]> {
     return await this.lessonQuote.findMany({
       where: {
         status: 'ACCEPTED',
@@ -167,8 +179,30 @@ export class QuoteRepository implements IQuoteRepository {
       skip,
       take,
       include: {
-        lessonRequest: true,
+        lessonRequest: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+          },
+        },
         Review: true,
+        trainer: {
+          select: {
+            id: true,
+            email: true,
+            nickname: true,
+            profile: {
+              select: {
+                name: true,
+                profileImage: true,
+              },
+            },
+          },
+        },
       },
     });
   }

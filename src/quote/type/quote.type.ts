@@ -1,4 +1,5 @@
 import type { LessonQuote } from '@prisma/client';
+import { profile } from 'console';
 
 export type CreateLessonQuote = {
   lessonRequestId: string;
@@ -14,6 +15,10 @@ export type LessonQuoteResponse = LessonQuote & {
     id: string;
     email: string;
     nickname: string;
+    profile: {
+      name: string | null;
+      profileImage: string | null;
+    } | null;
   };
   lessonRequest: {
     user: {

@@ -1,7 +1,7 @@
 import type { LessonQuote } from '@prisma/client';
 import { Prisma, QuoteStatus, DirectQuoteRequestStatus } from '@prisma/client';
 import { QueryQuoteDto } from '#quote/dto/quote.dto.js';
-import type { CreateLessonQuote, PatchLessonQuote } from '#quote/type/quote.type.js';
+import type { CreateLessonQuote, LessonQuoteResponse, PatchLessonQuote } from '#quote/type/quote.type.js';
 
 export interface IQuoteRepository {
   create(data: CreateLessonQuote): Promise<LessonQuote>;
@@ -15,7 +15,7 @@ export interface IQuoteRepository {
   ): Promise<LessonQuote>;
   findTrainerQuoteForLesson(lessonRequestId: string, trainerId: string): Promise<LessonQuote | null>;
   findDirectQuoteRequestTrainers(lessonRequestId: string): Promise<string[]>;
-  findReviewableQuotes(userId: string, skip: number, take: number): Promise<LessonQuote[]>;
+  findReviewableQuotes(userId: string, skip: number, take: number): Promise<LessonQuoteResponse[]>;
   countReviewableQuotes(userId: string): Promise<number>;
   updateDirectQuoteStatus({
     lessonRequestId,
