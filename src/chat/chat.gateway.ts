@@ -1,4 +1,3 @@
-import { ConfigService } from '@nestjs/config';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -12,7 +11,7 @@ import { CreateChatDto } from './dto/chat.dto.js';
 
 @WebSocketGateway({
   cors: {
-    origin: new ConfigService().get<string>('FRONTEND_BASE_URL'),
+    origin: process.env.FRONTEND_BASE_URL,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -22,10 +21,7 @@ export class ChatGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(
-    private readonly chatService: ChatService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly chatService: ChatService) {}
 
   @SubscribeMessage('sendMessage')
   async handleMessage(@MessageBody() data: CreateChatDto, @ConnectedSocket() client: Socket) {
