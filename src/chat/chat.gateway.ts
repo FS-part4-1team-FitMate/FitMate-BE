@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -11,7 +12,7 @@ import { CreateChatDto } from './dto/chat.dto.js';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3001', // 프론트엔드 주소
+    origin: new ConfigService().get<string>('FRONTEND_BASE_URL'),
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
