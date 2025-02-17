@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { QuoteStatus } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { LessonListResponseDto, LessonResponseDto } from '#lesson/dto/lesson.dto.js';
 
 export class CreateQuoteDto {
   @ApiProperty({
@@ -127,4 +128,71 @@ export class QueryQuoteDto {
       lessonRequestId: this.lesson_request_id,
     };
   }
+}
+
+export class ReviewDto {
+  @ApiProperty({ description: '리뷰 ID' })
+  id: string;
+
+  @ApiProperty({ description: '리뷰 내용' })
+  content: string;
+
+  @ApiProperty({ description: '작성일' })
+  createdAt: string;
+}
+export class QuoteResponseDto {
+  @ApiProperty({ description: '견적 ID' })
+  id: string;
+
+  @ApiProperty({ description: '트레이너 ID' })
+  trainerId: string;
+
+  @ApiProperty({ description: '레슨 요청 ID' })
+  lessonRequestId: string;
+
+  @ApiProperty({ description: '견적 가격' })
+  price: number;
+
+  @ApiProperty({ description: '견적 메시지' })
+  message: string;
+
+  @ApiProperty({ description: '견적 상태' })
+  status: QuoteStatus;
+
+  @ApiPropertyOptional({ description: '반려 사유' })
+  rejectionReason?: string;
+
+  @ApiProperty({ description: '생성 일자' })
+  createdAt: string;
+
+  @ApiProperty({ description: '수정 일자' })
+  updatedAt: string;
+
+  @ApiProperty({ description: '레슨 요청 정보' })
+  lessonRequest: LessonResponseDto;
+
+  @ApiProperty({ description: '리뷰 정보', type: [ReviewDto] })
+  Review: ReviewDto[];
+}
+
+export class QuoteListResponseDto {
+  @ApiProperty({ description: '견적 목록', type: [QuoteResponseDto] })
+  list: QuoteResponseDto[];
+
+  @ApiProperty({ description: '총 개수' })
+  totalCount: number;
+
+  @ApiProperty({ description: '다음 페이지 여부' })
+  hasMore: boolean;
+}
+
+export class ReviewableQuoteListResponseDto {
+  @ApiProperty({ description: '리뷰 가능 견적 목록', type: [QuoteResponseDto] })
+  list: QuoteResponseDto[];
+
+  @ApiProperty({ description: '총 개수' })
+  totalCount: number;
+
+  @ApiProperty({ description: '다음 페이지 여부' })
+  hasMore: boolean;
 }

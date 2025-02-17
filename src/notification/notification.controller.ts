@@ -3,7 +3,11 @@ import { ApiBearerAuth, ApiOperation, ApiProduces, ApiQuery, ApiResponse, ApiTag
 import { map, Observable, tap } from 'rxjs';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { logger } from '#logger/winston-logger.js';
-import { QueryNotificationDto } from './dto/notification.dto.js';
+import {
+  NotificationListResponseDto,
+  NotificationResponseDto,
+  QueryNotificationDto,
+} from './dto/notification.dto.js';
 import { NotificationService } from './notification.service.js';
 
 @ApiTags('notifications')
@@ -21,26 +25,7 @@ export class NotificationController {
     summary: '알림 목록 조회',
     description: '현재 사용자의 알림 목록을 조회합니다.',
   })
-  @ApiResponse({
-    status: 200,
-    description: '알림 목록 조회 성공',
-    schema: {
-      example: {
-        list: [
-          {
-            id: 1,
-            userId: '337fc386-d1a7-4430-a37d-9d1c5bdafd4d',
-            type: 'LESSON_QUOTE',
-            messge: '새로운 견적이 도착했습니다.',
-            isRead: false,
-            createdAt: '2025-01-14T02:20:19.471Z',
-          },
-        ],
-        totalCount: 35,
-        hasMore: true,
-      },
-    },
-  })
+  @ApiResponse({ status: 200, description: '알림 목록 조회 성공', type: NotificationListResponseDto })
   async getNotifications(@Query() query: QueryNotificationDto) {
     return this.notificationService.getNotifications(query);
   }
@@ -83,6 +68,7 @@ export class NotificationController {
     summary: '알림 읽음 처리',
     description: '특정 알림을 읽음 처리 합니다. 다시 보내면 읽지 않은 상태로 변경됩니다.',
   })
+  @ApiResponse({ status: 200, description: '알림 읽음 처리 여부', type: NotificationResponseDto })
   async readNotification(@Param('notificationId') notificationId: number) {
     return this.notificationService.toggleNotificaitonRead(notificationId);
   }

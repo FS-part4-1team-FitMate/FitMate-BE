@@ -15,4 +15,10 @@ export type LessonQuoteResponse = LessonQuote & {
     email: string;
     nickname: string;
   };
+  lessonRequest: {
+    user: {
+      id: string;
+      nickname: string;
+    };
+  };
 };
