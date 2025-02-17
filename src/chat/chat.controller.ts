@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Query, UseGuards, Delete } from '@nestjs/common';
 import { AccessTokenGuard } from '#auth/guard/access-token.guard.js';
 import { ChatService } from './chat.service.js';
 import { CreateChatDto, GetMessagesQueryDto, GetMyChatRoomsQueryDto } from './dto/chat.dto.js';
@@ -36,7 +36,7 @@ export class ChatController {
   }
 
   // 5. 채팅방 나가기
-  @Post('leave/:roomId')
+  @Delete('leave/:roomId')
   @UseGuards(AccessTokenGuard)
   async leaveChatRoom(@Param('roomId') roomId: string) {
     await this.chatService.leaveChatRoom(roomId);

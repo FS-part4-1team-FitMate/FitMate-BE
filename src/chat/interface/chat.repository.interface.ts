@@ -9,4 +9,6 @@ export interface IChatRepository {
   createChatRoom(data: Partial<ChatRoom>): Promise<ChatRoom>;
   deleteMessagesByUser(roomId: string, userId: string): Promise<void>;
   findChatRoomByParticipants(participant1: string, participant2: string): Promise<ChatRoom | null>;
+  updateParticipantLeft(roomId: string, userId: string): Promise<void>;
+  deleteChatRoom(roomId: string): Promise<void>;
 }

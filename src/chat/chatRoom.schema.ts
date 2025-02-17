@@ -11,6 +11,12 @@ export class ChatRoom extends Document {
 
   @Prop({ required: true }) // 채팅 상대방
   participant2: string;
+
+  @Prop({ default: false }) // participant1의 나가기 여부
+  left_participant1: boolean;
+
+  @Prop({ default: false }) // participant2의 나가기 여부
+  left_participant2: boolean;
 }
 
 export const ChatRoomSchema = SchemaFactory.createForClass(ChatRoom);
