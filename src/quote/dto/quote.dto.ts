@@ -2,7 +2,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { QuoteStatus } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import { LessonListResponseDto, LessonResponseDto } from '#lesson/dto/lesson.dto.js';
+import { LessonResponseDto } from '#lesson/dto/lesson.dto.js';
+import { ReviewResponseDto } from '#review/dto/review.dto.js';
 
 export class CreateQuoteDto {
   @ApiProperty({
@@ -130,16 +131,6 @@ export class QueryQuoteDto {
   }
 }
 
-export class ReviewDto {
-  @ApiProperty({ description: '리뷰 ID' })
-  id: string;
-
-  @ApiProperty({ description: '리뷰 내용' })
-  content: string;
-
-  @ApiProperty({ description: '작성일' })
-  createdAt: string;
-}
 export class QuoteResponseDto {
   @ApiProperty({ description: '견적 ID' })
   id: string;
@@ -171,8 +162,8 @@ export class QuoteResponseDto {
   @ApiProperty({ description: '레슨 요청 정보' })
   lessonRequest: LessonResponseDto;
 
-  @ApiProperty({ description: '리뷰 정보', type: [ReviewDto] })
-  Review: ReviewDto[];
+  @ApiProperty({ description: '리뷰 정보', type: [ReviewResponseDto] })
+  Review: ReviewResponseDto[];
 }
 
 export class QuoteListResponseDto {
