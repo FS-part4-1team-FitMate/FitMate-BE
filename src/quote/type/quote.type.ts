@@ -1,5 +1,4 @@
 import type { LessonQuote } from '@prisma/client';
-import { profile } from 'console';
 
 export type CreateLessonQuote = {
   lessonRequestId: string;
