@@ -22,7 +22,10 @@ export class ChatGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @SubscribeMessage('sendMessage')
   async handleMessage(@MessageBody() data: CreateChatDto, @ConnectedSocket() client: Socket) {
