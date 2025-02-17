@@ -56,4 +56,13 @@ export class ChatRepository implements IChatRepository {
       ],
     });
   }
+
+  async updateParticipantLeft(roomId: string, participant: 'participant1' | 'participant2'): Promise<void> {
+    await this.chatRoomModel.updateOne({ roomId }, { $set: { [`left_${participant}`]: true } });
+  }
+
+  async deleteChatRoom(roomId: string): Promise<void> {
+    await this.chatModel.deleteMany({ roomId });
+    await this.chatRoomModel.deleteOne({ roomId });
+  }
 }
