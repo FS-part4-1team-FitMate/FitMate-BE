@@ -1,0 +1,59 @@
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Chat } from './chat.schema.js';
+import { ChatRoom } from './chatRoom.schema.js';
+import { IChatRepository } from './interface/chat.repository.interface';
+
+@Injectable()
+export class ChatRepository implements IChatRepository {
+  constructor(
+    @InjectModel(Chat.name) private chatModel: Model<Chat>,
+    @InjectModel(ChatRoom.name) private chatRoomModel: Model<ChatRoom>,
+  ) {}
+
+  // 메시지 저장 기능
+  async saveMessage(chat: Partial<Chat>): Promise<Chat> {
+    return await this.chatModel.create(chat);
+  }
+
+  // ✅ 특정 채팅방의 메시지 조회 기능
+  async findMessagesByRoomId(roomId: string, skip: number, limit: number): Promise<Chat[]> {
+    return this.chatModel.find({ roomId }).sort({ createdAt: 1 }).skip(skip).limit(limit).lean();
+  }
+
+  // 로그인한 유저가 참여 중인 채팅방 조회 기능
+  async findMyChatRooms(userId: string, skip: number, limit: number): Promise<ChatRoom[]> {
+    return this.chatRoomModel
+      .find({ $or: [{ participant1: userId }, { participant2: userId }] })
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+  }
+
+  // 특정 채팅방 조회 기능
+  async findChatRoomById(roomId: string): Promise<ChatRoom | null> {
+    return await this.chatRoomModel.findOne({ roomId });
+  }
+
+  // 채팅방 생성 기능
+  async createChatRoom(data: Partial<ChatRoom>): Promise<ChatRoom> {
+    const chatRoom = new this.chatRoomModel(data);
+    return await chatRoom.save();
+  }
+
+  // 특정 유저가 보낸 메시지 삭제 기능 (채팅방 나가기 시)
+  async deleteMessagesByUser(roomId: string, userId: string): Promise<void> {
+    await this.chatModel.deleteMany({ roomId, senderId: userId });
+  }
+
+  async findChatRoomByParticipants(participant1: string, participant2: string): Promise<ChatRoom | null> {
+    return await this.chatRoomModel.findOne({
+      $or: [
+        { participant1, participant2 },
+        { participant1: participant2, participant2: participant1 },
+      ],
+    });
+  }
+}

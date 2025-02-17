@@ -1,0 +1,12 @@
+import { Chat } from '../chat.schema';
+import { ChatRoom } from '../chatRoom.schema.js';
+
+export interface IChatRepository {
+  saveMessage(chat: Partial<Chat>): Promise<Chat>;
+  findMessagesByRoomId(roomId: string, skip: number, limit: number): Promise<Chat[]>;
+  findMyChatRooms(userId: string, skip: number, limit: number): Promise<ChatRoom[]>;
+  findChatRoomById(roomId: string): Promise<ChatRoom | null>;
+  createChatRoom(data: Partial<ChatRoom>): Promise<ChatRoom>;
+  deleteMessagesByUser(roomId: string, userId: string): Promise<void>;
+  findChatRoomByParticipants(participant1: string, participant2: string): Promise<ChatRoom | null>;
+}
