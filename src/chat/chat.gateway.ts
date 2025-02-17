@@ -10,6 +10,7 @@ import { ChatService } from './chat.service.js';
 import { CreateChatDto } from './dto/chat.dto.js';
 
 @WebSocketGateway({
+  namespace: '/socket.io/',
   cors: {
     origin: process.env.FRONTEND_BASE_URL,
     methods: ['GET', 'POST'],
