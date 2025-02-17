@@ -6,15 +6,7 @@ import type { CreateLessonQuote, PatchLessonQuote } from '#quote/type/quote.type
 export interface IQuoteRepository {
   create(data: CreateLessonQuote): Promise<LessonQuote>;
   findQuotes(query: QueryQuoteDto): Promise<{ quotes: LessonQuote[]; totalCount: number; hasMore: boolean }>;
-  findAll(
-    where?: Record<string, any>,
-    orderBy?: Record<string, string>,
-    skip?: number,
-    take?: number,
-    select?: Prisma.LessonQuoteSelect,
-  ): Promise<LessonQuote[]>;
   findOne(id: string): Promise<LessonQuote | null>;
-  //update(id: string, data: PatchLessonQuote): Promise<LessonQuote | null>;
   updateStatus(id: string, status: QuoteStatus, rejectionReason?: string): Promise<LessonQuote | null>;
   updateStatusWithTx(
     tx: Prisma.TransactionClient,
