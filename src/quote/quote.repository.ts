@@ -115,10 +115,6 @@ export class QuoteRepository implements IQuoteRepository {
     });
   }
 
-  async update(id: string, data: PatchLessonQuote): Promise<LessonQuote | null> {
-    return await this.lessonQuote.update({ where: { id }, data });
-  }
-
   async updateStatus(
     id: string,
     status: QuoteStatus,

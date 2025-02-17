@@ -15,10 +15,10 @@ export class QueryNotificationDto {
   @IsOptional()
   @IsString()
   @IsIn(['created_at', 'updated_at'])
-  order?: string;
+  order?: string = 'created_at';
 
   @IsOptional()
   @IsString()
   @IsIn(['asc', 'desc'])
-  sort?: string;
+  sort?: string = 'desc';
 }
