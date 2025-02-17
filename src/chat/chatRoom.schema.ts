@@ -6,11 +6,11 @@ export class ChatRoom extends Document {
   @Prop({ required: true, unique: true }) // 채팅방 ID
   roomId: string;
 
-  @Prop({ required: true }) // 일반 유저 ID (PostgreSQL)
-  userId: string;
+  @Prop({ required: true }) // 채팅을 먼저 시작한 유저
+  participant1: string;
 
-  @Prop({ required: true }) // 트레이너 ID (PostgreSQL)
-  trainerId: string;
+  @Prop({ required: true }) // 채팅 상대방
+  participant2: string;
 }
 
 export const ChatRoomSchema = SchemaFactory.createForClass(ChatRoom);

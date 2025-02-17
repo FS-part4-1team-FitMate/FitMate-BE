@@ -16,9 +16,8 @@ import { QuoteModule } from '#quote/quote.module.js';
 import { ReviewModule } from '#review/review.module.js';
 import { CacheModule } from '#cache/cache.module.js';
 import { MqModule } from '#mq/mq.module.js';
+import { ChatModule } from './chat/chat.module.js';
 import { NotificationModule } from './notification/notification.module.js';
-
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -39,6 +38,7 @@ import { NotificationModule } from './notification/notification.module.js';
     EmailModule,
     MqModule,
     NotificationModule,
+    ChatModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

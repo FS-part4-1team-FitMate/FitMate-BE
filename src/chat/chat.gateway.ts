@@ -6,10 +6,17 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChatService } from './chat.service';
-import { CreateChatDto } from './dto/chat.dto';
+import { ChatService } from './chat.service.js';
+import { CreateChatDto } from './dto/chat.dto.js';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({
+  cors: {
+    origin: 'http://localhost:3001', // 프론트엔드 주소
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  },
+})
 export class ChatGateway {
   @WebSocketServer()
   server: Server;
