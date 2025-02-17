@@ -22,4 +22,5 @@ export interface IAuthService {
     provider,
     providerId,
   }: Omit<ValidateSocialAccount, 'email' | 'nickname' | 'role'>): Promise<string | FilterUser>;
+  logout(): Promise<void>;
 }

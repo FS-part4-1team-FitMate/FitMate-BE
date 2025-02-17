@@ -37,8 +37,10 @@ export class TrainerController {
 
   @Get('favorite')
   @UseGuards(AccessTokenGuard)
-  async getFavoriteTrainers(): Promise<TrainerWithFavorites[]> {
-    return this.trainerService.getFavoriteTrainers();
+  async getFavoriteTrainers(
+    @Query() query: QueryTrainerDto,
+  ): Promise<{ trainers: TrainerWithFavorites[]; totalCount: number; hasMore: boolean }> {
+    return this.trainerService.getFavoriteTrainers(query);
   }
 
   @Get(':trainerId/favorite')

@@ -14,6 +14,7 @@ export type ReviewResponse = {
 };
 
 export type MyReviewResponse = {
+  rating: number;
   content: string;
   createdAt: Date;
   lessonQuote: {

@@ -4,6 +4,7 @@ import { ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { firstValueFrom } from 'rxjs';
+import { AlsStore } from '#common/als/store-validator.js';
 import AuthExceptionMessage from '#exception/auth-exception-message.js';
 import ExceptionMessages from '#exception/exception-message.js';
 import { IAuthService } from '#auth/interface/auth.service.interface.js';
@@ -11,6 +12,7 @@ import type { CreateUser, FilterUser, ValidateSocialAccount, SocialAccountInfo }
 import { EmailService } from '#email/email.service.js';
 import { UserRepository } from '#user/user.repository.js';
 import { ProfileRepository } from '#profile/profile.repository.js';
+import { CacheService } from '#cache/cache.service.js';
 import { TOKEN_EXPIRATION } from '#configs/jwt.config.js';
 import { filterSensitiveUserData } from '#utils/filter-sensitive-user-data.js';
 import { getEnvOrThrow } from '#utils/get-env.js';
@@ -27,13 +29,15 @@ export class AuthService implements IAuthService {
     private readonly profileRepository: ProfileRepository,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly cacheService: CacheService,
+    private readonly alsStore: AlsStore,
   ) {
     this.frontBaseUrl = this.configService.get<string>('FRONTEND_BASE_URL') || 'http://localhost:3000';
   }
 
   async emailVerification(email: string): Promise<string> {
     const isValid = await this.emailService.validateEmailDomain(email);
-    if (!isValid) throw new BadRequestException(AuthExceptionMessage.EMAIL_NOT_FOUND);
+    if (!isValid) throw new NotFoundException(AuthExceptionMessage.EMAIL_NOT_FOUND);
 
     const code = this.emailService.generateVerificationCode();
     await this.emailService.saveVerificationCode(email, code);
@@ -77,24 +81,32 @@ export class AuthService implements IAuthService {
   }
 
   async updateUser(userId: string, refreshToken: string): Promise<FilterUser> {
-    const user = await this.userRepository.updateUser(userId, refreshToken);
+    await this.cacheService.set(userId, refreshToken, 604800);
+
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
+    }
 
     return filterSensitiveUserData(user);
   }
 
   createToken(userId: string, role: string, type: string = 'access'): string {
     const payload = { userId, role };
-    const options = { expiresIn: type === 'refresh' ? TOKEN_EXPIRATION.ACCESS : TOKEN_EXPIRATION.REFRESH };
+    const options = { expiresIn: type === 'refresh' ? TOKEN_EXPIRATION.REFRESH : TOKEN_EXPIRATION.ACCESS };
     const jwt = this.jwtService.sign(payload, options);
 
     return jwt;
   }
 
   async refreshToken(userId: string, role: string, refreshToken: string): Promise<string> {
-    const user = await this.userRepository.findUserById(userId);
-    if (!user || user.refreshToken !== refreshToken)
+    const { value: storedToken } = await this.cacheService.get(userId);
+    if (!storedToken || storedToken !== refreshToken) {
       throw new UnauthorizedException(ExceptionMessages.INVALID_REFRESH_TOKEN);
+    }
 
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) throw new NotFoundException(AuthExceptionMessage.USER_NOT_FOUND);
     return this.createToken(user.id, role);
   }
 
@@ -219,5 +231,28 @@ export class AuthService implements IAuthService {
       return `${this.frontBaseUrl}/sns-login?message=${encodeURIComponent(AuthExceptionMessage.USER_NOT_FOUND)}`;
 
     return filterSensitiveUserData(user);
+  }
+
+  async logout(): Promise<void> {
+    const { userId } = await this.alsStore.getStore();
+    await this.cacheService.del(userId);
+  }
+
+  async changePassword(currentPassword: string, newPassword: string, confirmNewPassword: string) {
+    const { userId } = await this.alsStore.getStore();
+
+    const user = await this.userRepository.findUserById(userId);
+    if (!user) throw new NotFoundException(AuthExceptionMessage.EMAIL_NOT_FOUND);
+
+    await verifyPassword(currentPassword, user.password);
+
+    if (newPassword !== confirmNewPassword) {
+      throw new BadRequestException(AuthExceptionMessage.PASSWORD_MISMATCH);
+    }
+
+    const hashedPassword = await hashingPassword(newPassword);
+    await this.userRepository.updatePassword(userId, hashedPassword);
+
+    return { message: '비밀번호가 변경되었습니다.' };
   }
 }

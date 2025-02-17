@@ -16,7 +16,7 @@ export class TrainerRepository implements ITrainerRepository {
     this.user = prisma.user;
   }
 
-  async findFavoriteByUserId(userId: string): Promise<TrainerWithFavorites[]> {
+  async findFavoriteByUserId(userId: string, skip: number, take: number): Promise<TrainerWithFavorites[]> {
     const trainers = await this.user.findMany({
       where: { favoritedByUsers: { some: { userId } } },
       select: {
@@ -42,6 +42,8 @@ export class TrainerRepository implements ITrainerRepository {
           },
         },
       },
+      skip,
+      take,
     });
     return trainers as TrainerWithFavorites[];
   }
@@ -132,6 +134,13 @@ export class TrainerRepository implements ITrainerRepository {
   async findFavoriteTrainerCount(trainerId: string): Promise<number> {
     return await this.prisma.favoriteTrainer.count({
       where: { trainerId },
+    });
+  }
+
+  // 찜한 트레이너 개수 조회
+  async countFavoriteByUserId(userId: string): Promise<number> {
+    return await this.prisma.favoriteTrainer.count({
+      where: { userId },
     });
   }
 }
