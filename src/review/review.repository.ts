@@ -51,6 +51,11 @@ export class ReviewRepository implements IReviewRepository {
         user: {
           select: {
             nickname: true,
+            profile: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },
@@ -86,6 +91,7 @@ export class ReviewRepository implements IReviewRepository {
                 profile: {
                   select: {
                     profileImage: true,
+                    name: true,
                   },
                 },
               },
