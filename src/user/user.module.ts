@@ -11,6 +11,6 @@ import { UserService } from '#user/user.service.js';
   imports: [PrismaModule, AuthModule, AlsModule],
   controllers: [UserController],
   providers: [UserService, UserRepository, AccessTokenGuard],
-  exports: [UserRepository],
+  exports: [UserRepository, UserService],
 })
 export class UserModule {}

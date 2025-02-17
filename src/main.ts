@@ -1,6 +1,7 @@
 import { ValidationPipe, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { GlobalExceptionFilter } from '#exception/global-exception-filter.js';
 import { LoggingInterceptor } from '#logger/logging.interceptor.js';
 import { logger } from '#logger/winston-logger.js';
@@ -30,7 +31,11 @@ async function bootstrap() {
   app.enableCors({
     origin: configService.get<string>('CORS_ORIGIN') || '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   });
+
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   app.listen(port, '0.0.0.0', () => {
     logger.info(`🚀 Server is running on port ${port}`);

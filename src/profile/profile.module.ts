@@ -13,5 +13,6 @@ import { S3Module } from '#s3/s3.module.js';
   imports: [PrismaModule, AlsModule, AuthModule, S3Module],
   controllers: [ProfileController],
   providers: [ProfileService, ProfileRepository, UserRepository, AccessTokenGuard],
+  exports: [ProfileService, ProfileRepository],
 })
 export class ProfileModule {}
