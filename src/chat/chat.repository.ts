@@ -1,18 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ProfileService } from '#profile/profile.service.js';
+import { ProfileRepository } from '#profile/profile.repository.js';
 import { Chat } from './chat.schema.js';
 import { ChatRoom } from './chatRoom.schema.js';
 import { IChatRepository } from './interface/chat.repository.interface';
-import { ProfileRepository } from '#profile/profile.repository.js';
 
 @Injectable()
 export class ChatRepository implements IChatRepository {
   constructor(
     @InjectModel(Chat.name) private chatModel: Model<Chat>,
     @InjectModel(ChatRoom.name) private chatRoomModel: Model<ChatRoom>,
-    private readonly profileRepository: ProfileRepository, // ProfileRepository 주입
+    private readonly profileRepository: ProfileRepository,
   ) {}
 
   // 메시지 저장 기능
@@ -20,7 +19,7 @@ export class ChatRepository implements IChatRepository {
     return await this.chatModel.create(chat);
   }
 
-  // ✅ 특정 채팅방의 메시지 조회 기능
+  // 특정 채팅방의 메시지 조회 기능
   async findMessagesByRoomId(roomId: string, skip: number, limit: number): Promise<Chat[]> {
     return this.chatModel.find({ roomId }).sort({ createdAt: 1 }).skip(skip).limit(limit).lean();
   }
