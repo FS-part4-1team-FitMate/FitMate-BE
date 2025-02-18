@@ -81,6 +81,10 @@ export class ChatbotService {
       throw new UnauthorizedException(AuthExceptionMessage.USER_NOT_FOUND);
     }
 
+    if (!userMessage || !userMessage.trim()) {
+      throw new BadRequestException(ChatbotExceptionMessage.BAD_REQUEST);
+    }
+
     let conversation = userConversations.get(userId) || [];
 
     // 시스템 메시지가 첫 번째 위치에 없으면 추가
