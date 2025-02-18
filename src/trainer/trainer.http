@@ -1,0 +1,53 @@
+### 로그인 (일반유저)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+"email": "user01@example.com",
+"password": "a123456."
+}
+
+### 로그인 (트레이너)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+"email": "trainer01@example.com",
+"password": "a123456."
+}
+
+### 트레이너 찜하기
+POST http://localhost:3000/trainers/11752641-132b-4ec3-ab67-bb2116cc3c94/favorite
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2YiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczODczNDI4MiwiZXhwIjoxNzM5OTQzODgyfQ.uITnJxpQiuPn_GxoYvalXoGYWM4t4v_QiYcHIUJUgio
+
+
+### 찜한 트레이너 삭제
+DELETE http://localhost:3000/trainers/11752641-132b-4ec3-ab67-bb2116cc3c94/favorite
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2YiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczODczNDI4MiwiZXhwIjoxNzM5OTQzODgyfQ.uITnJxpQiuPn_GxoYvalXoGYWM4t4v_QiYcHIUJUgio
+
+
+### 트레이너 목록 조회
+GET http://localhost:3000/trainers
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2YiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczODczNDI4MiwiZXhwIjoxNzM5OTQzODgyfQ.uITnJxpQiuPn_GxoYvalXoGYWM4t4v_QiYcHIUJUgio
+
+### 트레이너 목록 조회(비회원)
+GET http://localhost:3000/trainers
+Content-Type: application/json
+
+### 트레이너 리스트 필터 정렬 적용
+GET http://localhost:3000/trainers?page=1&limit=5&order=reviewCount&sort=desc&gender=MALE&lessonType=FITNESS&keyword=trainer01
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNTA0NWE4MS0xYWU0LTRiODItOWNiZC1lNGFjYTdhMDY5NjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNzYyNDczNywiZXhwIjoxNzM4ODM0MzM3fQ.lz0QVusYieLFTNFtFKjQPLHGHOuwYbk4w9aahXm7yuU
+
+### 찜한 트레이너만 조회
+GET http://localhost:3000/trainers/44752641-132b-4ec3-ab67-bb2116cc3c94/favorite
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNTA0NWE4MS0xYWU0LTRiODItOWNiZC1lNGFjYTdhMDY5NjUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczNzYyNDczNywiZXhwIjoxNzM4ODM0MzM3fQ.lz0QVusYieLFTNFtFKjQPLHGHOuwYbk4w9aahXm7yuU
+
+### 내가 찜한 트레이나 조회
+GET http://localhost:3000/trainers/favorite
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTlmYzM4Ni1kMWE3LTQ0MzAtYTM3ZC05ZDFjNWJkYWZkM2YiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTczODczNjg4NywiZXhwIjoxNzM5OTQ2NDg3fQ.VIsg3683smgVhWxLJsZKXp-Bg8lrZQF6AU2-JG_Sv2c

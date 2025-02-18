@@ -54,16 +54,19 @@ export class TrainerService implements ITrainerService {
   }
 
   async getFavoriteStatus(trainerId: string): Promise<{ isFavorite: boolean; favoriteTotalCount: number }> {
-    const { userId } = this.alsStore.getStore();
-    if (!userId) {
-      throw new UnauthorizedException(AuthExceptionMessage.UNAUTHORIZED);
+    const store = this.alsStore.getStore();
+    const userId = store?.userId || null;
+
+    const favoriteTotalCount = await this.trainerRepository.findFavoriteTrainerCount(trainerId);
+    let isFavorite = false;
+
+    if (userId) {
+      const favoriteTrainer = await this.trainerRepository.findFavoriteTrainer(userId, trainerId);
+      isFavorite = !!favoriteTrainer;
     }
 
-    const favoriteTrainer = await this.trainerRepository.findFavoriteTrainer(userId, trainerId);
-    const favoriteTotalCount = await this.trainerRepository.findFavoriteTrainerCount(trainerId);
-
     return {
-      isFavorite: !!favoriteTrainer,
+      isFavorite,
       favoriteTotalCount,
     };
   }
