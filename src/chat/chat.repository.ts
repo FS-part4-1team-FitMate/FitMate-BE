@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ProfileService } from '#profile/profile.service.js';
 import { Chat } from './chat.schema.js';
 import { ChatRoom } from './chatRoom.schema.js';
 import { IChatRepository } from './interface/chat.repository.interface';
+import { ProfileRepository } from '#profile/profile.repository.js';
 
 @Injectable()
 export class ChatRepository implements IChatRepository {
   constructor(
     @InjectModel(Chat.name) private chatModel: Model<Chat>,
     @InjectModel(ChatRoom.name) private chatRoomModel: Model<ChatRoom>,
+    private readonly profileRepository: ProfileRepository, // ProfileRepository 주입
   ) {}
 
   // 메시지 저장 기능
@@ -23,13 +26,28 @@ export class ChatRepository implements IChatRepository {
   }
 
   // 로그인한 유저가 참여 중인 채팅방 조회 기능
-  async findMyChatRooms(userId: string, skip: number, limit: number): Promise<ChatRoom[]> {
-    return this.chatRoomModel
+  async findMyChatRooms(userId: string, skip: number, limit: number): Promise<any[]> {
+    const chatRooms = await this.chatRoomModel
       .find({ $or: [{ participant1: userId }, { participant2: userId }] })
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
+
+    const roomsWithProfiles = await Promise.all(
+      chatRooms.map(async (room) => {
+        const participant1Profile = await this.profileRepository.findProfileById(room.participant1);
+        const participant2Profile = await this.profileRepository.findProfileById(room.participant2);
+
+        return {
+          ...room,
+          participant1Profile: { name: participant1Profile?.name || null },
+          participant2Profile: { name: participant2Profile?.name || null },
+        };
+      }),
+    );
+
+    return roomsWithProfiles;
   }
 
   // 특정 채팅방 조회 기능
