@@ -15,12 +15,14 @@ BEGIN
     "userId", 
     "type", 
     "message",
+    "createdAt",
     "updatedAt"
   ) VALUES (
     user_id, 
     type::"NotificationType",   -- 문자열을 enum으로 변환
     message,
-    now() -- DB 내부에서 updatedAt은 수동으로 셋팅해줘야 함
+    now() AT TIME ZONE 'UTC', -- UTC 기준으로 변환하여 저장장
+    now() AT TIME ZONE 'UTC' -- DB 내부에서 updatedAt은 수동으로 셋팅해줘야 함
   );
 END;
 $$;
