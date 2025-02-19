@@ -355,7 +355,10 @@ DECLARE
 
 BEGIN
   -- 새로운 레슨 요청의 정보 가져오기
-  SELECT lr."lessonType", lr."locationType", lr."startDate", lr."endDate", lr."roadAddress", u."nickname"
+  SELECT lr."lessonType", lr."locationType", 
+    lr."startDate" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Seoul', 
+    lr."endDate" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Seoul', 
+    lr."roadAddress", u."nickname"
   INTO lesson_type, location_type, start_date, end_date, road_address, requester_nick
   FROM "LessonRequest" lr
   JOIN "User" u ON lr."userId" = u."id"
@@ -380,7 +383,7 @@ BEGIN
       location_type_kr := '오프라인';
     END IF;
   ELSE
-    location_type_kr := '기타타';
+    location_type_kr := '기타';
   END IF;
 
   -- 매칭되는 트레이너 찾기
