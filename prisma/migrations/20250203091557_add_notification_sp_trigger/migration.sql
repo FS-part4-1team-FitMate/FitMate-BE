@@ -125,7 +125,7 @@ BEGIN
   );
 
   -- 트레이너 알림 생성 추가
-  IF lesson_status IN ('QUOTE_CONFIRMED', 'COMPLETED') THEN
+  IF lesson_status IN ('QUOTE_CONFIRMED', 'COMPLETED', 'CANCELED') THEN
     SELECT "trainerId"
     INTO trainer_id
     FROM "LessonQuote"
