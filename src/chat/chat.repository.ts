@@ -24,7 +24,7 @@ export class ChatRepository implements IChatRepository {
     return this.chatModel.find({ roomId }).sort({ createdAt: 1 }).skip(skip).limit(limit).lean();
   }
 
-  // 로그인한 유저가 참여 중인 채팅방 조회 기능
+  // 로그인한 유저가 참여 중인 채팅방 조회 기능.
   async findMyChatRooms(userId: string, skip: number, limit: number): Promise<any[]> {
     const chatRooms = await this.chatRoomModel
       .find({ $or: [{ participant1: userId }, { participant2: userId }] })
