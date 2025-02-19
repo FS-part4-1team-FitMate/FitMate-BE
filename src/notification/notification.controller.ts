@@ -34,6 +34,7 @@ export class NotificationController {
    * 알림 실시간 구독
    * ***********************************************************************************
    */
+
   @Sse('sse')
   @ApiOperation({
     summary: 'SSE 실시간 알림 구독',
@@ -49,11 +50,34 @@ export class NotificationController {
     },
   })
   sse(@Query('user_id') userId: string): Observable<string> {
+    const convertToKST = (dateString: string | null) => {
+      if (!dateString) return null;
+
+      // PostgreSQL에서 가져온 날짜 데이터가 'Z'를 포함하지 않는 경우 UTC 기준으로 처리되지 않을 수 있음.
+      if (!dateString.endsWith('Z')) {
+        dateString += 'Z';
+      }
+
+      const date = new Date(dateString);
+      // UTC 기준 시간을 KST(한국 시간, UTC+9)로 변환하여 반환
+      return new Date(date.getTime() + 9 * 60 * 60 * 1000)
+        .toISOString()
+        .replace('T', ' ') // 'T'를 공백으로 변경하여 가독성 향상
+        .slice(0, 19); // 밀리초(.sss)와 'Z' 제거하여 'YYYY-MM-DD HH:mm:ss' 형식으로 변환
+    };
+
     return this.notificationService.getUserNotificationStream(userId).pipe(
       tap((data) => {
         logger.debug(`SSE 응답 데이터:\n ${JSON.stringify(data, null, 2)}`);
       }),
-      map((data) => `${JSON.stringify(data)}\n\n`), //SSE 표준 형식으로 변환
+      // createdAt, updatedAt을 한국 시간으로 변환
+      map((data) => {
+        return `${JSON.stringify({
+          ...data,
+          createdAt: convertToKST(data.createdAt),
+          updatedAt: convertToKST(data.updatedAt),
+        })}\n\n`; // SSE 표준 형식으로 변환
+      }),
     );
   }
 
