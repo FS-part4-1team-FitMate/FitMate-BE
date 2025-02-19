@@ -104,16 +104,16 @@ BEGIN
   -- 상태에 따른 알림 메시지 생성
   CASE lesson_status
     WHEN 'QUOTE_CONFIRMED' THEN
-      notification_message := user_nick || '님의 레슨(' || lesson_sub_type_kr || ')에 대한 견적이 확정되었습니다.';
+      notification_message := user_nick || '님의 [' || lesson_type_kr || ' - ' || lesson_sub_type_kr || '] 레슨에 대한 견적이 확정되었습니다.';
 
     WHEN 'COMPLETED' THEN
-      notification_message := user_nick || '님의 레슨(' || lesson_sub_type_kr || ')이 완료되었습니다.';
+      notification_message := user_nick || '님의 [' || lesson_type_kr || ' - ' || lesson_sub_type_kr || '] 레슨이 완료되었습니다.';
 
     WHEN 'CANCELED' THEN
-      notification_message := user_nick || '님의 레슨(' || lesson_type_kr || ' - ' || lesson_sub_type_kr || ') 요청이 취소되었습니다.';
+      notification_message := user_nick || '님의 [' || lesson_type_kr || ' - ' || lesson_sub_type_kr || '] 레슨 요청이 취소되었습니다.';
 
     WHEN 'EXPIRED' THEN
-      notification_message := user_nick || '님의 레슨(' || lesson_sub_type_kr || ') 요청이 만료되었습니다.';
+      notification_message := user_nick || '님의 [' || lesson_type_kr || ' - ' || lesson_sub_type_kr || '] 레슨 요청이 만료되었습니다.';
     ELSE
       RETURN; -- 알림을 보낼 필요가 없는 상태이면 종료
   END CASE;
@@ -364,21 +364,23 @@ DECLARE
   trainer_id TEXT;
   lesson_type "LessonType";
   location_type "LocationType";
+  lesson_sub_type "LessonSubType";
   start_date DATE;
   end_date DATE;
   requester_nick TEXT;
   notification_message TEXT;
   lesson_type_kr TEXT;
+  lesson_sub_type_kr TEXT;
   location_type_kr TEXT;
   road_address TEXT;
 
 BEGIN
   -- 새로운 레슨 요청의 정보 가져오기
-  SELECT lr."lessonType", lr."locationType", 
+  SELECT lr."lessonType", lr."lessonSubType", lr."locationType", 
     lr."startDate" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Seoul', 
     lr."endDate" AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Seoul', 
     lr."roadAddress", u."nickname"
-  INTO lesson_type, location_type, start_date, end_date, road_address, requester_nick
+  INTO lesson_type, lesson_sub_type, location_type, start_date, end_date, road_address, requester_nick
   FROM "LessonRequest" lr
   JOIN "User" u ON lr."userId" = u."id"
   WHERE lr.id = lesson_id;
@@ -389,6 +391,28 @@ BEGIN
     WHEN 'FITNESS' THEN lesson_type_kr := '피트니스';
     WHEN 'REHAB' THEN lesson_type_kr := '재활';
     ELSE lesson_type_kr := '기타';
+  END CASE;
+
+  -- lesson_sub_type을 한글로 변환
+  CASE lesson_sub_type
+    WHEN 'SOCCER' THEN lesson_sub_type_kr := '축구';
+    WHEN 'BASKETBALL' THEN lesson_sub_type_kr := '농구';
+    WHEN 'BASEBALL' THEN lesson_sub_type_kr := '야구';
+    WHEN 'TENNIS' THEN lesson_sub_type_kr := '테니스';
+    WHEN 'BADMINTON' THEN lesson_sub_type_kr := '배드민턴';
+    WHEN 'TABLE_TENNIS' THEN lesson_sub_type_kr := '탁구';
+    WHEN 'SKI' THEN lesson_sub_type_kr := '스키';
+    WHEN 'SURFING' THEN lesson_sub_type_kr := '서핑';
+    WHEN 'BOXING' THEN lesson_sub_type_kr := '복싱';
+    WHEN 'TAEKWONDO' THEN lesson_sub_type_kr := '태권도';
+    WHEN 'JIUJITSU' THEN lesson_sub_type_kr := '주짓수';
+    WHEN 'PERSONAL_TRAINING' THEN lesson_sub_type_kr := '퍼스널 트레이닝';
+    WHEN 'YOGA' THEN lesson_sub_type_kr := '요가';
+    WHEN 'PILATES' THEN lesson_sub_type_kr := '필라테스';
+    WHEN 'DIET_MANAGEMENT' THEN lesson_sub_type_kr := '다이어트 관리';
+    WHEN 'STRETCHING' THEN lesson_sub_type_kr := '스트레칭';
+    WHEN 'REHAB_TREATMENT' THEN lesson_sub_type_kr := '재활 치료';
+    ELSE lesson_sub_type_kr := lesson_type_kr;
   END CASE;
 
   -- location_type에 따라 한글로 변환(OFFLINE 일 경우 해당 지역 표시)
@@ -415,7 +439,7 @@ BEGIN
 
   LOOP
     -- 알림 메시지 생성
-    notification_message := requester_nick || '님이 [' || location_type_kr || ']에서 ' || start_date || ' ~ ' || end_date || ' 동안 [' || lesson_type_kr || '] 레슨을 요청했습니다.';
+    notification_message := requester_nick || '님이 [' || location_type_kr || ']에서 ' || start_date || ' ~ ' || end_date || ' 동안 [' || lesson_type_kr || ' - ' || lesson_sub_type_kr || '] 레슨을 요청했습니다.';
 
     -- 트레이너에게 알림 전송
     CALL notify_user_change(
