@@ -47,6 +47,18 @@ export class LessonService implements ILessonService {
       throw new UnauthorizedException(LessonExceptionMessage.ONLY_USER_CAN_REQUEST_LESSON);
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startDate = new Date(data.startDate);
+    console.log('startDate', startDate);
+    console.log('today', today);
+
+    // 레슨 시작일이 오늘 이후이어야 함
+    if (startDate <= today) {
+      throw new BadRequestException(LessonExceptionMessage.INVALID_START_DATE);
+    }
+
     const [_user, pendingLesson] = await Promise.all([
       this.userService.findUserById(userId),
       this.lessonRepository.findLessonsByUserId(userId, LessonRequestStatus.PENDING),

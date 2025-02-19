@@ -14,6 +14,7 @@ enum LessonExceptionMessage {
   INVALID_LESSON_REQUEST_MATCH = '요청 레슨과 지정 견적 요청이 일치하지 않습니다.',
   DIRECT_QUOTE_LIMIT_REACHED = '지정 견적 요청은 최대 3개까지 가능합니다.',
   TRAINER_ALREADY_SENT_QUOTE = '이미 이 요청 레슨에 대해 견적서를 보냈습니다.',
+  INVALID_START_DATE = '레슨 시작일은 오늘 이후의 날짜이어야야 합니다.',
 }
 
 export default LessonExceptionMessage;
