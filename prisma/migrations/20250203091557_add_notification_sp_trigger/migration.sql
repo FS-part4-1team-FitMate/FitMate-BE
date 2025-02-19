@@ -46,6 +46,7 @@ DECLARE
   lesson_type_kr TEXT;
   lesson_sub_type_kr TEXT;
   user_nick TEXT;
+  interested_trainer TEXT;
 BEGIN
   SELECT lr."userId", lr."lessonType"::TEXT, lr."lessonSubType"::TEXT, lr."status" , u."nickname"
   INTO user_id, lesson_type, lesson_sub_type, lesson_status, user_nick
@@ -109,7 +110,7 @@ BEGIN
       notification_message := user_nick || '님의 레슨(' || lesson_sub_type_kr || ')이 완료되었습니다.';
 
     WHEN 'CANCELED' THEN
-      notification_message := user_nick || '님의 레슨(' || lesson_sub_type || ') 요청이 취소되었습니다.';
+      notification_message := user_nick || '님의 레슨(' || lesson_type_kr || ' - ' || lesson_sub_type_kr || ') 요청이 취소되었습니다.';
 
     WHEN 'EXPIRED' THEN
       notification_message := user_nick || '님의 레슨(' || lesson_sub_type_kr || ') 요청이 만료되었습니다.';
@@ -124,8 +125,8 @@ BEGIN
     notification_message
   );
 
-  -- 트레이너 알림 생성 추가
-  IF lesson_status IN ('QUOTE_CONFIRMED', 'COMPLETED', 'CANCELED') THEN
+  -- 트레이너 알림 생성 추가 (견적 확정된 트레이너너)
+  IF lesson_status IN ('QUOTE_CONFIRMED', 'COMPLETED') THEN
     SELECT "trainerId"
     INTO trainer_id
     FROM "LessonQuote"
@@ -139,7 +140,25 @@ BEGIN
         notification_message
       );
     END IF;
-  END IF;  
+  END IF; 
+
+  -- 관심 분야 트레이너에게도 알림 생성 (레슨 취소일 경우)
+  IF lesson_status IN ('CANCELED') THEN
+    FOR interested_trainer IN
+      SELECT u.id
+      FROM "User" u
+      JOIN "Profile" p ON u.id = p."userId"
+      WHERE u."role" = 'TRAINER'
+      AND lesson_type::"LessonType" = ANY(p."lessonType") -- ENUM 배열 비교
+
+    LOOP
+      CALL notify_user_change(
+        interested_trainer,
+        'LESSON_QUOTE',
+        notification_message
+      );
+    END LOOP;
+  END IF;
 END;
 $$;
 
