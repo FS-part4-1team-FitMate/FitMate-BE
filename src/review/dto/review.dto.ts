@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsInt, Min, Max, IsUUID, IsString, Length, IsOptional } from 'class-validator';
 
@@ -45,4 +46,15 @@ export class GetMyReviewsQueryDto {
   @IsInt()
   @Min(1, { message: '리밋은 최소 1 이상이어야 합니다.' })
   limit?: number;
+}
+
+export class ReviewResponseDto {
+  @ApiProperty({ description: '리뷰 ID' })
+  id: string;
+
+  @ApiProperty({ description: '리뷰 내용' })
+  content: string;
+
+  @ApiProperty({ description: '작성일' })
+  createdAt: string;
 }

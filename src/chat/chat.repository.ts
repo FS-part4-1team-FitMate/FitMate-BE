@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ProfileRepository } from '#profile/profile.repository.js';
 import { Chat } from './chat.schema.js';
 import { ChatRoom } from './chatRoom.schema.js';
 import { IChatRepository } from './interface/chat.repository.interface';
@@ -10,6 +11,7 @@ export class ChatRepository implements IChatRepository {
   constructor(
     @InjectModel(Chat.name) private chatModel: Model<Chat>,
     @InjectModel(ChatRoom.name) private chatRoomModel: Model<ChatRoom>,
+    private readonly profileRepository: ProfileRepository,
   ) {}
 
   // 메시지 저장 기능
@@ -17,19 +19,34 @@ export class ChatRepository implements IChatRepository {
     return await this.chatModel.create(chat);
   }
 
-  // ✅ 특정 채팅방의 메시지 조회 기능
+  // 특정 채팅방의 메시지 조회 기능
   async findMessagesByRoomId(roomId: string, skip: number, limit: number): Promise<Chat[]> {
     return this.chatModel.find({ roomId }).sort({ createdAt: 1 }).skip(skip).limit(limit).lean();
   }
 
-  // 로그인한 유저가 참여 중인 채팅방 조회 기능
-  async findMyChatRooms(userId: string, skip: number, limit: number): Promise<ChatRoom[]> {
-    return this.chatRoomModel
+  // 로그인한 유저가 참여 중인 채팅방 조회 기능.
+  async findMyChatRooms(userId: string, skip: number, limit: number): Promise<any[]> {
+    const chatRooms = await this.chatRoomModel
       .find({ $or: [{ participant1: userId }, { participant2: userId }] })
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
+
+    const roomsWithProfiles = await Promise.all(
+      chatRooms.map(async (room) => {
+        const participant1Profile = await this.profileRepository.findProfileById(room.participant1);
+        const participant2Profile = await this.profileRepository.findProfileById(room.participant2);
+
+        return {
+          ...room,
+          participant1Profile: { name: participant1Profile?.name || null },
+          participant2Profile: { name: participant2Profile?.name || null },
+        };
+      }),
+    );
+
+    return roomsWithProfiles;
   }
 
   // 특정 채팅방 조회 기능
@@ -55,5 +72,14 @@ export class ChatRepository implements IChatRepository {
         { participant1: participant2, participant2: participant1 },
       ],
     });
+  }
+
+  async updateParticipantLeft(roomId: string, participant: 'participant1' | 'participant2'): Promise<void> {
+    await this.chatRoomModel.updateOne({ roomId }, { $set: { [`left_${participant}`]: true } });
+  }
+
+  async deleteChatRoom(roomId: string): Promise<void> {
+    await this.chatModel.deleteMany({ roomId });
+    await this.chatRoomModel.deleteOne({ roomId });
   }
 }

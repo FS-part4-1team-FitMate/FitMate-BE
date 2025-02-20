@@ -70,6 +70,19 @@ export class ChatService implements IChatService {
 
   // 특정 채팅방의 메시지 가져오기
   async getMessages(roomId: string, page: number, limit: number): Promise<ChatMessageResponse[]> {
+    const chatRoom = await this.chatRepository.findChatRoomById(roomId);
+    if (!chatRoom) throw new NotFoundException(ChatExceptionMessage.DELETED_CHAT_ROOM);
+
+    const { userId } = this.alsStore.getStore();
+
+    // 유저가 나간 채팅방이라면 메시지 조회 불가
+    if (
+      (chatRoom.participant1 === userId && chatRoom.left_participant1) ||
+      (chatRoom.participant2 === userId && chatRoom.left_participant2)
+    ) {
+      throw new ForbiddenException(ChatExceptionMessage.DELETED_CHAT_ROOM);
+    }
+
     if (page <= 0 || limit <= 0) {
       throw new BadRequestException(ChatExceptionMessage.INVALID_PAGE_OR_LIMIT);
     }
@@ -101,23 +114,35 @@ export class ChatService implements IChatService {
 
     const { userId } = this.alsStore.getStore();
     const skip = (page - 1) * limit;
-    const chatRooms = await this.chatRepository.findMyChatRooms(userId, skip, limit).catch(() => {
-      throw new InternalServerErrorException(ChatExceptionMessage.CHAT_ROOM_LIST_FAILED);
-    });
 
-    return chatRooms ?? [];
+    // 유저가 나간 채팅방은 조회되지 않도록 필터링
+    const chatRooms = await this.chatRepository.findMyChatRooms(userId, skip, limit);
+    const filteredChatRooms = chatRooms.filter(
+      (chatRoom) =>
+        !(chatRoom.participant1 === userId && chatRoom.left_participant1) &&
+        !(chatRoom.participant2 === userId && chatRoom.left_participant2),
+    );
+
+    return filteredChatRooms;
   }
 
   // 채팅방 나가기
   async leaveChatRoom(roomId: string): Promise<void> {
     const { userId } = this.alsStore.getStore();
     const chatRoom = await this.chatRepository.findChatRoomById(roomId);
-
     if (!chatRoom) throw new NotFoundException(ChatExceptionMessage.CHAT_ROOM_NOT_FOUND);
-    if (chatRoom.participant1 === userId || chatRoom.participant2 === userId) {
-      await this.chatRepository.deleteMessagesByUser(roomId, userId);
-    } else {
-      throw new ForbiddenException(ChatExceptionMessage.CHAT_ROOM_FORBIDDEN);
+
+    if (chatRoom.participant1 === userId) {
+      await this.chatRepository.updateParticipantLeft(roomId, 'participant1');
+    } else if (chatRoom.participant2 === userId) {
+      await this.chatRepository.updateParticipantLeft(roomId, 'participant2');
+    }
+
+    const updatedChatRoom = await this.chatRepository.findChatRoomById(roomId);
+    if (!updatedChatRoom) return; // 채팅방이 이미 삭제된 경우 바로 반환
+
+    if (updatedChatRoom.left_participant1 && updatedChatRoom.left_participant2) {
+      await this.chatRepository.deleteChatRoom(roomId);
     }
   }
 }

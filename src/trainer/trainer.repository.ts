@@ -27,6 +27,7 @@ export class TrainerRepository implements ITrainerRepository {
         updatedAt: true,
         profile: {
           select: {
+            name: true,
             profileImage: true,
             intro: true,
             lessonType: true,
@@ -76,6 +77,7 @@ export class TrainerRepository implements ITrainerRepository {
         updatedAt: true,
         profile: {
           select: {
+            name: true,
             profileImage: true,
             intro: true,
             lessonType: true,

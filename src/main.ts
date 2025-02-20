@@ -2,6 +2,7 @@ import { ValidationPipe, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalExceptionFilter } from '#exception/global-exception-filter.js';
 import { LoggingInterceptor } from '#logger/logging.interceptor.js';
 import { logger } from '#logger/winston-logger.js';
@@ -27,6 +28,17 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new GlobalExceptionFilter());
+
+  // Swagger 설정
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('API 문서')
+    .setDescription('NestJS API 문서')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api-docs', app, document);
 
   app.enableCors({
     origin: configService.get<string>('CORS_ORIGIN') || '*',

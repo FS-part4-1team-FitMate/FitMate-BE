@@ -60,12 +60,27 @@ export class QuoteRepository implements IQuoteRepository {
         skip,
         take,
         include: {
-          lessonRequest: true,
+          lessonRequest: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  nickname: true,
+                },
+              },
+            },
+          },
           trainer: {
             select: {
               id: true,
               email: true,
               nickname: true,
+              profile: {
+                select: {
+                  name: true,
+                  profileImage: true,
+                },
+              },
             },
           },
         },
@@ -78,23 +93,6 @@ export class QuoteRepository implements IQuoteRepository {
     return { quotes, totalCount, hasMore };
   }
 
-  // 삭제 예정
-  async findAll(
-    where?: Record<string, any>,
-    orderBy?: Record<string, string>,
-    skip?: number,
-    take?: number,
-    include?: Prisma.LessonQuoteInclude,
-  ): Promise<LessonQuote[]> {
-    return await this.lessonQuote.findMany({
-      where,
-      orderBy,
-      skip,
-      take,
-      include,
-    });
-  }
-
   async count(where?: Record<string, any>): Promise<number> {
     return await this.lessonQuote.count({ where });
   }
@@ -103,20 +101,31 @@ export class QuoteRepository implements IQuoteRepository {
     return await this.lessonQuote.findUnique({
       where: { id },
       include: {
-        lessonRequest: true,
+        lessonRequest: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+          },
+        },
         trainer: {
           select: {
             id: true,
             email: true,
             nickname: true,
+            profile: {
+              select: {
+                name: true,
+                profileImage: true,
+              },
+            },
           },
         },
       },
     });
-  }
-
-  async update(id: string, data: PatchLessonQuote): Promise<LessonQuote | null> {
-    return await this.lessonQuote.update({ where: { id }, data });
   }
 
   async updateStatus(
@@ -155,7 +164,7 @@ export class QuoteRepository implements IQuoteRepository {
     return trainers.map((t) => t.trainerId);
   }
 
-  async findReviewableQuotes(userId: string, skip: number, take: number): Promise<LessonQuote[]> {
+  async findReviewableQuotes(userId: string, skip: number, take: number): Promise<LessonQuoteResponse[]> {
     return await this.lessonQuote.findMany({
       where: {
         status: 'ACCEPTED',
@@ -170,8 +179,30 @@ export class QuoteRepository implements IQuoteRepository {
       skip,
       take,
       include: {
-        lessonRequest: true,
+        lessonRequest: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                nickname: true,
+              },
+            },
+          },
+        },
         Review: true,
+        trainer: {
+          select: {
+            id: true,
+            email: true,
+            nickname: true,
+            profile: {
+              select: {
+                name: true,
+                profileImage: true,
+              },
+            },
+          },
+        },
       },
     });
   }
