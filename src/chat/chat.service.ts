@@ -50,20 +50,14 @@ export class ChatService implements IChatService {
   // 메시지 저장
   async createMessage(createChatDto: CreateChatDto): Promise<Chat> {
     const { userId } = this.alsStore.getStore();
-    const { receiverId, message } = createChatDto;
-    const roomId = await this.createOrGetChatRoom(receiverId);
+    const { roomId, message } = createChatDto;
 
-    const newMessage = await this.chatRepository
-      .saveMessage({
-        roomId,
-        senderId: userId,
-        receiverId,
-        message,
-        isRead: false,
-      })
-      .catch(() => {
-        throw new InternalServerErrorException(ChatExceptionMessage.MESSAGE_SAVE_FAILED);
-      });
+    const newMessage = await this.chatRepository.saveMessage({
+      roomId,
+      senderId: userId,
+      message,
+      isRead: false,
+    });
 
     return newMessage;
   }
@@ -144,5 +138,9 @@ export class ChatService implements IChatService {
     if (updatedChatRoom.left_participant1 && updatedChatRoom.left_participant2) {
       await this.chatRepository.deleteChatRoom(roomId);
     }
+  }
+
+  async markMessagesAsRead(roomId: string, userId: string): Promise<void> {
+    await this.chatRepository.updateMessagesAsRead(roomId, userId);
   }
 }
