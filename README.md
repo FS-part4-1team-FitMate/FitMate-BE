@@ -43,29 +43,33 @@
 
 &nbsp;
 
-## <a id="기술-스택">🛠️ 기술 스택</a>
+## <a id="기술-스택">🛠️ 공통 개발 환경 및 기술 스택</a>
 
-<img src="https://img.shields.io/badge/Node.js-FA04E?style=flat&logo=Node.js&logoColor=white"/> <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=JavaScript&logoColor=white"/>
-<img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=TypeScript&logoColor=white"/>
-<img src="https://img.shields.io/badge/nestjs-%23E0234E?logo=nestjs&logoColor=white"/>
-<img src="https://img.shields.io/badge/prisma-%232D3748?logo=prisma&logoColor=white"/>
-<img src="https://img.shields.io/badge/postgresql-%234169E1?logo=postgresql&logoColor=white
-"/>
-<img src="https://img.shields.io/badge/amazonec2-%23FF9900?logo=amazonec2&logoColor=white
-"/>
-<img src="https://img.shields.io/badge/amazons3-%23569A31?logo=amazons3&logoColor=white
-">
-<img src="https://img.shields.io/badge/mongodb-%2347A248?logo=mongodb&logoColor=white
-">
-<img src="https://img.shields.io/badge/mongoose-%23880000?logo=mongoose&logoColor=white
-">
+- environment
+  - VS Code, Prettier, ESLint, TypeScript, npm
+- infra
+  - EC2, PM2, Nginx, Let's Encrypt SSL, Github Actions, docker, Git & Github, Amazon S3
+- Real-time
+  - SSE, Socket.io
+- tools
+  - Notion, Slack, Discord, Gather, Zoom
 
-<img src="https://img.shields.io/badge/Slack-4A154B?style=flat&logo=Slack&logoColor=white"/> <img src="https://img.shields.io/badge/Discord-5865F2?style=flat&logo=Discord&logoColor=white"/>
-<img src="https://img.shields.io/badge/Gather-0B5CFF?style=flat&logo=Gather&logoColor=white"/>
-<img src="https://img.shields.io/badge/Git-F05032?style=flat&logo=Git&logoColor=white"/>
-<img src="https://img.shields.io/badge/GitHub-181717?style=flat&logo=GitHub&logoColor=white"/>
-<img src="https://img.shields.io/badge/Notion-000000?style=flat&logo=Notion&logoColor=white"/>
-<img src="https://img.shields.io/badge/Zoom-0B5CFF?style=flat&logo=Zoom&logoColor=white"/>
+## <a id="기술-스택">🛠️ 백엔드 기술 스택</a>
+
+- backend:
+  - NodeJS, Express.js
+- Authentication
+  - JWT, OAuth 2.0, Passport, bcrypt, async-local-storage
+- Scheduling
+  - @nest/schedule
+- Queue
+  - BullMQ
+- Email
+  - Nodemailer
+- Database
+  - MongoDB, PostgreSQL, Redis
+- Etc
+  - Swagger
 
 🔝 [목차로 돌아가기](#목차)
 
@@ -194,7 +198,6 @@
   - 채팅방 나가기
 
 </details>
-
 
 🔝 [목차로 돌아가기](#목차)
 
