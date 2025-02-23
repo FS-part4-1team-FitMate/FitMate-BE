@@ -9,9 +9,6 @@ export class Chat extends Document {
   @Prop({ required: true }) // 발신자 ID
   senderId: string;
 
-  @Prop({ required: true }) // 수신자 ID
-  receiverId: string;
-
   @Prop({ required: true }) // 메시지 내용
   message: string;
 

@@ -85,6 +85,6 @@ export class ChatRepository implements IChatRepository {
 
   // 메시지 읽음 처리
   async updateMessagesAsRead(roomId: string, userId: string): Promise<void> {
-    await this.chatModel.updateMany({ roomId, receiverId: userId, isRead: false }, { isRead: true });
+    await this.chatModel.updateMany({ roomId, senderId: { $ne: userId }, isRead: false }, { isRead: true });
   }
 }

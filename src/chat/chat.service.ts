@@ -52,6 +52,15 @@ export class ChatService implements IChatService {
     const { userId } = this.alsStore.getStore();
     const { roomId, message } = createChatDto;
 
+    // ✅ 채팅방을 조회하여 receiverId (상대방 ID) 확인
+    const chatRoom = await this.chatRepository.findChatRoomById(roomId);
+    if (!chatRoom) {
+      throw new NotFoundException(ChatExceptionMessage.CHAT_ROOM_NOT_FOUND);
+    }
+
+    // 상대방 ID 찾기
+    const receiverId = chatRoom.participant1 === userId ? chatRoom.participant2 : chatRoom.participant1;
+
     const newMessage = await this.chatRepository.saveMessage({
       roomId,
       senderId: userId,
