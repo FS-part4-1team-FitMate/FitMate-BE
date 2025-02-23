@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from '@prisma/client';
 
-export class ProfileResponseDto {
+export class ProfileSimpleResponseDto {
   @ApiProperty({ description: '이름' })
   name: string;
 

@@ -22,7 +22,7 @@ import {
   IsUUID,
   Min,
 } from 'class-validator';
-import { UserResponseDto } from '#user/dto/user.dto.js';
+import { UserSimpleResponseDto } from '#user/dto/user.dto.js';
 
 export class CreateLessonDto {
   @ApiProperty({
@@ -333,8 +333,8 @@ export class LessonResponseDto {
   @ApiProperty({ description: '지정 견적 요청 목록', type: [DirectQuoteRequestResponseDto] })
   directQuoteRequests: DirectQuoteRequestResponseDto[];
 
-  @ApiProperty({ description: '사용자 정보', type: UserResponseDto })
-  user: UserResponseDto;
+  @ApiProperty({ description: '사용자 정보', type: UserSimpleResponseDto })
+  user: UserSimpleResponseDto;
 
   @ApiProperty({ description: '지정 견적 여부' })
   isDirectQuote: boolean;
