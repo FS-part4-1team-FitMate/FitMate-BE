@@ -50,20 +50,23 @@ export class ChatService implements IChatService {
   // 메시지 저장
   async createMessage(createChatDto: CreateChatDto): Promise<Chat> {
     const { userId } = this.alsStore.getStore();
-    const { receiverId, message } = createChatDto;
-    const roomId = await this.createOrGetChatRoom(receiverId);
+    const { roomId, message } = createChatDto;
 
-    const newMessage = await this.chatRepository
-      .saveMessage({
-        roomId,
-        senderId: userId,
-        receiverId,
-        message,
-        isRead: false,
-      })
-      .catch(() => {
-        throw new InternalServerErrorException(ChatExceptionMessage.MESSAGE_SAVE_FAILED);
-      });
+    // ✅ 채팅방을 조회하여 receiverId (상대방 ID) 확인
+    const chatRoom = await this.chatRepository.findChatRoomById(roomId);
+    if (!chatRoom) {
+      throw new NotFoundException(ChatExceptionMessage.CHAT_ROOM_NOT_FOUND);
+    }
+
+    // 상대방 ID 찾기
+    const receiverId = chatRoom.participant1 === userId ? chatRoom.participant2 : chatRoom.participant1;
+
+    const newMessage = await this.chatRepository.saveMessage({
+      roomId,
+      senderId: userId,
+      message,
+      isRead: false,
+    });
 
     return newMessage;
   }
@@ -144,5 +147,9 @@ export class ChatService implements IChatService {
     if (updatedChatRoom.left_participant1 && updatedChatRoom.left_participant2) {
       await this.chatRepository.deleteChatRoom(roomId);
     }
+  }
+
+  async markMessagesAsRead(roomId: string, userId: string): Promise<void> {
+    await this.chatRepository.updateMessagesAsRead(roomId, userId);
   }
 }
