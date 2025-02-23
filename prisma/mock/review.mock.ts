@@ -20,7 +20,7 @@ export const REVIEWS: Review[] = [
     updatedAt: new Date('2025-01-29T12:00:00+09:00'),
   },
   {
-    id: 'c3d4e5f6-a7b8-49c9-9010-4d11ef12g013', // User03의 완료된 요청레슨
+    id: 'c3d4e5f6-a7b8-49c9-9010-4a11de12b013', // User03의 완료된 요청레슨
     userId: '399fc386-d1a7-4430-a37d-9d1c5bdafd3d', // User03
     lessonQuoteId: '673805e8-2c0a-4ec0-9edd-034db8563474', // trainer01 완료된 레슨
     rating: 5,
@@ -29,7 +29,7 @@ export const REVIEWS: Review[] = [
     updatedAt: new Date('2025-01-20T15:30:00+09:00'),
   },
   {
-    id: 'd4e5f6g7-a8b9-40c0-9110-5d12ef13h014',
+    id: 'd4e5f6a7-b8c9-40d0-9110-5a12de13b014',
     userId: '399fc386-d1a7-4430-a37d-9d1c5bdafd3d', // User03
     lessonQuoteId: '1a1f489c0-a951-44c4-8d52-bec26edf0ccd', // trainer01 완료된 레슨
     rating: 3,
@@ -38,7 +38,7 @@ export const REVIEWS: Review[] = [
     updatedAt: new Date('2025-01-19T08:45:00+09:00'),
   },
   {
-    id: 'e5f6g7h8-a9b0-41c1-9210-6d13ef14i015',
+    id: 'e5f6a7b8-c9d0-41e1-9210-6a13de14b015',
     userId: '449fc386-d1a7-4430-a37d-9d1c5bdafd4d', // User04
     lessonQuoteId: '33e489c0-a951-44c4-8d52-bec26edf0ff1', // trainer02 완료된 레슨
     rating: 5,
