@@ -13,7 +13,7 @@ export const REVIEWS: Review[] = [
   {
     id: 'b2c3d4e5-f6g7-h8i9-jk10-lm11no12pqr13', // User01의 완료된 요청레슨
     userId: '699fc386-d1a7-4430-a37d-9d1c5bdafd3f', // User01
-    lessonQuoteId: '11g489c0-a951-44c4-8d52-bec26edf0bbe', // trainer01 완료된 레슨
+    lessonQuoteId: '11f489c0-a951-44c4-8d52-bec26edf0bbe', // trainer01 완료된 레슨
     rating: 4,
     content: '강사님이 친절하고 꼼꼼하게 가르쳐주십니다.',
     createdAt: new Date('2025-01-29T12:00:00+09:00'),
@@ -40,7 +40,7 @@ export const REVIEWS: Review[] = [
   {
     id: 'e5f6g7h8-i9j10-k11lm12-no13pqr16',
     userId: '449fc386-d1a7-4430-a37d-9d1c5bdafd4d', // User04
-    lessonQuoteId: '8df489c0-a951-44c4-8d52-bec26edf0ffg', // trainer02 완료된 레슨
+    lessonQuoteId: '33e489c0-a951-44c4-8d52-bec26edf0ff1', // trainer02 완료된 레슨
     rating: 5,
     content: '전문적인 강의와 친절한 응대에 만족합니다.',
     createdAt: new Date('2025-01-22T10:15:00+09:00'),
