@@ -82,4 +82,9 @@ export class ChatRepository implements IChatRepository {
     await this.chatModel.deleteMany({ roomId });
     await this.chatRoomModel.deleteOne({ roomId });
   }
+
+  // 메시지 읽음 처리
+  async updateMessagesAsRead(roomId: string, userId: string): Promise<void> {
+    await this.chatModel.updateMany({ roomId, senderId: { $ne: userId }, isRead: false }, { isRead: true });
+  }
 }

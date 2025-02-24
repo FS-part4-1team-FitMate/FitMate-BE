@@ -4,7 +4,7 @@ import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 export class CreateChatDto {
   @IsString()
   @IsNotEmpty()
-  receiverId: string;
+  roomId: string;
 
   @IsString()
   @IsNotEmpty()

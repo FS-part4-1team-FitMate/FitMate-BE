@@ -9,4 +9,5 @@ export interface IChatService {
   createOrGetChatRoom(participantId: string): Promise<string>;
   getMyChatRooms(page: number, limit: number): Promise<ChatRoom[]>;
   leaveChatRoom(roomId: string): Promise<void>;
+  markMessagesAsRead(roomId: string, userId: string): Promise<void>;
 }
