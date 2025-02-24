@@ -1,3 +1,4 @@
+import { JwtService } from '@nestjs/jwt';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -8,12 +9,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service.js';
 import { CreateChatDto } from './dto/chat.dto.js';
-import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({
   namespace: '/socket.io/',
   cors: {
-    origin: '*',
+    origin: process.env.FRONTEND_BASE_URL,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
