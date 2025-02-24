@@ -163,4 +163,17 @@ export class NotificationService implements OnModuleInit, OnModuleDestroy, INoti
     });
     return notification;
   }
+
+  /*************************************************************************************
+   * 채팅방 생성 알림
+   * ***********************************************************************************
+   */
+  async createChatNotification(userId: string, message: string): Promise<NotificationResponse> {
+    const notification = await this.notificationRepository.createNotification({
+      userId,
+      type: 'CHAT_MESSAGE',
+      message,
+    });
+    return notification;
+  }
 }
