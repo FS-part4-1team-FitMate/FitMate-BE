@@ -1,5 +1,5 @@
-import { Chat } from '../chat.schema.js';
-import { ChatRoom } from '../chatRoom.schema.js';
+import { Chat } from '../schema/chat.schema.js';
+import { ChatRoom } from '../schema/chatRoom.schema.js';
 import { CreateChatDto } from '../dto/chat.dto.js';
 import { ChatMessageResponse } from '../type/chat.type.js';
 

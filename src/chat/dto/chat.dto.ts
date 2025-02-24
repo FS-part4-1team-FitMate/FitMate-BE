@@ -9,6 +9,10 @@ export class CreateChatDto {
   @IsString()
   @IsNotEmpty()
   message: string;
+
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
 }
 
 export class PageLimitQueryDto {
