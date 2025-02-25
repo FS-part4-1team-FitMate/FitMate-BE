@@ -89,7 +89,12 @@ export class TrainerService implements ITrainerService {
 
     const where = {
       role: 'TRAINER',
-      ...(query.keyword && { nickname: { contains: query.keyword, mode: 'insensitive' } }),
+      OR: query.keyword
+        ? [
+            { nickname: { contains: query.keyword, mode: 'insensitive' } },
+            { profile: { name: { contains: query.keyword, mode: 'insensitive' } } },
+          ]
+        : undefined,
       profile: {
         ...(query.lessonType && { lessonType: { hasSome: query.lessonType } }),
         ...(query.gender && { gender: query.gender }),
