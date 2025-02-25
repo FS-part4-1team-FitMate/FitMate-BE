@@ -5,9 +5,9 @@ import { ProfileModule } from '#profile/profile.module.js';
 import { ChatController } from './chat.controller.js';
 import { ChatGateway } from './chat.gateway.js';
 import { ChatRepository } from './chat.repository.js';
-import { Chat, ChatSchema } from './chat.schema.js';
 import { ChatService } from './chat.service.js';
-import { ChatRoom, ChatRoomSchema } from './chatRoom.schema.js';
+import { Chat, ChatSchema } from './schema/chat.schema.js';
+import { ChatRoom, ChatRoomSchema } from './schema/chatRoom.schema.js';
 
 @Module({
   imports: [
