@@ -12,7 +12,7 @@ export class CreateChatDto {
 
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  senderId: string;
 }
 
 export class PageLimitQueryDto {
