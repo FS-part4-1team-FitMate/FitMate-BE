@@ -49,9 +49,9 @@ export class ChatService implements IChatService {
 
   // 메시지 저장
   async createMessage(createChatDto: CreateChatDto): Promise<Chat> {
-    const { userId, roomId, message } = createChatDto;
+    const { senderId: senderId, roomId, message } = createChatDto;
 
-    console.log(`📝 [서비스] 메시지 저장 요청: userId=${userId}, roomId=${roomId}, message=${message}`);
+    console.log(`📝 [서비스] 메시지 저장 요청: userId=${senderId}, roomId=${roomId}, message=${message}`);
 
     // 채팅방이 존재하는지 확인
     const chatRoom = await this.chatRepository.findChatRoomById(roomId);
@@ -62,7 +62,7 @@ export class ChatService implements IChatService {
 
     const newMessage = await this.chatRepository.saveMessage({
       roomId,
-      senderId: userId,
+      senderId: senderId,
       message,
       isRead: false,
     });
