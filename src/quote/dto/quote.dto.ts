@@ -3,7 +3,7 @@ import { QuoteStatus } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsIn, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { LessonResponseDto } from '#lesson/dto/lesson.dto.js';
-import { ReviewResponseDto } from '#review/dto/review.dto.js';
+import { ReviewSimpleResponseDto } from '#review/dto/review.dto.js';
 
 export class CreateQuoteDto {
   @ApiProperty({
@@ -162,8 +162,8 @@ export class QuoteResponseDto {
   @ApiProperty({ description: '레슨 요청 정보' })
   lessonRequest: LessonResponseDto;
 
-  @ApiProperty({ description: '리뷰 정보', type: [ReviewResponseDto] })
-  Review: ReviewResponseDto[];
+  @ApiProperty({ description: '리뷰 정보', type: [ReviewSimpleResponseDto] })
+  Review: ReviewSimpleResponseDto[];
 }
 
 export class QuoteListResponseDto {

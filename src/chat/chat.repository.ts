@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ProfileRepository } from '#profile/profile.repository.js';
-import { Chat } from './chat.schema.js';
-import { ChatRoom } from './chatRoom.schema.js';
 import { IChatRepository } from './interface/chat.repository.interface';
+import { Chat } from './schema/chat.schema.js';
+import { ChatRoom } from './schema/chatRoom.schema.js';
 
 @Injectable()
 export class ChatRepository implements IChatRepository {
@@ -16,7 +16,13 @@ export class ChatRepository implements IChatRepository {
 
   // 메시지 저장 기능
   async saveMessage(chat: Partial<Chat>): Promise<Chat> {
-    return await this.chatModel.create(chat);
+    console.log('💾 [레포지토리] 메시지 MongoDB에 저장 요청:', chat);
+
+    const savedMessage = await this.chatModel.create(chat);
+
+    console.log('✅ [레포지토리] 메시지 MongoDB 저장 완료:', savedMessage);
+
+    return savedMessage;
   }
 
   // 특정 채팅방의 메시지 조회 기능

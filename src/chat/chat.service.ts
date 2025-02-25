@@ -12,10 +12,10 @@ import { UserService } from '#user/user.service.js';
 import { ProfileService } from '#profile/profile.service.js';
 import { fetchUserDetails } from '#utils/chat-utils.js';
 import { ChatRepository } from './chat.repository.js';
-import { Chat } from './chat.schema.js';
-import { ChatRoom } from './chatRoom.schema.js';
 import { CreateChatDto } from './dto/chat.dto.js';
 import { IChatService } from './interface/chat.service.interface.js';
+import { Chat } from './schema/chat.schema.js';
+import { ChatRoom } from './schema/chatRoom.schema.js';
 import { ChatMessageResponse } from './type/chat.type.js';
 
 @Injectable()
@@ -49,24 +49,25 @@ export class ChatService implements IChatService {
 
   // 메시지 저장
   async createMessage(createChatDto: CreateChatDto): Promise<Chat> {
-    const { userId } = this.alsStore.getStore();
-    const { roomId, message } = createChatDto;
+    const { senderId: senderId, roomId, message } = createChatDto;
 
-    // ✅ 채팅방을 조회하여 receiverId (상대방 ID) 확인
+    console.log(`📝 [서비스] 메시지 저장 요청: userId=${senderId}, roomId=${roomId}, message=${message}`);
+
+    // 채팅방이 존재하는지 확인
     const chatRoom = await this.chatRepository.findChatRoomById(roomId);
     if (!chatRoom) {
+      console.log('❌ 채팅방이 존재하지 않음!');
       throw new NotFoundException(ChatExceptionMessage.CHAT_ROOM_NOT_FOUND);
     }
 
-    // 상대방 ID 찾기
-    const receiverId = chatRoom.participant1 === userId ? chatRoom.participant2 : chatRoom.participant1;
-
     const newMessage = await this.chatRepository.saveMessage({
       roomId,
-      senderId: userId,
+      senderId: senderId,
       message,
       isRead: false,
     });
+
+    console.log(`✅ [서비스] 메시지 저장 완료:`, newMessage);
 
     return newMessage;
   }
