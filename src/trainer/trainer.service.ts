@@ -11,12 +11,14 @@ import type {
   FavoriteTrainerResponse,
   TrainerWithFavorites,
 } from '#trainer/type/trainer.type.js';
+import { S3Service } from '#s3/s3.service.js';
 
 @Injectable()
 export class TrainerService implements ITrainerService {
   constructor(
     private readonly trainerRepository: TrainerRepository,
     private readonly alsStore: AlsStore,
+    private readonly s3Service: S3Service,
   ) {}
 
   async getFavoriteTrainers(
@@ -50,7 +52,24 @@ export class TrainerService implements ITrainerService {
     // 찜한 트레이너 총 개수 가져오기
     const totalCount = await this.trainerRepository.countFavoriteByUserId(userId);
 
-    return { trainers, totalCount, hasMore: totalCount > page * limit };
+    // 프로필 이미지 presigned URL 생성
+    const trainersWithPresignedUrls = await Promise.all(
+      trainers.map(async (trainer) => {
+        const { profileImage, ...profileWithoutImage } = trainer.profile || {};
+        return {
+          ...trainer,
+          profile: {
+            ...profileWithoutImage,
+            profileImagePresignedUrl: profileImage
+              ? await this.s3Service.getPresignedDownloadUrl(profileImage)
+              : undefined,
+            lessonType: trainer.profile?.lessonType ?? [],
+          },
+        };
+      }),
+    );
+
+    return { trainers: trainersWithPresignedUrls, totalCount, hasMore: totalCount > page * limit };
   }
 
   async getFavoriteStatus(trainerId: string): Promise<{ isFavorite: boolean; favoriteTotalCount: number }> {

@@ -93,7 +93,7 @@ export class TrainerRepository implements ITrainerRepository {
           },
         },
       },
-      orderBy, // 서비스에서 보낸 `orderBy` 그대로 적용
+      orderBy,
       skip,
       take,
     })) as TrainerWithFavorites[];
